@@ -150,3 +150,84 @@ with get_session() as session:
 - Financial data now includes both annual (FY) and quarterly (Q1-Q4) periods
 - All Numeric columns migrated from precision 10 to 20 to handle extreme values
 - Sanitization layer provides safety net for truly corrupt/overflow data
+
+● Summary of Options
+
+  Manual (Development)
+
+  python scripts/update_economic_data.py
+  - Run whenever you want
+  - Good for testing
+
+  Windows Task Scheduler (Production - Windows)
+
+  run_economic_update.bat
+  - Built into Windows
+  - Most reliable for Windows servers
+  - Runs even when not logged in
+
+  Python Scheduler (Production - Any OS)
+
+  pip install schedule
+  python scripts/scheduler.py
+  - Cross-platform
+  - Run as background service
+  - More flexible (can add more jobs easily)
+
+  Linux/Mac Cron (Production - Linux/Mac)
+
+  # Add to crontab -e
+  0 8 * * * cd /path/to/finexus-data-collector && venv/bin/python scripts/update_economic_data.py
+
+  Recommended Setup
+
+  For your Windows environment:
+
+  1. Development: Run python scripts/update_economic_data.py manually when needed
+  2. Production: Use Windows Task Scheduler with the .bat file
+
+  Smart Update Logic
+
+  The script already checks the tracking table - it won't waste API calls if data was updated recently (within 23 hours). The economic data updates daily with new values, so daily at 8:00 AM is ideal (before    
+   market open).
+
+  Want me to help set up any of these options?
+
+> What do you mean by saying set up any of these options? 
+
+● Good question! Let me clarify what I can help with for each option:
+
+  What I Mean by "Set Up"
+
+  Option 1: Manual Script ✅ Already Done
+
+  The script is ready to use. Just run:
+  python scripts/update_economic_data.py
+  Nothing else needed!
+
+  Option 2: Windows Task Scheduler
+
+  I cannot directly configure Windows Task Scheduler, but I can:
+  - ✅ Walk you through the steps (which buttons to click)
+  - ✅ Help troubleshoot if it doesn't work
+  - ✅ Explain settings (run whether user is logged on, wake computer, etc.)
+  - ✅ Test the batch file before scheduling
+
+  Option 3: Python Scheduler
+
+  I can help you:
+  - ✅ Install the schedule package: pip install schedule
+  - ✅ Test the scheduler script before running it continuously
+  - ✅ Create a Windows service wrapper (so it runs in background)
+  - ✅ Add more scheduled jobs (daily prices, weekly financials, etc.)
+
+  So "Set Up" Means:
+
+  I'm asking if you need help with:
+  1. Testing the scripts I created
+  2. Walking through Windows Task Scheduler configuration
+  3. Installing dependencies for Python scheduler
+  4. Creating additional scheduled jobs
+  5. Troubleshooting if something doesn't work
+
+  Or are you good to go and will handle scheduling yourself? The scripts are ready to use as-is - you can just run them manually for now and add scheduling later when you're ready for production!

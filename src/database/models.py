@@ -773,29 +773,6 @@ class InsiderStatistics(Base):
     )
 
 
-class EconomicIndicator(Base):
-    """Economic indicators in vertical (normalized) format"""
-    __tablename__ = 'economic_indicators'
-    
-    indicator_name = Column(String(100), primary_key=True)
-    date = Column(Date, primary_key=True)
-    
-    value = Column(Numeric(20, 6))
-    frequency = Column(String(20))  # 'daily', 'weekly', 'monthly', 'quarterly', 'annual'
-    
-    # FRED metadata
-    series_id = Column(String(50))
-    units = Column(String(100))
-    seasonal_adjustment = Column(String(50))
-    
-    last_updated = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
-    
-    __table_args__ = (
-        Index('ix_economic_indicators_date', 'date'),
-        Index('ix_economic_indicators_name_date', 'indicator_name', 'date'),
-    )
-
-
 class DataCollectionLog(Base):
     """Log of data collection runs"""
     __tablename__ = 'data_collection_log'
@@ -850,6 +827,63 @@ class TableUpdateTracking(Base):
         UniqueConstraint('table_name', 'symbol', name='uq_table_symbol'),
         Index('ix_update_tracking_table_symbol', 'table_name', 'symbol'),
         Index('ix_update_tracking_next_due', 'next_update_due'),
+    )
+
+
+class EconomicIndicator(Base):
+    """Metadata for economic indicators (FRED and FMP)"""
+    __tablename__ = 'economic_indicators'
+
+    indicator_code = Column(String(100), primary_key=True)
+    indicator_name = Column(String(255))
+    source = Column(String(20))  # 'FRED' or 'FMP'
+    source_series_id = Column(String(100))  # Original API series ID
+    native_frequency = Column(String(20))  # 'DAILY', 'MONTHLY', 'QUARTERLY', 'ANNUAL'
+    units = Column(String(100))  # 'Billions', 'Index', 'Percent', etc.
+    description = Column(Text)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
+class EconomicDataRaw(Base):
+    """Raw/daily economic data time series"""
+    __tablename__ = 'economic_data_raw'
+
+    indicator_code = Column(String(100), ForeignKey('economic_indicators.indicator_code'), primary_key=True)
+    date = Column(Date, primary_key=True, nullable=False)
+    value = Column(Numeric(20, 6))
+    created_at = Column(DateTime, default=func.now())
+
+    __table_args__ = (
+        Index('ix_economic_data_raw_date', 'date'),
+    )
+
+
+class EconomicDataMonthly(Base):
+    """Monthly aggregated economic data (month-end values)"""
+    __tablename__ = 'economic_data_monthly'
+
+    indicator_code = Column(String(100), ForeignKey('economic_indicators.indicator_code'), primary_key=True)
+    date = Column(Date, primary_key=True, nullable=False)  # Always month-end date
+    value = Column(Numeric(20, 6))
+    created_at = Column(DateTime, default=func.now())
+
+    __table_args__ = (
+        Index('ix_economic_data_monthly_date', 'date'),
+    )
+
+
+class EconomicDataQuarterly(Base):
+    """Quarterly aggregated economic data (quarter-end values)"""
+    __tablename__ = 'economic_data_quarterly'
+
+    indicator_code = Column(String(100), ForeignKey('economic_indicators.indicator_code'), primary_key=True)
+    date = Column(Date, primary_key=True, nullable=False)  # Always quarter-end date
+    value = Column(Numeric(20, 6))
+    created_at = Column(DateTime, default=func.now())
+
+    __table_args__ = (
+        Index('ix_economic_data_quarterly_date', 'date'),
     )
 
 
