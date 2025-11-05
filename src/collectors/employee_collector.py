@@ -111,8 +111,11 @@ class EmployeeCollector(BaseCollector):
         if not records:
             return True
 
+        # Sanitize records
+        sanitized_records = [self.sanitize_record(r, EmployeeHistory, symbol) for r in records]
+
         # Upsert records
-        stmt = insert(EmployeeHistory).values(records)
+        stmt = insert(EmployeeHistory).values(sanitized_records)
         pk_columns = ['symbol', 'period_of_report']
 
         update_dict = {

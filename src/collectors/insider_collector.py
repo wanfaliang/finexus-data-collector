@@ -59,255 +59,300 @@ class InsiderCollector(BaseCollector):
     
     def _collect_insider_trading(self, symbol: str) -> bool:
         """Collect insider trading transactions"""
+        try:
+            # Check if update needed (update weekly)
+            if not self.should_update_symbol('insider_trading', symbol, max_age_days=7):
+                logger.info(f"Insider trading for {symbol} is up to date")
+                return True
 
-        # Check if update needed (update weekly)
-        if not self.should_update_symbol('insider_trading', symbol, max_age_days=7):
-            logger.info(f"Insider trading for {symbol} is up to date")
-            return True
+            # In force refill mode, ignore last_filing to fetch all data
+            last_filing = None if self.force_refill else self._get_last_insider_filing_date(symbol)
 
-        # In force refill mode, ignore last_filing to fetch all data
-        last_filing = None if self.force_refill else self._get_last_insider_filing_date(symbol)
-        
-        # Fetch from API
-        url = FMP_ENDPOINTS['insider_trading_search']
-        params = {
-            'symbol': symbol,
-            'page': 1,
-            'limit': 1000
-        }
-        
-        response = self._get(url, params)
-        data = self._json_safe(response)
+            # Fetch from API with pagination (API returns oldest first)
+            url = FMP_ENDPOINTS['insider_trading_search']
+            all_data = []
+            page = 0
 
-        if not data:
-            logger.warning(f"No insider trading data returned for {symbol}")
-            return False
-
-        # Transform API data from camelCase to snake_case
-        transformed_data = transform_batch(data, transform_keys)
-
-        df = self._to_dataframe(transformed_data)
-        if df.empty:
-            logger.warning(f"Empty insider trading dataframe for {symbol}")
-            return False
-
-        # Convert date columns
-        if 'filing_date' in df.columns:
-            df['filing_date'] = pd.to_datetime(df['filing_date']).dt.date
-        if 'transaction_date' in df.columns:
-            df['transaction_date'] = pd.to_datetime(df['transaction_date']).dt.date
-        
-        # Filter for only new records
-        if last_filing:
-            df = df[df['filing_date'] > last_filing]
-        
-        if df.empty:
-            logger.info(f"No new insider trading records for {symbol}")
-            return True
-
-        # Handle special field name mappings
-        if 'link' in df.columns:
-            df['url'] = df['link']
-            df = df.drop('link', axis=1)
-
-        # Add symbol if not present
-        df['symbol'] = symbol
-
-        records = df.to_dict('records')
-
-        if not records:
-            return True
-        
-        # Insert records (no conflict handling - each transaction is unique)
-        stmt = insert(InsiderTrading).values(records)
-        
-        self.session.execute(stmt)
-        self.session.commit()
-        
-        self.records_inserted += len(records)
-        
-        # Update tracking
-        latest_filing = df['filing_date'].max()
-        record_count = self.session.query(InsiderTrading)\
-            .filter(InsiderTrading.symbol == symbol)\
-            .count()
-        
-        self.update_tracking(
-            'insider_trading',
-            symbol,
-            last_api_date=latest_filing,
-            record_count=record_count,
-            next_update_frequency='daily'
-        )
-        
-        logger.info(f"✓ {symbol} insider_trading: {len(records)} inserted")
-        return True
-    
-    def _collect_institutional_ownership(self, symbol: str) -> bool:
-        """Collect institutional ownership summary"""
-
-        # Check if update needed (update quarterly)
-        if not self.should_update_symbol('institutional_ownership', symbol, max_age_days=90):
-            logger.info(f"Institutional ownership for {symbol} is up to date")
-            return True
-
-        current_year = datetime.now().year
-        quarters = [1, 2, 3, 4]
-        all_quarters = []
-
-        # Collect data for current year and previous year, all quarters
-        for year_offset in [0, 1]:
-            year = current_year - year_offset
-            for quarter in quarters:
-                url = FMP_ENDPOINTS['institutional_ownership_summary']
+            while True:
                 params = {
                     'symbol': symbol,
-                    'year': year,
-                    'quarter': quarter
+                    'page': page,
+                    'limit': 1000
                 }
 
                 response = self._get(url, params)
                 data = self._json_safe(response)
 
                 if not data:
-                    continue
+                    break
 
-                # Transform API data from camelCase to snake_case
-                transformed_data = transform_batch(data, transform_keys)
+                all_data.extend(data)
 
-                df = self._to_dataframe(transformed_data)
-                if df.empty:
-                    continue
+                # Stop if we got less than limit (last page)
+                if len(data) < 1000:
+                    break
 
-                # Add metadata
-                df['symbol'] = symbol
-                df['collected_year'] = year
-                df['collected_quarter'] = quarter
-
-                if 'date' in df.columns:
-                    df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
-
-                all_quarters.append(df)
-
+                page += 1
                 time.sleep(self.sleep_sec)
 
-        if not all_quarters:
-            logger.warning(f"No institutional ownership data returned for {symbol}")
-            return False
+            if not all_data:
+                logger.warning(f"No insider trading data returned for {symbol}")
+                return False
 
-        # Combine all quarters
-        combined = pd.concat(all_quarters, ignore_index=True)
+            # Transform API data from camelCase to snake_case
+            transformed_data = transform_batch(all_data, transform_keys)
 
-        records = combined.to_dict('records')
-        if not records:
+            df = self._to_dataframe(transformed_data)
+            if df.empty:
+                logger.warning(f"Empty insider trading dataframe for {symbol}")
+                return False
+
+            # Convert date columns (coerce invalid dates to NaT/None)
+            if 'filing_date' in df.columns:
+                df['filing_date'] = pd.to_datetime(df['filing_date'], errors='coerce').dt.date
+                df['filing_date'] = df['filing_date'].where(df['filing_date'].notna(), None)
+            if 'transaction_date' in df.columns:
+                df['transaction_date'] = pd.to_datetime(df['transaction_date'], errors='coerce').dt.date
+                df['transaction_date'] = df['transaction_date'].where(df['transaction_date'].notna(), None)
+
+            # Drop rows with invalid filing_date
+            df = df.dropna(subset=['filing_date'])
+
+            # Use filing_date as fallback for missing transaction_date (required field)
+            if 'transaction_date' in df.columns:
+                df['transaction_date'] = df['transaction_date'].fillna(df['filing_date'])
+
+            # Filter for only new records
+            if last_filing:
+                df = df[df['filing_date'] > last_filing]
+
+            if df.empty:
+                logger.info(f"No new insider trading records for {symbol}")
+                return True
+
+            # Handle special field name mappings
+            if 'link' in df.columns:
+                df['url'] = df['link']
+                df = df.drop('link', axis=1)
+
+            # Add symbol if not present
+            df['symbol'] = symbol
+
+            records = df.to_dict('records')
+
+            if not records:
+                return True
+
+            # Insert records (no conflict handling - each transaction is unique)
+            stmt = insert(InsiderTrading).values(records)
+
+            try:
+                self.session.execute(stmt)
+                self.session.commit()
+            except Exception as e:
+                logger.error(f"Error inserting insider trading for {symbol}: {type(e).__name__}: {str(e)[:200]}")
+                self.session.rollback()
+                return False
+
+            self.records_inserted += len(records)
+
+            # Update tracking
+            latest_filing = df['filing_date'].max()
+            record_count = self.session.query(InsiderTrading)\
+                .filter(InsiderTrading.symbol == symbol)\
+                .count()
+
+            self.update_tracking(
+                'insider_trading',
+                symbol,
+                last_api_date=latest_filing,
+                record_count=record_count,
+                next_update_frequency='daily'
+            )
+
+            logger.info(f"✓ {symbol} insider_trading: {len(records)} inserted")
             return True
 
-        # Upsert records
-        stmt = insert(InstitutionalOwnership).values(records)
-        pk_columns = ['symbol', 'date']
+        except Exception as e:
+            logger.error(f"Error collecting insider trading for {symbol}: {type(e).__name__}")
+            self.session.rollback()
+            return False
+    
+    def _collect_institutional_ownership(self, symbol: str) -> bool:
+        """Collect institutional ownership summary"""
+        try:
+            # Check if update needed (update quarterly)
+            if not self.should_update_symbol('institutional_ownership', symbol, max_age_days=90):
+                logger.info(f"Institutional ownership for {symbol} is up to date")
+                return True
 
-        update_dict = {
-            col.name: col
-            for col in stmt.excluded
-            if col.name not in pk_columns
-        }
+            current_year = datetime.now().year
+            quarters = [1, 2, 3, 4]
+            all_quarters = []
 
-        stmt = stmt.on_conflict_do_update(
-            index_elements=pk_columns,
-            set_=update_dict
-        )
+            # Collect data for current year and previous year, all quarters
+            for year_offset in [0, 1]:
+                year = current_year - year_offset
+                for quarter in quarters:
+                    url = FMP_ENDPOINTS['institutional_ownership_summary']
+                    params = {
+                        'symbol': symbol,
+                        'year': year,
+                        'quarter': quarter
+                    }
 
-        self.session.execute(stmt)
-        self.session.commit()
+                    response = self._get(url, params)
+                    data = self._json_safe(response)
 
-        self.records_inserted += len(records)
+                    if not data:
+                        continue
 
-        # Update tracking
-        latest_date = combined['date'].max()
-        record_count = self.session.query(InstitutionalOwnership)\
-            .filter(InstitutionalOwnership.symbol == symbol)\
-            .count()
+                    # Transform API data from camelCase to snake_case
+                    transformed_data = transform_batch(data, transform_keys)
 
-        self.update_tracking(
-            'institutional_ownership',
-            symbol,
-            last_api_date=latest_date,
-            record_count=record_count,
-            next_update_frequency='quarterly'
-        )
+                    df = self._to_dataframe(transformed_data)
+                    if df.empty:
+                        continue
 
-        logger.info(f"✓ {symbol} institutional_ownership: {len(records)} upserted")
-        return True
+                    # Add metadata
+                    df['symbol'] = symbol
+                    df['collected_year'] = year
+                    df['collected_quarter'] = quarter
+
+                    if 'date' in df.columns:
+                        df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
+
+                    all_quarters.append(df)
+
+                    time.sleep(self.sleep_sec)
+
+            if not all_quarters:
+                logger.warning(f"No institutional ownership data returned for {symbol}")
+                return False
+
+            # Combine all quarters
+            combined = pd.concat(all_quarters, ignore_index=True)
+
+            records = combined.to_dict('records')
+            if not records:
+                return True
+
+            # Upsert records
+            stmt = insert(InstitutionalOwnership).values(records)
+            pk_columns = ['symbol', 'date']
+
+            update_dict = {
+                col.name: col
+                for col in stmt.excluded
+                if col.name not in pk_columns
+            }
+
+            stmt = stmt.on_conflict_do_update(
+                index_elements=pk_columns,
+                set_=update_dict
+            )
+
+            self.session.execute(stmt)
+            self.session.commit()
+
+            self.records_inserted += len(records)
+
+            # Update tracking
+            latest_date = combined['date'].max()
+            record_count = self.session.query(InstitutionalOwnership)\
+                .filter(InstitutionalOwnership.symbol == symbol)\
+                .count()
+
+            self.update_tracking(
+                'institutional_ownership',
+                symbol,
+                last_api_date=latest_date,
+                record_count=record_count,
+                next_update_frequency='quarterly'
+            )
+
+            logger.info(f"✓ {symbol} institutional_ownership: {len(records)} upserted")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error collecting institutional ownership for {symbol}: {e}")
+            self.session.rollback()
+            return False
     
     def _collect_insider_statistics(self, symbol: str) -> bool:
         """Collect aggregated insider trading statistics"""
-        
-        # Check if update needed (update quarterly)
-        if not self.should_update_symbol('insider_statistics', symbol, max_age_days=90):
-            logger.info(f"Insider statistics for {symbol} are up to date")
+        try:
+            # Check if update needed (update quarterly)
+            if not self.should_update_symbol('insider_statistics', symbol, max_age_days=90):
+                logger.info(f"Insider statistics for {symbol} are up to date")
+                return True
+
+            # Fetch from API
+            url = FMP_ENDPOINTS['insider_trading_statistics']
+            params = {'symbol': symbol}
+
+            response = self._get(url, params)
+            data = self._json_safe(response)
+
+            if not data:
+                logger.warning(f"No insider statistics returned for {symbol}")
+                return False
+
+            # Transform API data from camelCase to snake_case
+            transformed_data = transform_batch(data, transform_keys)
+
+            df = self._to_dataframe(transformed_data)
+            if df.empty:
+                logger.warning(f"Empty insider statistics dataframe for {symbol}")
+                return False
+
+            # Add symbol
+            df['symbol'] = symbol
+
+            records = df.to_dict('records')
+            if not records:
+                return True
+
+            # Upsert records
+            stmt = insert(InsiderStatistics).values(records)
+            pk_columns = ['symbol', 'year', 'quarter']
+
+            update_dict = {
+                col.name: col
+                for col in stmt.excluded
+                if col.name not in pk_columns
+            }
+
+            stmt = stmt.on_conflict_do_update(
+                index_elements=pk_columns,
+                set_=update_dict
+            )
+
+            self.session.execute(stmt)
+            self.session.commit()
+
+            self.records_inserted += len(records)
+
+            # Update tracking
+            record_count = self.session.query(InsiderStatistics)\
+                .filter(InsiderStatistics.symbol == symbol)\
+                .count()
+
+            self.update_tracking(
+                'insider_statistics',
+                symbol,
+                last_api_date=datetime.now().date(),
+                record_count=record_count,
+                next_update_frequency='quarterly'
+            )
+
+            logger.info(f"✓ {symbol} insider_statistics: {len(records)} upserted")
             return True
-        
-        # Fetch from API
-        url = FMP_ENDPOINTS['insider_trading_statistics']
-        params = {'symbol': symbol}
-        
-        response = self._get(url, params)
-        data = self._json_safe(response)
 
-        if not data:
-            logger.warning(f"No insider statistics returned for {symbol}")
+        except Exception as e:
+            logger.error(f"Error collecting insider statistics for {symbol}: {e}")
+            self.session.rollback()
             return False
-
-        # Transform API data from camelCase to snake_case
-        transformed_data = transform_batch(data, transform_keys)
-
-        df = self._to_dataframe(transformed_data)
-        if df.empty:
-            logger.warning(f"Empty insider statistics dataframe for {symbol}")
-            return False
-        
-        # Add symbol
-        df['symbol'] = symbol
-        
-        records = df.to_dict('records')
-        if not records:
-            return True
-        
-        # Upsert records
-        stmt = insert(InsiderStatistics).values(records)
-        pk_columns = ['symbol', 'year', 'quarter']
-        
-        update_dict = {
-            col.name: col 
-            for col in stmt.excluded 
-            if col.name not in pk_columns
-        }
-        
-        stmt = stmt.on_conflict_do_update(
-            index_elements=pk_columns,
-            set_=update_dict
-        )
-        
-        self.session.execute(stmt)
-        self.session.commit()
-        
-        self.records_inserted += len(records)
-        
-        # Update tracking
-        record_count = self.session.query(InsiderStatistics)\
-            .filter(InsiderStatistics.symbol == symbol)\
-            .count()
-        
-        self.update_tracking(
-            'insider_statistics',
-            symbol,
-            last_api_date=datetime.now().date(),
-            record_count=record_count,
-            next_update_frequency='quarterly'
-        )
-        
-        logger.info(f"✓ {symbol} insider_statistics: {len(records)} upserted")
-        return True
     
     def _get_last_insider_filing_date(self, symbol: str) -> Optional[date]:
         """Get most recent insider trading filing date for symbol"""

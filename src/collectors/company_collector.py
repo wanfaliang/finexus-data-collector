@@ -72,7 +72,10 @@ class CompanyCollector(BaseCollector):
                     record['ipo_date'] = pd.to_datetime(record['ipo_date']).date()
                 except:
                     record['ipo_date'] = None
-            
+
+            # Sanitize record
+            record = self.sanitize_record(record, Company, symbol)
+
             # Upsert record
             stmt = insert(Company).values([record])
             

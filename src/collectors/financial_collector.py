@@ -103,7 +103,7 @@ class FinancialCollector(BaseCollector):
             return False
 
         if last_date:
-            df['date'] = pd.to_datetime(df['date']).dt.date
+            df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
             df = df[df['date'] > last_date]
 
         if df.empty:

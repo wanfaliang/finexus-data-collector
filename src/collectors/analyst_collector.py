@@ -85,9 +85,9 @@ class AnalystCollector(BaseCollector):
         # Add symbol
         df['symbol'] = symbol
 
-        # Convert date
+        # Convert date (coerce invalid dates to NaT/None)
         if 'date' in df.columns:
-            df['date'] = pd.to_datetime(df['date']).dt.date
+            df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
 
         # Drop duplicates on primary key to avoid "cannot affect row a second time" error
         # Keep the last occurrence (most recent data)
@@ -96,9 +96,12 @@ class AnalystCollector(BaseCollector):
         records = df.to_dict('records')
         if not records:
             return True
-        
+
+        # Sanitize records
+        sanitized_records = [self.sanitize_record(r, AnalystEstimate, symbol) for r in records]
+
         # Upsert records
-        stmt = insert(AnalystEstimate).values(records)
+        stmt = insert(AnalystEstimate).values(sanitized_records)
         pk_columns = ['symbol', 'date']
         
         update_dict = {

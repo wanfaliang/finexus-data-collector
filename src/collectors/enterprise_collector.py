@@ -98,8 +98,11 @@ class EnterpriseCollector(BaseCollector):
         if not records:
             return True
 
+        # Sanitize records
+        sanitized_records = [self.sanitize_record(r, EnterpriseValue, symbol) for r in records]
+
         # Upsert records
-        stmt = insert(EnterpriseValue).values(records)
+        stmt = insert(EnterpriseValue).values(sanitized_records)
         pk_columns = ['symbol', 'date']
 
         update_dict = {

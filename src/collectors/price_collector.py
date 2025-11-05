@@ -73,7 +73,7 @@ class PriceCollector(BaseCollector):
 
         df = pd.DataFrame(transformed_data)
         df['symbol'] = symbol
-        df['date'] = pd.to_datetime(df['date']).dt.date
+        df['date'] = pd.to_datetime(df['date'], errors='coerce').dt.date
 
         records = df.to_dict('records')
         inserted = self._insert_daily_prices(records)
@@ -105,8 +105,12 @@ class PriceCollector(BaseCollector):
         """Insert price records with upsert logic"""
         if not records:
             return 0
-        
-        stmt = insert(PriceDaily).values(records)
+
+        # Sanitize records to prevent BigInteger overflow
+        symbol = records[0].get('symbol', 'unknown') if records else 'unknown'
+        sanitized_records = [self.sanitize_record(r, PriceDaily, symbol) for r in records]
+
+        stmt = insert(PriceDaily).values(sanitized_records)
         stmt = stmt.on_conflict_do_nothing(index_elements=['symbol', 'date'])
         
         result = self.session.execute(stmt)
@@ -135,7 +139,10 @@ class PriceCollector(BaseCollector):
         
         records = monthly.to_dict('records')
         if records:
-            stmt = insert(PriceMonthly).values(records)
+            # Sanitize records to prevent BigInteger overflow
+            sanitized_records = [self.sanitize_record(r, PriceMonthly, symbol) for r in records]
+
+            stmt = insert(PriceMonthly).values(sanitized_records)
             stmt = stmt.on_conflict_do_update(
                 index_elements=['symbol', 'date'],
                 set_={'close': stmt.excluded.close, 'high': stmt.excluded.high,
@@ -143,7 +150,7 @@ class PriceCollector(BaseCollector):
             )
             self.session.execute(stmt)
             self.session.commit()
-            logger.info(f"✓ Generated {len(records)} monthly prices for {symbol}")
+            logger.info(f"✓ Generated {len(sanitized_records)} monthly prices for {symbol}")
     
     def _get_index_name(self, symbol: str) -> str:
         """Map index symbol to name"""

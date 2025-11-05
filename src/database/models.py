@@ -29,11 +29,11 @@ class Company(Base):
     # Profile data from FMP
     price = Column(Numeric(20, 4))
     market_cap = Column(BigInteger)
-    beta = Column(Numeric(10, 4))
-    last_dividend = Column(Numeric(10, 4))
+    beta = Column(Numeric(20, 4))
+    last_dividend = Column(Numeric(20, 4))
     range = Column(String(50))
     change = Column(Numeric(20, 4))
-    change_percentage = Column(Numeric(10, 4))
+    change_percentage = Column(Numeric(20, 4))
     volume = Column(BigInteger)
     average_volume = Column(BigInteger)
     currency = Column(String(10))
@@ -91,7 +91,7 @@ class IncomeStatement(Base):
     revenue = Column(Numeric(20, 2))
     cost_of_revenue = Column(Numeric(20, 2))
     gross_profit = Column(Numeric(20, 2))
-    gross_profit_ratio = Column(Numeric(10, 6))
+    gross_profit_ratio = Column(Numeric(20, 6))
 
     research_and_development_expenses = Column(Numeric(20, 2))
     general_and_administrative_expenses = Column(Numeric(20, 2))
@@ -107,19 +107,19 @@ class IncomeStatement(Base):
 
     depreciation_and_amortization = Column(Numeric(20, 2))
     ebitda = Column(Numeric(20, 2))
-    ebitda_ratio = Column(Numeric(10, 6))
+    ebitda_ratio = Column(Numeric(20, 6))
     ebit = Column(Numeric(20, 2))
 
     non_operating_income_excluding_interest = Column(Numeric(20, 2))
     operating_income = Column(Numeric(20, 2))
-    operating_income_ratio = Column(Numeric(10, 6))
+    operating_income_ratio = Column(Numeric(20, 6))
     total_other_income_expenses_net = Column(Numeric(20, 2))
     income_before_tax = Column(Numeric(20, 2))
-    income_before_tax_ratio = Column(Numeric(10, 6))
+    income_before_tax_ratio = Column(Numeric(20, 6))
     income_tax_expense = Column(Numeric(20, 2))
 
     net_income = Column(Numeric(20, 2))
-    net_income_ratio = Column(Numeric(10, 6))
+    net_income_ratio = Column(Numeric(20, 6))
     net_income_from_continuing_operations = Column(Numeric(20, 2))
     net_income_from_discontinued_operations = Column(Numeric(20, 2))
     other_adjustments_to_net_income = Column(Numeric(20, 2))
@@ -313,62 +313,62 @@ class FinancialRatio(Base):
     reported_currency = Column(String(10))
 
     # Profitability ratios
-    gross_profit_margin = Column(Numeric(10, 6))
-    ebit_margin = Column(Numeric(10, 6))
-    ebitda_margin = Column(Numeric(10, 6))
-    operating_profit_margin = Column(Numeric(10, 6))
-    pretax_profit_margin = Column(Numeric(10, 6))
-    continuous_operations_profit_margin = Column(Numeric(10, 6))
-    net_profit_margin = Column(Numeric(10, 6))
-    bottom_line_profit_margin = Column(Numeric(10, 6))
+    gross_profit_margin = Column(Numeric(20, 6))
+    ebit_margin = Column(Numeric(20, 6))
+    ebitda_margin = Column(Numeric(20, 6))
+    operating_profit_margin = Column(Numeric(20, 6))
+    pretax_profit_margin = Column(Numeric(20, 6))
+    continuous_operations_profit_margin = Column(Numeric(20, 6))
+    net_profit_margin = Column(Numeric(20, 6))
+    bottom_line_profit_margin = Column(Numeric(20, 6))
 
     # Activity ratios
-    receivables_turnover = Column(Numeric(10, 4))
-    payables_turnover = Column(Numeric(10, 4))
-    inventory_turnover = Column(Numeric(10, 4))
-    fixed_asset_turnover = Column(Numeric(10, 4))
-    asset_turnover = Column(Numeric(10, 4))
+    receivables_turnover = Column(Numeric(20, 4))
+    payables_turnover = Column(Numeric(20, 4))
+    inventory_turnover = Column(Numeric(20, 4))
+    fixed_asset_turnover = Column(Numeric(20, 4))
+    asset_turnover = Column(Numeric(20, 4))
 
     # Liquidity ratios
-    current_ratio = Column(Numeric(10, 4))
-    quick_ratio = Column(Numeric(10, 4))
-    solvency_ratio = Column(Numeric(10, 4))
-    cash_ratio = Column(Numeric(10, 4))
+    current_ratio = Column(Numeric(20, 4))
+    quick_ratio = Column(Numeric(20, 4))
+    solvency_ratio = Column(Numeric(20, 4))
+    cash_ratio = Column(Numeric(20, 4))
 
     # Valuation ratios
-    price_to_earnings_ratio = Column(Numeric(10, 4))
-    price_to_earnings_growth_ratio = Column(Numeric(10, 4))
-    forward_price_to_earnings_growth_ratio = Column(Numeric(10, 4))
-    price_to_book_ratio = Column(Numeric(10, 4))
-    price_to_sales_ratio = Column(Numeric(10, 4))
-    price_to_free_cash_flow_ratio = Column(Numeric(10, 4))
-    price_to_operating_cash_flow_ratio = Column(Numeric(10, 4))
+    price_to_earnings_ratio = Column(Numeric(20, 4))
+    price_to_earnings_growth_ratio = Column(Numeric(20, 4))
+    forward_price_to_earnings_growth_ratio = Column(Numeric(20, 4))
+    price_to_book_ratio = Column(Numeric(20, 4))
+    price_to_sales_ratio = Column(Numeric(20, 4))
+    price_to_free_cash_flow_ratio = Column(Numeric(20, 4))
+    price_to_operating_cash_flow_ratio = Column(Numeric(20, 4))
 
     # Leverage ratios
-    debt_to_assets_ratio = Column(Numeric(10, 6))
-    debt_to_equity_ratio = Column(Numeric(10, 4))
-    debt_to_capital_ratio = Column(Numeric(10, 6))
-    long_term_debt_to_capital_ratio = Column(Numeric(10, 6))
-    financial_leverage_ratio = Column(Numeric(10, 4))
+    debt_to_assets_ratio = Column(Numeric(20, 6))
+    debt_to_equity_ratio = Column(Numeric(20, 4))
+    debt_to_capital_ratio = Column(Numeric(20, 6))
+    long_term_debt_to_capital_ratio = Column(Numeric(20, 6))
+    financial_leverage_ratio = Column(Numeric(20, 4))
 
     # Other ratios
-    working_capital_turnover_ratio = Column(Numeric(10, 4))
-    operating_cash_flow_ratio = Column(Numeric(10, 4))
-    operating_cash_flow_sales_ratio = Column(Numeric(10, 6))
-    free_cash_flow_operating_cash_flow_ratio = Column(Numeric(10, 6))
+    working_capital_turnover_ratio = Column(Numeric(20, 4))
+    operating_cash_flow_ratio = Column(Numeric(20, 4))
+    operating_cash_flow_sales_ratio = Column(Numeric(20, 6))
+    free_cash_flow_operating_cash_flow_ratio = Column(Numeric(20, 6))
 
     # Coverage ratios
-    debt_service_coverage_ratio = Column(Numeric(10, 4))
-    interest_coverage_ratio = Column(Numeric(10, 4))
-    short_term_operating_cash_flow_coverage_ratio = Column(Numeric(10, 4))
-    operating_cash_flow_coverage_ratio = Column(Numeric(10, 4))
-    capital_expenditure_coverage_ratio = Column(Numeric(10, 4))
-    dividend_paid_and_capex_coverage_ratio = Column(Numeric(10, 4))
+    debt_service_coverage_ratio = Column(Numeric(20, 4))
+    interest_coverage_ratio = Column(Numeric(20, 4))
+    short_term_operating_cash_flow_coverage_ratio = Column(Numeric(20, 4))
+    operating_cash_flow_coverage_ratio = Column(Numeric(20, 4))
+    capital_expenditure_coverage_ratio = Column(Numeric(20, 4))
+    dividend_paid_and_capex_coverage_ratio = Column(Numeric(20, 4))
 
     # Dividend ratios
-    dividend_payout_ratio = Column(Numeric(10, 6))
-    dividend_yield = Column(Numeric(10, 6))
-    dividend_yield_percentage = Column(Numeric(10, 6))
+    dividend_payout_ratio = Column(Numeric(20, 6))
+    dividend_yield = Column(Numeric(20, 6))
+    dividend_yield_percentage = Column(Numeric(20, 6))
 
     # Per share metrics
     revenue_per_share = Column(Numeric(20, 4))
@@ -384,12 +384,12 @@ class FinancialRatio(Base):
     free_cash_flow_per_share = Column(Numeric(20, 4))
 
     # Other metrics
-    net_income_per_ebt = Column(Numeric(10, 6))
-    ebt_per_ebit = Column(Numeric(10, 6))
-    price_to_fair_value = Column(Numeric(10, 4))
-    debt_to_market_cap = Column(Numeric(10, 6))
-    effective_tax_rate = Column(Numeric(10, 6))
-    enterprise_value_multiple = Column(Numeric(10, 4))
+    net_income_per_ebt = Column(Numeric(20, 6))
+    ebt_per_ebit = Column(Numeric(20, 6))
+    price_to_fair_value = Column(Numeric(20, 4))
+    debt_to_market_cap = Column(Numeric(20, 6))
+    effective_tax_rate = Column(Numeric(20, 6))
+    enterprise_value_multiple = Column(Numeric(20, 4))
 
     # Metadata
     created_at = Column(DateTime, default=func.now(), nullable=False)
@@ -415,50 +415,50 @@ class KeyMetric(Base):
     # Valuation metrics
     market_cap = Column(BigInteger)
     enterprise_value = Column(BigInteger)
-    ev_to_sales = Column(Numeric(10, 4))
-    ev_to_operating_cash_flow = Column(Numeric(10, 4))
-    ev_to_free_cash_flow = Column(Numeric(10, 4))
-    ev_to_ebitda = Column(Numeric(10, 4))
-    net_debt_to_ebitda = Column(Numeric(10, 4))
+    ev_to_sales = Column(Numeric(20, 4))
+    ev_to_operating_cash_flow = Column(Numeric(20, 4))
+    ev_to_free_cash_flow = Column(Numeric(20, 4))
+    ev_to_ebitda = Column(Numeric(20, 4))
+    net_debt_to_ebitda = Column(Numeric(20, 4))
 
     # Liquidity metrics
-    current_ratio = Column(Numeric(10, 4))
+    current_ratio = Column(Numeric(20, 4))
 
     # Quality metrics
-    income_quality = Column(Numeric(10, 6))
+    income_quality = Column(Numeric(20, 6))
     graham_number = Column(Numeric(20, 4))
     graham_net_net = Column(Numeric(20, 4))
 
     # Burden metrics
-    tax_burden = Column(Numeric(10, 6))
-    interest_burden = Column(Numeric(10, 6))
+    tax_burden = Column(Numeric(20, 6))
+    interest_burden = Column(Numeric(20, 6))
 
     # Working capital metrics
     working_capital = Column(Numeric(20, 2))
     invested_capital = Column(Numeric(20, 2))
 
     # Return metrics
-    return_on_assets = Column(Numeric(10, 6))
-    operating_return_on_assets = Column(Numeric(10, 6))
-    return_on_tangible_assets = Column(Numeric(10, 6))
-    return_on_equity = Column(Numeric(10, 6))
-    return_on_invested_capital = Column(Numeric(10, 6))
-    return_on_capital_employed = Column(Numeric(10, 6))
+    return_on_assets = Column(Numeric(20, 6))
+    operating_return_on_assets = Column(Numeric(20, 6))
+    return_on_tangible_assets = Column(Numeric(20, 6))
+    return_on_equity = Column(Numeric(20, 6))
+    return_on_invested_capital = Column(Numeric(20, 6))
+    return_on_capital_employed = Column(Numeric(20, 6))
 
     # Yield metrics
-    earnings_yield = Column(Numeric(10, 6))
-    free_cash_flow_yield = Column(Numeric(10, 6))
+    earnings_yield = Column(Numeric(20, 6))
+    free_cash_flow_yield = Column(Numeric(20, 6))
 
     # Capital allocation metrics
-    capex_to_operating_cash_flow = Column(Numeric(10, 6))
-    capex_to_depreciation = Column(Numeric(10, 4))
-    capex_to_revenue = Column(Numeric(10, 6))
+    capex_to_operating_cash_flow = Column(Numeric(20, 6))
+    capex_to_depreciation = Column(Numeric(20, 4))
+    capex_to_revenue = Column(Numeric(20, 6))
 
     # Expense ratios
-    sales_general_and_administrative_to_revenue = Column(Numeric(10, 6))
-    research_and_developement_to_revenue = Column(Numeric(10, 6))  # Note: API has typo "Developement"
-    stock_based_compensation_to_revenue = Column(Numeric(10, 6))
-    intangibles_to_total_assets = Column(Numeric(10, 6))
+    sales_general_and_administrative_to_revenue = Column(Numeric(20, 6))
+    research_and_developement_to_revenue = Column(Numeric(20, 6))  # Note: API has typo "Developement"
+    stock_based_compensation_to_revenue = Column(Numeric(20, 6))
+    intangibles_to_total_assets = Column(Numeric(20, 6))
 
     # Average metrics
     average_receivables = Column(Numeric(20, 2))
@@ -466,12 +466,12 @@ class KeyMetric(Base):
     average_inventory = Column(Numeric(20, 2))
 
     # Working capital days
-    days_of_sales_outstanding = Column(Numeric(10, 2))
-    days_of_payables_outstanding = Column(Numeric(10, 2))
-    days_of_inventory_on_hand = Column(Numeric(10, 2))
-    days_of_inventory_outstanding = Column(Numeric(10, 2))
-    operating_cycle = Column(Numeric(10, 2))
-    cash_conversion_cycle = Column(Numeric(10, 2))
+    days_of_sales_outstanding = Column(Numeric(20, 2))
+    days_of_payables_outstanding = Column(Numeric(20, 2))
+    days_of_inventory_on_hand = Column(Numeric(20, 2))
+    days_of_inventory_outstanding = Column(Numeric(20, 2))
+    operating_cycle = Column(Numeric(20, 2))
+    cash_conversion_cycle = Column(Numeric(20, 2))
 
     # Free cash flow metrics
     free_cash_flow_to_equity = Column(Numeric(20, 2))
@@ -503,7 +503,7 @@ class PriceDaily(Base):
     close = Column(Numeric(20, 4))
     volume = Column(BigInteger)
     change = Column(Numeric(20, 4))
-    change_percent = Column(Numeric(10, 6))
+    change_percent = Column(Numeric(20, 6))
     vwap = Column(Numeric(20, 4))
 
     # Metadata
@@ -527,7 +527,7 @@ class PriceMonthly(Base):
     close = Column(Numeric(20, 4))
     volume = Column(BigInteger)
     change = Column(Numeric(20, 4))
-    change_percent = Column(Numeric(10, 6))
+    change_percent = Column(Numeric(20, 6))
     vwap = Column(Numeric(20, 4))
 
     created_at = Column(DateTime, default=func.now(), nullable=False)
@@ -610,9 +610,9 @@ class AnalystEstimate(Base):
     ebitda_avg = Column(Numeric(20, 2))
 
     # EPS estimates
-    eps_avg = Column(Numeric(10, 4))
-    eps_high = Column(Numeric(10, 4))
-    eps_low = Column(Numeric(10, 4))
+    eps_avg = Column(Numeric(20, 4))
+    eps_high = Column(Numeric(20, 4))
+    eps_low = Column(Numeric(20, 4))
     num_analysts_eps = Column(Integer)
 
     # sga expenses estimates
@@ -702,9 +702,9 @@ class InstitutionalOwnership(Base):
     last_total_invested = Column(Numeric(20, 2))
     total_invested_change = Column(Numeric(20, 2))
     
-    ownership_percent = Column(Numeric(10, 6))
-    last_ownership_percent = Column(Numeric(10, 6))
-    ownership_percent_change = Column(Numeric(10, 6))
+    ownership_percent = Column(Numeric(20, 6))
+    last_ownership_percent = Column(Numeric(20, 6))
+    ownership_percent_change = Column(Numeric(20, 6))
     
     new_positions = Column(Integer)
     last_new_positions = Column(Integer)
@@ -730,9 +730,9 @@ class InstitutionalOwnership(Base):
     last_total_puts = Column(Integer)
     total_puts_change = Column(Integer)
 
-    put_call_ratio = Column(Numeric(10, 6))
-    last_put_call_ratio = Column(Numeric(10, 6))
-    put_call_ratio_change = Column(Numeric(10, 6))
+    put_call_ratio = Column(Numeric(20, 6))
+    last_put_call_ratio = Column(Numeric(20, 6))
+    put_call_ratio_change = Column(Numeric(20, 6))
 
     collected_year = Column(Integer)
     collected_quarter = Column(Integer)
@@ -757,7 +757,7 @@ class InsiderStatistics(Base):
     
     acquired_transactions = Column(Integer)
     disposed_transactions = Column(Integer)
-    acquired_disposed_ratio = Column(Numeric(10, 6))
+    acquired_disposed_ratio = Column(Numeric(20, 6))
     total_acquired = Column(Numeric(20, 2))
     total_disposed = Column(Numeric(20, 2))
     total_sales = Column(Numeric(20, 2))    
