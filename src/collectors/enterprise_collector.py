@@ -91,6 +91,9 @@ class EnterpriseCollector(BaseCollector):
         if 'date' in df.columns:
             df = df.sort_values('date', ascending=False)
 
+        # Drop duplicates on primary key (symbol, date) to avoid batch insert conflicts
+        df = df.drop_duplicates(subset=['symbol', 'date'], keep='last')
+
         records = df.to_dict('records')
         if not records:
             return True

@@ -53,9 +53,9 @@ class AnalystCollector(BaseCollector):
     
     def _collect_estimates(self, symbol: str) -> bool:
         """Collect analyst estimates for revenue, EPS, etc."""
-        
-        # Check if update needed (update daily)
-        if not self.should_update_symbol('analyst_estimates', symbol, max_age_days=1):
+
+        # Check if update needed (update every 15 days)
+        if not self.should_update_symbol('analyst_estimates', symbol, max_age_days=15):
             logger.info(f"Analyst estimates for {symbol} are up to date")
             return True
         
@@ -84,11 +84,15 @@ class AnalystCollector(BaseCollector):
         
         # Add symbol
         df['symbol'] = symbol
-        
+
         # Convert date
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date']).dt.date
-        
+
+        # Drop duplicates on primary key to avoid "cannot affect row a second time" error
+        # Keep the last occurrence (most recent data)
+        df = df.drop_duplicates(subset=['symbol', 'date'], keep='last')
+
         records = df.to_dict('records')
         if not records:
             return True
@@ -132,9 +136,9 @@ class AnalystCollector(BaseCollector):
     
     def _collect_price_targets(self, symbol: str) -> bool:
         """Collect analyst price target consensus"""
-        
-        # Check if update needed (update daily)
-        if not self.should_update_symbol('price_targets', symbol, max_age_days=1):
+
+        # Check if update needed (update every 15 days)
+        if not self.should_update_symbol('price_targets', symbol, max_age_days=15):
             logger.info(f"Price targets for {symbol} are up to date")
             return True
         

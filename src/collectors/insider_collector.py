@@ -47,24 +47,26 @@ class InsiderCollector(BaseCollector):
             insider_success = self._collect_insider_trading(symbol)
             institutional_success = self._collect_institutional_ownership(symbol)
             stats_success = self._collect_insider_statistics(symbol)
-            
+
             return insider_success or institutional_success or stats_success
-            
+
         except Exception as e:
             logger.error(f"Error collecting insider data for {symbol}: {e}")
             self.record_error('insider_trading', symbol, str(e))
+            # Rollback to prevent cascade failures
+            self.session.rollback()
             return False
     
     def _collect_insider_trading(self, symbol: str) -> bool:
         """Collect insider trading transactions"""
-        
-        # Check if update needed (update daily)
-        if not self.should_update_symbol('insider_trading', symbol, max_age_days=1):
+
+        # Check if update needed (update weekly)
+        if not self.should_update_symbol('insider_trading', symbol, max_age_days=7):
             logger.info(f"Insider trading for {symbol} is up to date")
             return True
-        
-        # Get last filing date from database
-        last_filing = self._get_last_insider_filing_date(symbol)
+
+        # In force refill mode, ignore last_filing to fetch all data
+        last_filing = None if self.force_refill else self._get_last_insider_filing_date(symbol)
         
         # Fetch from API
         url = FMP_ENDPOINTS['insider_trading_search']

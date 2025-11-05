@@ -123,6 +123,8 @@ def backfill_symbol(session, symbol, collectors, args):
 
     except Exception as e:
         print(f"    [ERROR] {symbol}: {e}")
+        # Rollback transaction to prevent "InFailedSqlTransaction" cascade errors
+        session.rollback()
         return False, {'error': str(e)}
 
 
@@ -154,6 +156,8 @@ Examples:
                         help='Resume from previous run (skip already completed)')
     parser.add_argument('--progress-file', default='data/progress/backfill_progress.txt',
                         help='File to track progress for resume capability')
+    parser.add_argument('--force', action='store_true',
+                        help='Force refill all data (bypass incremental update logic)')
 
     args = parser.parse_args()
 
@@ -170,6 +174,8 @@ Examples:
         print(f"Limit: {args.limit:,} companies")
     if args.resume:
         print(f"Resume mode: ON")
+    if args.force:
+        print(f"Force refill: ON (will bypass incremental update logic)")
     print()
 
     # Load priority list
@@ -219,6 +225,12 @@ Examples:
             collectors['employee'] = EmployeeCollector(session)
         if 'enterprise' in args.collectors:
             collectors['enterprise'] = EnterpriseCollector(session)
+
+        # Set force refill mode on all collectors
+        if args.force:
+            for collector in collectors.values():
+                collector.force_refill = True
+            print("Force refill mode enabled on all collectors")
 
         # Start collection run for proper logging to data_collection_log
         job_name = f"backfill_priority_data_{Path(args.priority_file).stem}"

@@ -38,8 +38,8 @@ class CompanyCollector(BaseCollector):
             return True
 
         try:
-            # Check if update needed (update weekly)
-            if not self.should_update_symbol('companies', symbol, max_age_days=7):
+            # Check if update needed (update every 15 days)
+            if not self.should_update_symbol('companies', symbol, max_age_days=15):
                 logger.info(f"Company profile for {symbol} is up to date")
                 return True
             

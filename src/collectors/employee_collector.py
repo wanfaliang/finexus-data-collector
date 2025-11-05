@@ -104,6 +104,9 @@ class EmployeeCollector(BaseCollector):
         if 'period_of_report' in df.columns:
             df = df.sort_values('period_of_report', ascending=False)
 
+        # Drop duplicates on primary key (symbol, period_of_report) to avoid batch insert conflicts
+        df = df.drop_duplicates(subset=['symbol', 'period_of_report'], keep='last')
+
         records = df.to_dict('records')
         if not records:
             return True

@@ -44,7 +44,7 @@ class BaseCollector:
         
         self.http_session = requests.Session()
         self.http_session.headers.update({"User-Agent": "FinExusCollector/1.0"})
-        
+
         # Tracking
         self.run_id: Optional[int] = None
         self.records_inserted = 0
@@ -53,6 +53,9 @@ class BaseCollector:
         self.companies_processed = 0
         self.companies_failed = 0
         self.errors: List[Dict[str, Any]] = []
+
+        # Force refill mode (bypass incremental update logic)
+        self.force_refill = False
     
     def get_table_name(self) -> str:
         """
@@ -270,40 +273,44 @@ class BaseCollector:
         return pd.DataFrame()
     
     def should_update_symbol(
-        self, 
-        table_name: str, 
+        self,
+        table_name: str,
         symbol: str,
         max_age_days: Optional[int] = None
     ) -> bool:
         """
         Check if symbol needs updating based on tracking table
-        
+
         Args:
             table_name: Name of table to check
             symbol: Stock symbol
             max_age_days: Maximum age in days before requiring update
-        
+
         Returns:
             True if update needed, False otherwise
         """
+        # Force refill mode: always update
+        if self.force_refill:
+            return True
+
         tracking = self.session.query(TableUpdateTracking)\
             .filter(TableUpdateTracking.table_name == table_name)\
             .filter(TableUpdateTracking.symbol == symbol)\
             .first()
-        
+
         if not tracking:
             # Never updated before
             return True
-        
+
         if max_age_days:
             age = (datetime.now() - tracking.last_update_timestamp).days
             if age >= max_age_days:
                 return True
-        
+
         # Check if next update is due
         if tracking.next_update_due and datetime.now() >= tracking.next_update_due:
             return True
-        
+
         return False
     
     def get_last_date_from_db(
@@ -490,6 +497,67 @@ class BaseCollector:
             'records_updated': self.records_updated,
             'errors': len(self.errors)
         }
+
+    def sanitize_record(self, record: Dict[str, Any], model: Any, symbol: str = None) -> Dict[str, Any]:
+        """
+        Sanitize a record to prevent database constraint violations.
+        Only modifies values that would cause actual database errors.
+
+        Args:
+            record: Dictionary of field values
+            model: SQLAlchemy model class
+            symbol: Symbol for logging purposes
+
+        Returns:
+            Sanitized record dictionary
+        """
+        from sqlalchemy import Numeric, String, BigInteger
+        from decimal import Decimal
+
+        sanitized = record.copy()
+
+        for column in model.__table__.columns:
+            field_name = column.name
+            if field_name not in sanitized:
+                continue
+
+            value = sanitized[field_name]
+            if value is None:
+                continue
+
+            # Handle Numeric fields with precision/scale constraints
+            if isinstance(column.type, Numeric):
+                if isinstance(value, (int, float, Decimal)):
+                    precision = column.type.precision
+                    scale = column.type.scale
+
+                    if precision and scale:
+                        # Calculate max value: 10^(precision - scale) - 1
+                        # E.g., Numeric(10, 4): 10^(10-4) = 10^6 = 1,000,000 max
+                        #       Numeric(10, 6): 10^(10-6) = 10^4 = 10,000 max
+                        max_value = 10 ** (precision - scale)
+
+                        if abs(value) >= max_value * 0.9:  # 90% threshold for safety
+                            logger.warning(f"Sanitizing {symbol or 'record'}.{field_name}: {value} -> NULL (exceeds Numeric({precision},{scale}) limit)")
+                            sanitized[field_name] = None
+
+            # Handle String fields - truncate to max length
+            elif isinstance(column.type, String):
+                if isinstance(value, str) and column.type.length:
+                    max_len = column.type.length
+                    if len(value) > max_len:
+                        logger.warning(f"Sanitizing {symbol or 'record'}.{field_name}: truncating string from {len(value)} to {max_len} chars")
+                        sanitized[field_name] = value[:max_len]
+
+            # Handle BigInteger overflow (PostgreSQL max: 2^63 - 1)
+            elif isinstance(column.type, BigInteger):
+                if isinstance(value, (int, float)):
+                    max_bigint = 9223372036854775807  # 2^63 - 1
+                    if abs(value) > max_bigint:
+                        logger.warning(f"Sanitizing {symbol or 'record'}.{field_name}: {value} -> NULL (exceeds BigInteger limit)")
+                        sanitized[field_name] = None
+
+        return sanitized
 
 
 if __name__ == "__main__":

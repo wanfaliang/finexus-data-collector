@@ -36,7 +36,7 @@ class FinancialCollector(BaseCollector):
         return "financial_statements"
     
     def collect_for_symbol(self, symbol: str) -> bool:
-        """Collect all financial data for a symbol"""
+        """Collect all financial data for a symbol (both annual and quarterly)"""
         # Skip indices - they don't have financial statements
         if self.is_index_symbol(symbol):
             logger.info(f"Skipping financial data for index {symbol}")
@@ -44,31 +44,47 @@ class FinancialCollector(BaseCollector):
 
         success_count = 0
 
-        for statement_type, model in self.STATEMENT_MAP.items():
-            try:
-                if self._collect_statement(symbol, statement_type, model):
-                    success_count += 1
-            except Exception as e:
-                logger.error(f"Error collecting {statement_type} for {symbol}: {e}")
-                self.record_error(model.__tablename__, symbol, str(e))
-        
+        # Collect both annual and quarterly data
+        for period in ['annual', 'quarter']:
+            for statement_type, model in self.STATEMENT_MAP.items():
+                try:
+                    if self._collect_statement(symbol, statement_type, model, period):
+                        success_count += 1
+                except Exception as e:
+                    logger.error(f"Error collecting {statement_type} ({period}) for {symbol}: {e}")
+                    self.record_error(model.__tablename__, symbol, str(e))
+                    # Rollback to prevent cascade failures in subsequent statement types
+                    self.session.rollback()
+
         return success_count > 0
     
-    def _collect_statement(self, symbol: str, statement_type: str, model: Any) -> bool:
-        """Collect specific statement type for a symbol"""
+    def _collect_statement(self, symbol: str, statement_type: str, model: Any, period: str = 'annual') -> bool:
+        """Collect specific statement type for a symbol with given period (annual or quarter)"""
         table_name = model.__tablename__
-        
-        if not self.should_update_symbol(table_name, symbol, max_age_days=1):
-            logger.info(f"{table_name} for {symbol} is up to date")
+
+        # Create a unique tracking key that includes period
+        tracking_key = f"{table_name}_{period}"
+
+        if not self.should_update_symbol(tracking_key, symbol, max_age_days=15):
+            logger.info(f"{table_name} ({period}) for {symbol} is up to date")
             return True
-        
-        last_date = self._get_last_date_for_table(model, symbol)
-        
+
+        # In force refill mode, ignore last_date to fetch all data
+        last_date = None if self.force_refill else self._get_last_date_for_table(model, symbol, period)
+
+        # Set limit based on period type for consistent years of history
+        if period == 'annual':
+            limit = 10 if last_date else 50  # 50 years initially, 10 on update
+        elif period == 'quarter':
+            limit = 40 if last_date else 200  # 50 years initially (200 quarters), 40 on update (10 years)
+        else:
+            limit = 50  # fallback
+
         url = FMP_ENDPOINTS[statement_type]
         params = {
             'symbol': symbol,
-            'period': 'annual',
-            'limit': 10 if last_date else 50
+            'period': period,
+            'limit': limit
         }
         
         response = self._get(url, params)
@@ -83,56 +99,77 @@ class FinancialCollector(BaseCollector):
 
         df = self._to_dataframe(transformed_data)
         if df.empty:
-            logger.warning(f"Empty dataframe for {symbol} {statement_type}")
+            logger.warning(f"Empty dataframe for {symbol} {statement_type} ({period})")
             return False
-        
+
         if last_date:
             df['date'] = pd.to_datetime(df['date']).dt.date
             df = df[df['date'] > last_date]
-        
+
         if df.empty:
-            logger.info(f"No new records for {symbol} {statement_type}")
-            self.update_tracking(table_name, symbol)
+            logger.info(f"No new records for {symbol} {statement_type} ({period})")
+            self.update_tracking(tracking_key, symbol)
             return True
-        
+
+        # The API already returns a 'period' field, no need to add it
+        # Just ensure date conversion
         records = df.to_dict('records')
         inserted, updated = self._upsert_records(model, records, symbol)
-        
+
         self.records_inserted += inserted
         self.records_updated += updated
-        
+
         latest_date = df['date'].max()
-        record_count = self.session.query(model).filter(model.symbol == symbol).count()
-        
+
+        # Count records for the correct period type
+        count_query = self.session.query(model).filter(model.symbol == symbol)
+        if period == 'annual':
+            count_query = count_query.filter(model.period == 'FY')
+        elif period == 'quarter':
+            count_query = count_query.filter(model.period.in_(['Q1', 'Q2', 'Q3', 'Q4']))
+        record_count = count_query.count()
+
         self.update_tracking(
-            table_name, symbol, 
+            tracking_key, symbol,
             last_api_date=latest_date,
             record_count=record_count,
             next_update_frequency='daily'
         )
-        
-        logger.info(f"✓ {symbol} {table_name}: {inserted} inserted, {updated} updated")
+
+        logger.info(f"✓ {symbol} {table_name} ({period}): {inserted} inserted, {updated} updated")
         return True
     
-    def _get_last_date_for_table(self, model: Any, symbol: str) -> Optional[date]:
-        """Get the most recent date for a symbol in a table"""
-        result = self.session.query(model.date)\
-            .filter(model.symbol == symbol)\
-            .order_by(desc(model.date))\
-            .first()
-        
+    def _get_last_date_for_table(self, model: Any, symbol: str, period: str = 'annual') -> Optional[date]:
+        """Get the most recent date for a symbol in a table for a specific period"""
+        # API uses 'annual' or 'quarter', but DB stores 'FY', 'Q1', 'Q2', 'Q3', 'Q4'
+        query = self.session.query(model.date).filter(model.symbol == symbol)
+
+        if period == 'annual':
+            query = query.filter(model.period == 'FY')
+        elif period == 'quarter':
+            query = query.filter(model.period.in_(['Q1', 'Q2', 'Q3', 'Q4']))
+
+        result = query.order_by(desc(model.date)).first()
         return result[0] if result else None
     
     def _upsert_records(self, model: Any, records: List[Dict], symbol: str) -> tuple:
         """Upsert records using PostgreSQL ON CONFLICT"""
         if not records:
             return (0, 0)
-        
+
+        # Sanitize and prepare records
+        sanitized_records = []
         for record in records:
             record['symbol'] = symbol
             if 'date' in record and isinstance(record['date'], str):
                 record['date'] = pd.to_datetime(record['date']).date()
-        
+
+            # Use base collector's smart sanitization
+            sanitized = self.sanitize_record(record, model, symbol)
+            sanitized_records.append(sanitized)
+
+        records = sanitized_records
+
         stmt = insert(model).values(records)
         pk_columns = [col.name for col in model.__table__.primary_key]
         update_dict = {

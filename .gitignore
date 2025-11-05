@@ -60,3 +60,5 @@ alembic/versions/*.pyc
 # Temporary files
 *.tmp
 *.bak
+
+nul

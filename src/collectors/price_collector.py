@@ -41,8 +41,9 @@ class PriceCollector(BaseCollector):
         if not self.should_update_symbol('prices_daily', symbol, max_age_days=1):
             logger.info(f"Daily prices for {symbol} are up to date")
             return True
-        
-        last_date = self._get_last_price_date(symbol)
+
+        # In force refill mode, ignore last_date to fetch all data
+        last_date = None if self.force_refill else self._get_last_price_date(symbol)
         
         if last_date:
             from_date = last_date + timedelta(days=1)
