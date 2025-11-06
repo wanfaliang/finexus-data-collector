@@ -537,10 +537,63 @@ class PriceMonthly(Base):
     )
 
 
+class PriceDailyBulk(Base):
+    """
+    Bulk EOD prices - unvalidated data lake
+    No foreign key to companies - stores all global symbols from bulk API
+    Use as fallback/safety net when regular prices_daily is missing data
+    """
+    __tablename__ = 'prices_daily_bulk'
+
+    # Composite primary key - NO foreign key to companies
+    symbol = Column(String(20), primary_key=True, nullable=False)
+    date = Column(Date, primary_key=True, nullable=False)
+
+    # OHLCV data
+    open = Column(Numeric(20, 4))
+    high = Column(Numeric(20, 4))
+    low = Column(Numeric(20, 4))
+    close = Column(Numeric(20, 4))
+    adj_close = Column(Numeric(20, 4))  # Adjusted close (from bulk API)
+    volume = Column(BigInteger)
+
+    # Metadata
+    collected_at = Column(DateTime, default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_prices_daily_bulk_symbol', 'symbol'),
+        Index('ix_prices_daily_bulk_date', 'date'),
+        Index('ix_prices_daily_bulk_symbol_date', 'symbol', 'date'),
+    )
+
+
+class PeersBulk(Base):
+    """
+    Stock peers bulk data - unvalidated peer relationships
+    No foreign key to companies - stores all global symbols from bulk API
+    Peers list stored as comma-separated text for simplicity
+    Override approach: latest peer relationships only (no history)
+    """
+    __tablename__ = 'peers_bulk'
+
+    # Primary key - NO foreign key to companies
+    symbol = Column(String(20), primary_key=True, nullable=False)
+
+    # Comma-separated peer list (e.g., "LTH,LEA,LNW,KMX,URBN")
+    peers_list = Column(Text, nullable=True)
+
+    # Metadata
+    collected_at = Column(DateTime, default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_peers_bulk_symbol', 'symbol'),
+    )
+
+
 class EnterpriseValue(Base):
     """Enterprise value calculations"""
     __tablename__ = 'enterprise_values'
-    
+
     symbol = Column(String(20), ForeignKey('companies.symbol'), primary_key=True)
     date = Column(Date, primary_key=True)
     

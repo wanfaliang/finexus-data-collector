@@ -131,14 +131,28 @@ class PriceCollector(BaseCollector):
             'high': p.high, 'low': p.low, 'close': p.close,
             'volume': p.volume
         } for p in daily_prices])
-        
+
         df['date'] = pd.to_datetime(df['date'])
         df.set_index('date', inplace=True)
         monthly = df.resample('ME').last().reset_index()
         monthly['date'] = monthly['date'].dt.date
-        
+
         records = monthly.to_dict('records')
         if records:
+            # Convert numpy types to Python types to ensure sanitization works
+            for record in records:
+                # Explicitly ensure symbol is present (pandas resample might drop it)
+                record['symbol'] = symbol
+
+                for key, value in record.items():
+                    if key == 'symbol':  # Skip symbol field, already set
+                        continue
+                    if pd.notna(value):  # Skip NaN/None
+                        if hasattr(value, 'item'):  # numpy scalar
+                            record[key] = value.item()  # Convert numpy to Python type
+                    else:
+                        record[key] = None  # Ensure NaN becomes None
+
             # Sanitize records to prevent BigInteger overflow
             sanitized_records = [self.sanitize_record(r, PriceMonthly, symbol) for r in records]
 

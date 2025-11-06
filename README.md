@@ -49,8 +49,11 @@ python src/jobs/update_all_data.py --schedule
 
 ## Features
 
-- **18 Database Tables**: All financial data types
+- **20 Database Tables**: All financial data types plus bulk data lakes (prices, peers)
 - **Incremental Updates**: Only fetch new data
+- **Bulk Data Collection**: EOD prices (100K+ symbols), peer relationships (75K+ symbols)
+- **Fallback Queries**: Automatic failover from regular to bulk prices
+- **Peer Network Analysis**: Company relationships and competitive analysis
 - **Vertical Economic Indicators**: Handle different update frequencies
 - **Comprehensive Tracking**: Audit trail of all operations
 - **Automatic Scheduling**: Daily/weekly/monthly updates
@@ -207,7 +210,41 @@ All collectors inherit from `BaseCollector`, which provides:
   collector.collect_all()  # Collects all ~48 indicators
   ```
 
-#### 9. **BulkProfileCollector** (`bulk_profile_collector.py`)
+#### 9. **BulkPriceCollector** (`bulk_price_collector.py`)
+- **Tables**: `prices_daily_bulk`
+- **Data**: All global EOD prices from FMP bulk API (100K+ symbols)
+- **Special Features**:
+  - **No foreign keys** - Stores all global symbols without validation
+  - **CSV parsing** - Handles bulk CSV endpoint responses
+  - **Batch processing** - 1,000 records per batch for efficiency and error isolation
+  - **Acts as data lake** - Unvalidated fallback/safety net for missing prices
+  - **Separate from regular prices** - No conflicts with PriceCollector
+- **Use Cases**:
+  - Daily bulk collection (1 API call vs 100+ individual calls)
+  - Gap filling when regular collection fails
+  - Symbol discovery (what's new in market)
+  - Data validation (cross-check prices)
+  - Retroactive portfolio expansion (copy historical data for new companies)
+- **Usage**: Via `scripts/collect_bulk_eod.py`
+
+#### 10. **BulkPeersCollector** (`bulk_peers_collector.py`)
+- **Tables**: `peers_bulk`
+- **Data**: Peer relationships for all global symbols from FMP bulk API (75K+ symbols)
+- **Special Features**:
+  - **No foreign keys** - Stores all global symbols without validation
+  - **CSV parsing** - Handles bulk CSV endpoint responses
+  - **Override approach** - Replaces old peer data with latest (no history)
+  - **Batch processing** - 1,000 records per batch for efficiency and error isolation
+  - **Comma-separated storage** - Simple text format matching API response
+- **Use Cases**:
+  - Competitive analysis (who are symbol's competitors?)
+  - Sector/industry grouping validation
+  - Peer network analysis (find related companies)
+  - Portfolio diversification (avoid overlapping peers)
+  - Market structure research
+- **Usage**: Via `scripts/collect_bulk_peers.py`
+
+#### 11. **BulkProfileCollector** (`bulk_profile_collector.py`)
 - **Tables**: `companies`
 - **Data**: Bulk company profiles from CSV files
 - **Special Features**:
@@ -217,13 +254,13 @@ All collectors inherit from `BaseCollector`, which provides:
   - Batch processing (1000 records per batch)
 - **Usage**: Via `scripts/load_bulk_profiles.py`
 
-#### 10. **FREDCollector** (`fred_collector.py`) ⚠️ *Not a BaseCollector*
+#### 12. **FREDCollector** (`fred_collector.py`) ⚠️ *Not a BaseCollector*
 - **Purpose**: Standalone FRED/FMP data fetcher (Excel export)
 - **Data**: Economic indicators from FRED and FMP APIs
 - **Output**: Excel workbooks with 4 sheets (Raw_Long, Monthly_Panel, Quarterly_Panel, Meta)
 - **Note**: Used internally by `EconomicCollector` for database integration
 
-#### ⚠️ **BulkFinancialCollector** (`bulk_financial_collector.py`) - *UNUSED*
+#### 13. ⚠️ **BulkFinancialCollector** (`bulk_financial_collector.py`) - *UNUSED*
 - **Purpose**: Load financial statements from bulk CSV files
 - **Status**: Not actively used in current workflow
 - **Why Unused**: The `FinancialCollector` (API-based) is more practical and automated
@@ -273,8 +310,8 @@ record = self.sanitize_record(record, Model, symbol)
 ### Core Tables (6)
 - companies, income_statements, balance_sheets, cash_flows, financial_ratios, key_metrics
 
-### Market Data (4)
-- prices_daily, prices_monthly, enterprise_values, employee_history
+### Market Data (6)
+- prices_daily, prices_daily_bulk, prices_monthly, enterprise_values, employee_history, peers_bulk
 
 ### Analyst & Ownership (5)
 - analyst_estimates, price_targets, insider_trading, institutional_ownership, insider_statistics
@@ -411,6 +448,8 @@ python scripts/backfill_priority_data.py data/priority_lists/priority1_active_in
 Choose which data types to collect:
 
 ```bash
+Collect from Russell 3000 list
+python scripts/backfill_priority_data.py data/priority_lists/Russell_3000.csv --limit 120
 # Only company profiles and prices (fast)
 python scripts/backfill_priority_data.py priority.txt --collectors company,price
 
@@ -518,6 +557,370 @@ python scripts/scheduler.py
 ```
 
 Economic data updates daily with new values from FRED and FMP APIs.
+
+## Bulk EOD Price Collection
+
+The bulk price system collects **all global EOD prices** (100K+ symbols) in a single API call and stores them in a separate data lake table (`prices_daily_bulk`) without validation or foreign key constraints.
+
+### Why Use Bulk Prices?
+
+**Benefits:**
+- **Efficient**: 1 API call vs 100+ individual calls for portfolio companies
+- **Complete**: Captures entire market, not just your portfolio
+- **Resilient**: Acts as fallback when regular price collection fails
+- **Discoverable**: See what symbols exist in the market
+- **Flexible**: Retroactively add historical data when expanding portfolio
+
+**Architecture:**
+- **Separate table** (`prices_daily_bulk`) - No conflicts with regular `prices_daily`
+- **No foreign keys** - Stores all symbols without company profile validation
+- **No overhead** - Regular price collection continues independently
+- **Fallback queries** - Helper functions automatically check bulk table when regular data missing
+
+### Collecting Bulk Prices
+
+```bash
+# Collect yesterday's prices (default)
+python scripts/collect_bulk_eod.py
+
+# Collect specific date
+python scripts/collect_bulk_eod.py --date 2024-11-01
+
+# Collect date range (backfill)
+python scripts/collect_bulk_eod.py --start-date 2024-11-01 --end-date 2024-11-05
+
+# Collect last N days
+python scripts/collect_bulk_eod.py --last-days 7
+```
+
+**Performance:**
+- Processes 70K+ symbols in ~30 seconds
+- Batch inserts (1,000 per batch)
+- Progress logging for large batches
+
+### Using Bulk Prices in Queries
+
+The `price_helpers.py` module provides fallback query functions:
+
+```python
+from src.utils.price_helpers import get_price, get_close_price, get_price_range
+from src.database.connection import get_session
+from datetime import date
+
+with get_session() as session:
+    # Get price with automatic fallback to bulk
+    price = get_price(session, 'AAPL', date(2024, 11, 1), fallback_to_bulk=True)
+    if price:
+        print(f"Close: ${price['close']}")
+        print(f"Source: {price['source']}")  # 'regular' or 'bulk'
+
+    # Get just the close price
+    close = get_close_price(session, 'AAPL', date(2024, 11, 1))
+
+    # Get price range (combines both tables)
+    prices = get_price_range(session, 'AAPL',
+                            date(2024, 11, 1),
+                            date(2024, 11, 5))
+    for p in prices:
+        print(f"{p['date']}: ${p['close']} (from {p['source']})")
+```
+
+### Helper Functions Available
+
+**Query Functions:**
+- `get_price(session, symbol, date, fallback_to_bulk)` - Single date with fallback
+- `get_close_price(session, symbol, date)` - Quick close price lookup
+- `get_price_range(session, symbol, start_date, end_date)` - Date range with fallback
+
+**Analysis Functions:**
+- `check_price_availability(session, symbol, date)` - Check which tables have data
+- `find_missing_dates(session, symbol, start_date, end_date)` - Gap detection
+- `compare_prices(session, symbol, date)` - Validate regular vs bulk data
+
+**Data Management:**
+- `copy_from_bulk_to_regular(session, symbol, start_date, end_date)` - Populate regular table from bulk (useful when adding new companies to portfolio)
+
+### Typical Workflows
+
+**Daily Collection (Recommended):**
+```bash
+# Run after market close (e.g., 6:00 PM EST)
+python scripts/collect_bulk_eod.py
+
+# Schedule with Windows Task Scheduler or cron
+# This gives you a complete market snapshot every day
+```
+
+**Backfilling Historical Data:**
+```bash
+# Fill last 30 days for validation/gap filling
+python scripts/collect_bulk_eod.py --last-days 30
+
+# Fill specific date range for new portfolio additions
+python scripts/collect_bulk_eod.py --start-date 2024-01-01 --end-date 2024-11-01
+```
+
+**Adding New Company to Portfolio:**
+```python
+# After adding a new company profile, copy historical prices from bulk
+from src.utils.price_helpers import copy_from_bulk_to_regular
+from src.database.connection import get_session
+from datetime import date
+
+with get_session() as session:
+    # Copy 1 year of historical data
+    records_copied = copy_from_bulk_to_regular(
+        session,
+        'TSLA',
+        date(2023, 11, 1),
+        date(2024, 11, 1)
+    )
+    print(f"Copied {records_copied} records from bulk to regular table")
+```
+
+**Gap Detection and Filling:**
+```python
+from src.utils.price_helpers import find_missing_dates, get_price
+from src.database.connection import get_session
+from datetime import date
+
+with get_session() as session:
+    # Find gaps in regular price data
+    missing = find_missing_dates(session, 'AAPL',
+                                date(2024, 1, 1),
+                                date(2024, 11, 1))
+
+    # Check if bulk has these dates
+    for missing_date in missing:
+        bulk_price = get_price(session, 'AAPL', missing_date,
+                              fallback_to_bulk=True)
+        if bulk_price and bulk_price['source'] == 'bulk':
+            print(f"Bulk has data for {missing_date}: ${bulk_price['close']}")
+```
+
+### When to Use Bulk vs Regular
+
+**Use Bulk Collection:**
+- Daily market-wide snapshots
+- Initial historical backfill (faster than individual calls)
+- Discovering new symbols in the market
+- Validation and gap detection
+
+**Use Regular Price Collection:**
+- Portfolio-specific updates with full OHLCV validation
+- When you need only specific symbols
+- Integration with company profiles (foreign key relationships)
+
+**Best Practice:**
+- Run bulk collection daily for complete market coverage
+- Run regular price collection for portfolio companies with validation
+- Use fallback queries in downstream applications for resilience
+
+## Bulk Stock Peers Collection
+
+The bulk peers system collects **peer relationships for all global symbols** (75K+ symbols) in a single API call and stores them in a simple table (`peers_bulk`) without validation or foreign key constraints.
+
+### Why Collect Peer Data?
+
+**Benefits:**
+- **Competitive Analysis**: Quickly identify competitors for any symbol
+- **Sector Validation**: Cross-check company classifications
+- **Portfolio Diversification**: Avoid overlapping peer exposure
+- **Network Analysis**: Find related companies through peer-of-peer relationships
+- **Market Structure**: Understand industry groupings
+
+**Architecture:**
+- **Simple text storage** - Comma-separated peer lists (matches API format)
+- **No foreign keys** - Stores all symbols without company profile validation
+- **Override approach** - Latest peer data only (peers change infrequently)
+- **Efficient** - 1 API call for entire market vs individual lookups
+
+### Collecting Bulk Peers
+
+```bash
+# Collect all peer relationships (no arguments needed)
+python scripts/collect_bulk_peers.py
+```
+
+**What it does:**
+- Fetches CSV from FMP bulk peers API
+- Parses ~75,000 symbol relationships
+- Upserts into `peers_bulk` table (replaces old data)
+- Completes in ~10-15 seconds
+
+**Update frequency:** Monthly or quarterly (peers don't change often)
+
+### Using Peers Data in Analysis
+
+The `peers_helpers.py` module provides powerful query functions:
+
+```python
+from src.utils.peers_helpers import (
+    get_peers, find_common_peers, get_peer_network,
+    are_peers, search_by_peer
+)
+from src.database.connection import get_session
+
+with get_session() as session:
+    # Get AAPL's peers
+    peers = get_peers(session, 'AAPL')
+    print(f"AAPL has {len(peers)} peers: {peers}")
+
+    # Find common competitors between AAPL and MSFT
+    common = find_common_peers(session, 'AAPL', 'MSFT')
+    print(f"Common peers: {common}")
+
+    # Check if they're mutual peers
+    if are_peers(session, 'AAPL', 'MSFT'):
+        print("AAPL and MSFT list each other as peers")
+
+    # Get 2-level peer network (peers of peers)
+    network = get_peer_network(session, 'AAPL', depth=2)
+    print(f"Level 1: {len(network[1])} direct peers")
+    print(f"Level 2: {len(network[2])} peers of peers")
+
+    # Reverse lookup: who lists AAPL as a peer?
+    listings = search_by_peer(session, 'AAPL')
+    print(f"{len(listings)} symbols list AAPL as peer")
+```
+
+### Helper Functions Available
+
+**Basic Queries:**
+- `get_peers(session, symbol)` - Get list of peer symbols
+- `get_peers_raw(session, symbol)` - Get raw comma-separated string
+- `get_peer_counts(session, symbols)` - Count peers for multiple symbols
+
+**Comparative Analysis:**
+- `find_common_peers(session, symbol1, symbol2)` - Find shared peers
+- `are_peers(session, symbol1, symbol2)` - Check if mutual peers
+
+**Network Analysis:**
+- `get_peer_network(session, symbol, depth)` - Multi-level peer traversal
+- `search_by_peer(session, peer_symbol)` - Reverse lookup (who lists this symbol?)
+- `find_most_connected(session, limit)` - Find symbols with most peers
+
+### Typical Use Cases
+
+**Competitive Analysis:**
+```python
+from src.utils.peers_helpers import get_peers
+from src.database.connection import get_session
+
+with get_session() as session:
+    # Analyze TSLA's competitive landscape
+    peers = get_peers(session, 'TSLA')
+
+    print(f"Tesla's competitors: {peers}")
+    # Might show: ['F', 'GM', 'TM', 'HMC', 'RIVN', 'LCID', ...]
+
+    # Now fetch financial metrics for these peers for comparison
+```
+
+**Portfolio Diversification Check:**
+```python
+from src.utils.peers_helpers import find_common_peers
+
+with get_session() as session:
+    # Check overlap between two holdings
+    holdings = ['AAPL', 'MSFT', 'GOOGL', 'AMZN']
+
+    for i, stock1 in enumerate(holdings):
+        for stock2 in holdings[i+1:]:
+            common = find_common_peers(session, stock1, stock2)
+            if len(common) > 5:  # Significant overlap
+                print(f"Warning: {stock1} and {stock2} share {len(common)} peers")
+                print(f"  Common: {common[:5]}")
+```
+
+**Sector Discovery:**
+```python
+from src.utils.peers_helpers import get_peer_network
+
+with get_session() as session:
+    # Discover related companies in fintech
+    network = get_peer_network(session, 'SQ', depth=2)
+
+    # All level 1 and 2 peers are likely in similar space
+    all_related = set()
+    for level, peers_set in network.items():
+        all_related.update(peers_set)
+
+    print(f"Found {len(all_related)} companies in SQ's peer network")
+```
+
+**Market Structure Analysis:**
+```python
+from src.utils.peers_helpers import find_most_connected, search_by_peer
+
+with get_session() as session:
+    # Find hub companies (most connected)
+    hubs = find_most_connected(session, limit=10)
+
+    for item in hubs:
+        print(f"{item['symbol']}: {item['peer_count']} peers")
+
+    # Check who considers AAPL a competitor
+    competitors_of_aapl = search_by_peer(session, 'AAPL')
+    print(f"{len(competitors_of_aapl)} companies list AAPL as peer")
+```
+
+### Testing Your Peers Data
+
+Run the comprehensive test suite:
+
+```bash
+python scripts/test_peers_collector.py
+```
+
+This tests:
+- Basic peer queries for major symbols
+- Common peer finding
+- Multi-level network traversal
+- Peer counts and statistics
+- Most connected symbols
+- Reverse lookup functionality
+- Database statistics
+
+### Update Schedule
+
+**Recommended:**
+- **Monthly** - Run on 1st of each month
+- **Quarterly** - For less critical applications
+- **On-demand** - When adding new companies to your analysis
+
+```bash
+# Schedule with Windows Task Scheduler or cron
+# Example: First day of each month
+python scripts/collect_bulk_peers.py
+```
+
+**Why infrequent updates?**
+- Peer relationships change slowly (companies don't switch industries daily)
+- FMP likely updates their peer data monthly/quarterly
+- Override approach means each collection replaces all data
+- Saves API quota for more dynamic data (prices, financials)
+
+### Architecture Decisions
+
+**Why override instead of incremental?**
+- Peers change infrequently - tracking history adds complexity with little value
+- Most queries need current state ("who are AAPL's peers today?")
+- Simpler schema and faster queries
+- Can always add history tracking later if needed
+
+**Why text storage instead of array?**
+- Matches API format exactly (comma-separated)
+- Simple to update and query
+- Easy to split in application when needed: `peers.split(',')`
+- Less storage overhead
+- Still searchable with SQL `CONTAINS` operator
+
+**Why no foreign keys?**
+- Same benefits as bulk prices - no validation overhead
+- Can store peer relationships for symbols not in your portfolio
+- Resilient to missing company profiles
+- Faster inserts during bulk collection
 
 ## Priority Lists
 
