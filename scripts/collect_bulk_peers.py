@@ -14,6 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.database.connection import get_session
 from src.collectors.bulk_peers_collector import BulkPeersCollector
 
+# Create logs directory if needed (BEFORE logging setup)
+Path('logs').mkdir(exist_ok=True)
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -33,9 +36,6 @@ def main():
     logger.info("="*80)
     logger.info("Fetching peer relationships for all global symbols...")
     logger.info("")
-
-    # Create logs directory if needed
-    Path('logs').mkdir(exist_ok=True)
 
     # Run collection
     with get_session() as session:

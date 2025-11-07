@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.database.connection import get_session
 from src.collectors.bulk_price_collector import BulkPriceCollector
 
+# Create logs directory if needed (BEFORE logging setup)
+Path('logs').mkdir(exist_ok=True)
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,

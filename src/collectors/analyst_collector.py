@@ -93,6 +93,10 @@ class AnalystCollector(BaseCollector):
         # Keep the last occurrence (most recent data)
         df = df.drop_duplicates(subset=['symbol', 'date'], keep='last')
 
+        # Clean NaN/inf values BEFORE to_dict() - PostgreSQL can't handle nan
+        import numpy as np
+        df = df.replace({np.nan: None, np.inf: None, -np.inf: None})
+
         records = df.to_dict('records')
         if not records:
             return True
@@ -170,7 +174,13 @@ class AnalystCollector(BaseCollector):
         # Add required fields
         record['symbol'] = symbol
         record['published_date'] = datetime.now().date()
-        
+
+        # Clean any NaN/inf values from API (safety check)
+        import math
+        for k, v in record.items():
+            if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+                record[k] = None
+
         # Upsert record
         stmt = insert(PriceTarget).values([record])
         stmt = stmt.on_conflict_do_update(

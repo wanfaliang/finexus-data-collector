@@ -411,6 +411,24 @@ python scripts/load_bulk_profiles.py
 - Supports FMP bulk export format (camelCase columns)
 - Automatically converts data types
 
+### 1b. Load ALL Global Company Profiles
+
+To load companies from ALL exchanges globally (not just US):
+
+```bash
+python scripts/load_all_profiles.py
+```
+
+**What it does:**
+- Same as `load_bulk_profiles.py` but **no exchange filtering**
+- Loads companies from all global exchanges (LSE, TSX, etc.)
+- Useful for global portfolio or international analysis
+- Typically loads 50K-70K companies vs 35K-40K US-only
+
+**When to use:**
+- US companies only: Use `load_bulk_profiles.py` (default)
+- Global companies: Use `load_all_profiles.py`
+
 ### 2. Alternative: Load from FMP List
 ```bash
 # Load specific exchanges

@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.database.connection import get_session
 from src.collectors.economic_collector import EconomicCollector
 
+# Create logs directory if needed (BEFORE logging setup)
+Path('logs').mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
