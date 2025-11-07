@@ -65,6 +65,15 @@ class BulkPriceCollector(BaseCollector):
 
             response = self._get(url, params)
 
+            if not response:
+                logger.warning(f"Failed to fetch bulk data for {date_str}")
+                return {
+                    'date': target_date,
+                    'symbols_received': 0,
+                    'symbols_inserted': 0,
+                    'success': False
+                }
+
             # Parse CSV response
             csv_text = response.text
 

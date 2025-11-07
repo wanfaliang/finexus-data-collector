@@ -33,6 +33,17 @@ US_EXCHANGES = [
 class BulkProfileCollector(BaseCollector):
     """Collector for bulk company profile data"""
 
+    def __init__(self, session, us_only: bool = True):
+        """
+        Initialize bulk profile collector
+
+        Args:
+            session: SQLAlchemy session
+            us_only: If True, filter for US exchanges only. If False, load all global companies.
+        """
+        super().__init__(session)
+        self.us_only = us_only
+
     def get_table_name(self) -> str:
         return "companies"
 
@@ -53,11 +64,14 @@ class BulkProfileCollector(BaseCollector):
             df = pd.read_csv(file_path)
             logger.info(f"Loaded {len(df):,} records from CSV")
 
-            # Filter for US exchanges only
-            initial_count = len(df)
-            df = df[df['exchange'].isin(US_EXCHANGES)]
-            if len(df) < initial_count:
-                logger.info(f"Filtered to {len(df):,} US companies (removed {initial_count - len(df)} non-US)")
+            # Filter for US exchanges only (if us_only is True)
+            if self.us_only:
+                initial_count = len(df)
+                df = df[df['exchange'].isin(US_EXCHANGES)]
+                if len(df) < initial_count:
+                    logger.info(f"Filtered to {len(df):,} US companies (removed {initial_count - len(df):,} non-US)")
+            else:
+                logger.info(f"Loading ALL global companies (no exchange filter)")
 
             # Skip rows with null symbols
             initial_count = len(df)
@@ -83,7 +97,7 @@ class BulkProfileCollector(BaseCollector):
             df = pd.DataFrame(transformed_records)
 
             # Data type conversions
-            self._convert_data_types(df)
+            df = self._convert_data_types(df)
 
             # Prepare records for insertion
             records = df.to_dict('records')
@@ -114,6 +128,13 @@ class BulkProfileCollector(BaseCollector):
 
     def _convert_data_types(self, df: pd.DataFrame):
         """Convert data types to match database schema"""
+        import numpy as np
+
+        # Count NaN values before cleaning (for diagnostics)
+        nan_count = df.isna().sum().sum()
+        if nan_count > 0:
+            logger.info(f"Cleaning {nan_count:,} NaN values from dataframe")
+
         # Convert date columns (handle NaT by converting to None)
         if 'ipo_date' in df.columns:
             df['ipo_date'] = pd.to_datetime(df['ipo_date'], errors='coerce')
@@ -188,6 +209,13 @@ class BulkProfileCollector(BaseCollector):
                 df[col] = df[col].str[:max_len]  # Truncate to max length
                 df[col] = df[col].where(pd.notna(df[col]) & (df[col] != 'nan') & (df[col] != ''), None)
 
+        # FINAL PASS: Replace ALL NaN/inf with None using the CORRECT method
+        # df.where() and df.apply() don't work - we MUST use replace with numpy.nan
+        import numpy as np
+        df = df.replace({np.nan: None, np.inf: None, -np.inf: None})
+
+        return df
+
     def _upsert_batch(self, records: list) -> tuple[int, int]:
         """
         Insert or update a batch of records
@@ -241,7 +269,20 @@ class BulkProfileCollector(BaseCollector):
                     self.session.commit()
                     inserted += 1
                 except Exception as e2:
-                    logger.warning(f"Failed to insert {record.get('symbol', 'UNKNOWN')}: {e2}")
+                    symbol = record.get('symbol', 'UNKNOWN')
+                    # Check for NaN values in the record
+                    nan_fields = []
+                    for k, v in record.items():
+                        try:
+                            if pd.isna(v):
+                                nan_fields.append(f"{k}={v}")
+                        except (TypeError, ValueError):
+                            pass  # Not a value that can be NaN
+
+                    if nan_fields:
+                        logger.warning(f"Failed to insert {symbol}: NaN in [{', '.join(nan_fields[:5])}]")
+                    else:
+                        logger.warning(f"Failed to insert {symbol}: {str(e2)[:200]}")
                     self.session.rollback()
                     failed += 1
 
