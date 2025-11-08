@@ -135,7 +135,7 @@ class AnalystCollector(BaseCollector):
             symbol,
             last_api_date=latest_date,
             record_count=record_count,
-            next_update_frequency='daily'
+            next_update_frequency='15days'
         )
         
         logger.info(f"✓ {symbol} analyst_estimates: {len(records)} upserted")
@@ -208,7 +208,7 @@ class AnalystCollector(BaseCollector):
             symbol,
             last_api_date=record['published_date'],
             record_count=record_count,
-            next_update_frequency='daily'
+            next_update_frequency='15days'
         )
         
         logger.info(f"✓ {symbol} price_targets: 1 upserted")

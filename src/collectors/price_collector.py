@@ -154,7 +154,7 @@ class PriceCollector(BaseCollector):
                         record[key] = None  # Ensure NaN becomes None
 
             # Sanitize records to prevent BigInteger overflow
-            sanitized_records = [self.sanitize_record(r, PriceMonthly, symbol) for r in records]
+            sanitized_records = [self.sanitize_record(r, PriceMonthly, symbol) for r in records] # type: ignore
 
             stmt = insert(PriceMonthly).values(sanitized_records)
             stmt = stmt.on_conflict_do_update(
@@ -164,7 +164,7 @@ class PriceCollector(BaseCollector):
             )
             self.session.execute(stmt)
             self.session.commit()
-            logger.info(f"✓ Generated {len(sanitized_records)} monthly prices for {symbol}")
+            logger.info(f" Generated {len(sanitized_records)} monthly prices for {symbol}")
     
     def _get_index_name(self, symbol: str) -> str:
         """Map index symbol to name"""

@@ -128,6 +128,12 @@ class InsiderCollector(BaseCollector):
 
             if df.empty:
                 logger.info(f"No new insider trading records for {symbol}")
+                # Still update tracking to record that we checked
+                self.update_tracking(
+                    'insider_trading',
+                    symbol,
+                    next_update_frequency='daily'
+                )
                 return True
 
             # Handle special field name mappings

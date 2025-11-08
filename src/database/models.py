@@ -940,6 +940,66 @@ class EconomicDataQuarterly(Base):
     )
 
 
+class EconomicCalendar(Base):
+    """Economic data releases calendar - upcoming and historical economic events"""
+    __tablename__ = 'economic_calendar'
+
+    # Composite primary key: date + country + event (unique event at specific time)
+    date = Column(DateTime, primary_key=True, nullable=False)  # Includes time component
+    country = Column(String(10), primary_key=True, nullable=False)  # Country code (US, JP, etc.)
+    event = Column(String(200), primary_key=True, nullable=False)  # Event name
+
+    # Event details
+    currency = Column(String(10))  # Currency code (USD, JPY, etc.)
+    previous = Column(Numeric(20, 4))  # Previous value
+    estimate = Column(Numeric(20, 4))  # Estimated value (can be NULL)
+    actual = Column(Numeric(20, 4))  # Actual value (can be NULL before release)
+    change = Column(Numeric(20, 4))  # Change from previous
+    change_percentage = Column(Numeric(20, 4))  # Percentage change
+    impact = Column(String(20))  # Impact level: "Low", "Medium", "High"
+    unit = Column(String(10))  # Unit of measurement (B for Billion, etc.)
+
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_economic_calendar_date', 'date'),
+        Index('ix_economic_calendar_country', 'country'),
+        Index('ix_economic_calendar_impact', 'impact'),
+    )
+
+
+class EarningsCalendar(Base):
+    """Earnings announcements calendar - upcoming and historical earnings releases"""
+    __tablename__ = 'earnings_calendar'
+
+    # Composite primary key: symbol + date (one earnings announcement per company per date)
+    # NO foreign key constraint - allows symbols not yet in companies table
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+    date = Column(Date, primary_key=True, nullable=False)  # Earnings announcement date
+
+    # EPS data
+    eps_actual = Column(Numeric(20, 4))  # Actual EPS (NULL before release)
+    eps_estimated = Column(Numeric(20, 4))  # Estimated EPS
+
+    # Revenue data
+    revenue_actual = Column(Numeric(20, 2))  # Actual revenue (NULL before release)
+    revenue_estimated = Column(Numeric(20, 2))  # Estimated revenue
+
+    # Tracking
+    last_updated = Column(Date)  # When this record was last updated by FMP
+
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_earnings_calendar_date', 'date'),
+        Index('ix_earnings_calendar_symbol_date', 'symbol', 'date'),
+    )
+
+
 # Helper function to create all tables
 def create_all_tables(engine):
     """Create all tables in the database"""

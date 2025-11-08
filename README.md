@@ -126,7 +126,7 @@ All collectors inherit from `BaseCollector`, which provides:
 #### 2. **FinancialCollector** (`financial_collector.py`)
 - **Tables**: `income_statements`, `balance_sheets`, `cash_flows`, `financial_ratios`, `key_metrics`
 - **Data**: Financial statements (annual & quarterly), ratios, key metrics
-- **Update Frequency**: Every 15 days
+- **Update Frequency**: Quarterly (90 days) - aligns with earnings cycles
 - **Historical Depth**:
   - Annual: 50 years initial, 10 years on update
   - Quarterly: 200 quarters (50 years) initial, 40 quarters on update
@@ -160,6 +160,7 @@ All collectors inherit from `BaseCollector`, which provides:
 - **Special Features**:
   - Deduplicates on (symbol, date) to prevent conflicts
   - Tracks analyst consensus changes over time
+- **Note**: Estimates don't change daily, 15-day frequency balances freshness with API efficiency
 
 #### 5. **InsiderCollector** (`insider_collector.py`)
 - **Tables**: `insider_trading`, `institutional_ownership`, `insider_statistics`
@@ -576,6 +577,232 @@ python scripts/scheduler.py
 
 Economic data updates daily with new values from FRED and FMP APIs.
 
+## Economic Calendar Collection
+
+The Economic Calendar tracks upcoming and historical economic data releases with estimates and actual values. Essential for anticipating market-moving events.
+
+### Quick Start
+
+**Collect upcoming 90 days (default):**
+```bash
+python scripts/collect_economic_calendar.py
+```
+
+**Backfill last year:**
+```bash
+python scripts/collect_economic_calendar.py --backfill-days 365
+```
+
+### Features
+
+- **Upcoming events**: Track estimates for future economic releases
+- **Historical data**: Full history of past releases with actual values
+- **Auto-updates**: Updates existing events when actuals are released
+- **Global coverage**: Events from all countries (US, JP, EU, etc.)
+- **Impact ratings**: "Low", "Medium", "High" impact classification
+
+### Collection Modes
+
+**1. Upcoming Events (Default)**
+```bash
+# Next 90 days
+python scripts/collect_economic_calendar.py
+
+# Next 30 days
+python scripts/collect_economic_calendar.py --upcoming 30
+```
+
+**2. Specific Date Range**
+```bash
+# Collect Q1 2024
+python scripts/collect_economic_calendar.py --from 2024-01-01 --to 2024-03-31
+```
+
+**3. Historical Backfill**
+```bash
+# Last 365 days
+python scripts/collect_economic_calendar.py --backfill-days 365
+
+# From specific date to today
+python scripts/collect_economic_calendar.py --backfill-from 2020-01-01
+```
+
+### Data Structure
+
+Each event includes:
+- **date**: Event timestamp (includes time component)
+- **country**: Country code (US, JP, GB, etc.)
+- **event**: Event name (e.g., "Non-Farm Payrolls", "CPI YoY")
+- **currency**: Currency code (USD, JPY, EUR, etc.)
+- **previous**: Previous value
+- **estimate**: Analyst estimate (NULL if not available)
+- **actual**: Actual released value (NULL before release)
+- **change**: Change from previous value
+- **change_percentage**: Percentage change
+- **impact**: Impact level ("Low", "Medium", "High")
+- **unit**: Unit of measurement (B = Billion, etc.)
+
+### Scheduled Daily Collection
+
+For daily updates, schedule this command:
+
+```bash
+# Collect next 90 days every day
+# Updates estimates and fills in actual values as they're released
+python scripts/collect_economic_calendar.py
+```
+
+**Recommended schedule:** Daily at 6:00 AM (after most global releases)
+
+### Query Examples
+
+```sql
+-- Upcoming high-impact US events
+SELECT date, event, estimate, impact
+FROM economic_calendar
+WHERE country = 'US'
+  AND impact = 'High'
+  AND date > NOW()
+ORDER BY date;
+
+-- Events with biggest surprises (actual vs estimate)
+SELECT date, event, country, estimate, actual,
+       ABS(change_percentage) as surprise
+FROM economic_calendar
+WHERE estimate IS NOT NULL
+  AND actual IS NOT NULL
+ORDER BY surprise DESC
+LIMIT 10;
+
+-- All events for a specific date
+SELECT * FROM economic_calendar
+WHERE date::date = '2024-01-15'
+ORDER BY impact DESC, date;
+```
+
+### Notes
+
+- **API Limit**: 90-day maximum per request (script handles chunking automatically)
+- **Updates**: Run daily to get latest estimates and actual values
+- **History**: All historical events are preserved for backtesting
+- **UPSERT**: Automatically updates events when actual values are released
+
+## Earnings Calendar Collection
+
+The Earnings Calendar tracks upcoming and historical earnings announcements with estimated and actual EPS/revenue. Essential for earnings season planning and trade timing.
+
+### Quick Start
+
+**Collect upcoming 90 days (default):**
+```bash
+python scripts/collect_earnings_calendar.py
+```
+
+**Backfill last 2 years:**
+```bash
+python scripts/collect_earnings_calendar.py --backfill-days 730
+```
+
+### Features
+
+- **Company-specific**: Earnings dates for individual stocks
+- **Estimates vs Actuals**: Track analyst estimates and actual results
+- **Historical data**: Full history for backtesting earnings strategies
+- **Auto-updates**: Updates when actual results are released
+- **Revenue tracking**: Both EPS and revenue estimates/actuals
+
+### Collection Modes
+
+**1. Upcoming Earnings (Default)**
+```bash
+# Next 90 days
+python scripts/collect_earnings_calendar.py
+
+# Next 30 days
+python scripts/collect_earnings_calendar.py --upcoming 30
+```
+
+**2. Specific Date Range**
+```bash
+# Collect Q4 2024 earnings season
+python scripts/collect_earnings_calendar.py --from 2024-10-01 --to 2024-12-31
+```
+
+**3. Historical Backfill**
+```bash
+# Last 2 years
+python scripts/collect_earnings_calendar.py --backfill-days 730
+
+# From specific date to today
+python scripts/collect_earnings_calendar.py --backfill-from 2020-01-01
+```
+
+### Data Structure
+
+Each announcement includes:
+- **symbol**: Company ticker
+- **date**: Earnings announcement date
+- **eps_estimated**: Analyst EPS estimate (NULL if not available)
+- **eps_actual**: Actual EPS (NULL before release)
+- **revenue_estimated**: Analyst revenue estimate (NULL if not available)
+- **revenue_actual**: Actual revenue (NULL before release)
+- **last_updated**: When FMP last updated this record
+
+### Scheduled Daily Collection
+
+For daily updates, schedule this command:
+
+```bash
+# Collect next 90 days every day
+# Updates estimates and fills in actuals as they're released
+python scripts/collect_earnings_calendar.py
+```
+
+**Recommended schedule:** Daily at 7:00 AM (after most after-hours earnings)
+
+### Query Examples
+
+```sql
+-- Upcoming earnings for your portfolio
+SELECT e.symbol, c.company_name, e.date, e.eps_estimated, e.revenue_estimated
+FROM earnings_calendar e
+JOIN companies c ON e.symbol = c.symbol
+WHERE e.date >= CURRENT_DATE
+  AND e.symbol IN ('AAPL', 'MSFT', 'GOOGL', 'AMZN')
+ORDER BY e.date;
+
+-- Biggest earnings surprises this quarter
+SELECT symbol, date, eps_estimated, eps_actual,
+       ((eps_actual - eps_estimated) / ABS(eps_estimated) * 100) as surprise_pct
+FROM earnings_calendar
+WHERE date >= '2024-10-01'
+  AND eps_estimated IS NOT NULL
+  AND eps_actual IS NOT NULL
+ORDER BY ABS((eps_actual - eps_estimated) / eps_estimated) DESC
+LIMIT 10;
+
+-- Earnings calendar for next week
+SELECT symbol, date, eps_estimated, revenue_estimated
+FROM earnings_calendar
+WHERE date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+ORDER BY date, symbol;
+
+-- Companies that beat estimates
+SELECT symbol, date, eps_estimated, eps_actual
+FROM earnings_calendar
+WHERE eps_actual > eps_estimated
+  AND date >= '2024-01-01'
+ORDER BY date DESC;
+```
+
+### Notes
+
+- **API Limit**: 90-day maximum per request, 4000 records max (script handles chunking)
+- **Updates**: Run daily to get latest estimates and actual results
+- **History**: All historical announcements are preserved for backtesting
+- **UPSERT**: Automatically updates when actual values are released
+- **Foreign Key**: Linked to `companies` table via symbol
+
 ## Bulk EOD Price Collection
 
 The bulk price system collects **all global EOD prices** (100K+ symbols) in a single API call and stores them in a separate data lake table (`prices_daily_bulk`) without validation or foreign key constraints.
@@ -939,6 +1166,184 @@ python scripts/collect_bulk_peers.py
 - Can store peer relationships for symbols not in your portfolio
 - Resilient to missing company profiles
 - Faster inserts during bulk collection
+
+## Price Data Optimization Scripts
+
+The following scripts optimize price data collection and maintenance by leveraging bulk price data and eliminating redundant API calls.
+
+### 1. Backfill Daily Prices from Bulk (`backfill_prices_from_bulk.py`)
+
+Copies price data from `prices_daily_bulk` to `prices_daily` without making any API calls. This is essential for keeping individual symbol prices current when you've already collected bulk market data.
+
+**Use Cases:**
+- After running bulk EOD collection, sync to individual symbol tables
+- Fill gaps in `prices_daily` from the bulk data lake
+- Save API quota by reusing already-collected bulk data
+- Backfill new symbols added to your portfolio
+
+**How It Works:**
+1. Finds symbols where `prices_daily_bulk` has newer dates than `prices_daily`
+2. Copies missing dates from bulk to daily table
+3. Calculates `change` and `change_percent` fields (bulk doesn't have these)
+4. Sets `vwap` to NULL (bulk doesn't have VWAP data)
+5. UPSERTs to prevent duplicates
+
+**Usage:**
+```bash
+# Preview what would be backfilled
+python scripts/backfill_prices_from_bulk.py --dry-run
+
+# Backfill all symbols where bulk is ahead
+python scripts/backfill_prices_from_bulk.py
+
+# Test with first 10 symbols
+python scripts/backfill_prices_from_bulk.py --limit 10
+```
+
+**Typical Workflow:**
+```bash
+# Step 1: Collect bulk prices (1 API call for all 100K+ symbols)
+python scripts/collect_bulk_eod.py
+
+# Step 2: Sync to prices_daily (0 API calls!)
+python scripts/backfill_prices_from_bulk.py
+
+# Result: All portfolio symbols updated without burning API quota
+```
+
+### 2. Fill Bulk EOD Gaps (`backfill_bulk_eod_gaps.py`)
+
+Detects and fills missing dates in the `prices_daily_bulk` table using a two-phase approach: first update to current, then fix historical gaps.
+
+**Two-Phase Strategy:**
+- **Phase 1**: Fill from latest bulk date up to today (get current first)
+- **Phase 2**: Scan historical date range for missing weekdays and backfill
+
+**Use Cases:**
+- Daily bulk EOD collection failed for specific dates
+- Network issues caused gaps in bulk price data
+- Ensure bulk table is complete before syncing to daily table
+- Systematic gap detection and repair
+
+**Usage:**
+```bash
+# Preview gaps (dry run)
+python scripts/backfill_bulk_eod_gaps.py --dry-run
+
+# Fill recent dates + up to 10 historical gaps (default)
+python scripts/backfill_bulk_eod_gaps.py
+
+# Fill recent + first 5 historical gaps, search last 180 days
+python scripts/backfill_bulk_eod_gaps.py --max-days 180 --max-fills 5
+
+# Fill recent + all gaps found in last year
+python scripts/backfill_bulk_eod_gaps.py --max-days 365 --max-fills 100
+```
+
+**Features:**
+- **Smart detection**: Only checks weekdays (Mon-Fri) to avoid API waste on sparse weekend data
+- **Two-phase approach**: Always gets current first, then fixes historical issues
+- **Controlled backfill**: Limit number of dates filled per run to manage API usage
+- **Comprehensive logging**: Shows exactly what dates were found and filled
+
+**Example Output:**
+```
+PHASE 1: Checking for recent missing dates...
+📅 Latest bulk date: 2025-11-05
+📅 Today: 2025-11-07
+📅 Missing recent dates: 2 weekdays
+    - 2025-11-06
+    - 2025-11-07
+
+[1/2] Filling 2025-11-06...
+  ✓ 2025-11-06: 67,234 symbols inserted
+
+PHASE 2: Checking for historical gaps...
+Found 3 missing weekdays
+    1. 2025-10-15
+    2. 2025-10-22
+    3. 2025-10-29
+```
+
+### 3. Regenerate Monthly Prices (`regenerate_monthly_prices.py`)
+
+Regenerates `prices_monthly` from `prices_daily` data. Essential for maintaining monthly price consistency when daily prices are backfilled via bulk operations or other methods that bypass the normal collector.
+
+**Use Cases:**
+- Fix monthly gaps after bulk daily backfills
+- One-time cleanup when monthly data is inconsistent
+- Periodic maintenance to ensure data integrity
+- After manually importing daily price data
+
+**How It Works:**
+1. Reads all daily prices for each symbol
+2. Resamples to month-end (last trading day of each month)
+3. UPSERTs into `prices_monthly` table
+4. Uses existing `PriceCollector._generate_monthly_prices()` logic
+
+**Usage:**
+```bash
+# Test with first 10 symbols
+python scripts/regenerate_monthly_prices.py --limit 10
+
+# Regenerate all monthly prices (full cleanup)
+python scripts/regenerate_monthly_prices.py
+
+# Regenerate specific symbols
+python scripts/regenerate_monthly_prices.py --symbols AAPL,MSFT,GOOGL
+
+# Regenerate from priority list
+python scripts/regenerate_monthly_prices.py --symbols-file data/priority_lists/priority1_active_in_db.txt
+```
+
+**When to Use:**
+- After running `backfill_prices_from_bulk.py` (bulk doesn't regenerate monthly)
+- After importing price data from external sources
+- Periodic maintenance (monthly or quarterly)
+- When you notice monthly price gaps
+
+**Best Practice Workflow:**
+```bash
+# 1. Fill bulk table gaps
+python scripts/backfill_bulk_eod_gaps.py
+
+# 2. Sync bulk → daily
+python scripts/backfill_prices_from_bulk.py
+
+# 3. Regenerate monthly prices
+python scripts/regenerate_monthly_prices.py
+
+# Result: Complete data integrity across all three price tables
+```
+
+### Optimized Daily Price Update Workflow
+
+**Recommended daily schedule:**
+
+```bash
+# 6:00 PM EST - After market close
+# Collect bulk EOD (1 API call for 100K+ symbols)
+python scripts/collect_bulk_eod.py
+
+# Sync to individual symbol table (0 API calls)
+python scripts/backfill_prices_from_bulk.py
+
+# Regenerate monthly prices (0 API calls)
+python scripts/regenerate_monthly_prices.py
+```
+
+**Benefits:**
+- **3 scripts, 1 API call** - Maximum efficiency
+- **Complete coverage** - All symbols, all price tables updated
+- **Data integrity** - Monthly prices stay consistent
+- **API savings** - Would normally require 1 API call per symbol
+
+**Comparison:**
+
+| Method | API Calls | Time | Coverage |
+|--------|-----------|------|----------|
+| Individual symbol updates (2000 symbols) | 2,000 | ~60 min | Portfolio only |
+| Bulk + sync (this approach) | 1 | ~2 min | Entire market (100K+ symbols) |
 
 ## Priority Lists
 

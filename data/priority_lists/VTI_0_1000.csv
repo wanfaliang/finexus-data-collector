@@ -1,0 +1,3490 @@
+﻿Symbol,HOLDINGS,% OF FUNDS*,SUB-INDUSTRY,COUNTRY,SECURITYDEPOSITORYRECEIPTTYPE,MARKET VALUE*,SHARES
+NVDA,NVIDIA Corp,6.69%,Semiconductors,US,---,"$135,537,505,682.16 ","726,431,052"
+MSFT,Microsoft Corp,5.98%,Systems Software,US,---,"$121,149,378,781.65 ","233,901,687"
+AAPL,Apple Inc,5.87%,"Technology Hardware, Storage & Peripherals",US,---,"$118,910,815,391.49 ","466,994,523"
+AMZN,Amazon.com Inc,3.27%,Broadline Retail,US,---,"$66,319,048,613.61 ","302,040,573"
+META,Meta Platforms Inc,2.47%,Interactive Media & Services,US,---,"$50,122,513,804.22 ","68,251,469"
+AVGO,Broadcom Inc,2.41%,Semiconductors,US,---,"$48,829,948,748.28 ","148,009,908"
+GOOGL,Alphabet Inc,2.20%,Interactive Media & Services,US,---,"$44,486,120,478.80 ","182,995,148"
+TSLA,Tesla Inc,1.89%,Automobile Manufacturers,US,---,"$38,368,224,670.80 ","86,275,015"
+GOOG,Alphabet Inc,1.75%,Interactive Media & Services,US,---,"$35,386,109,906.45 ","145,292,999"
+BRK/B,Berkshire Hathaway Inc,1.40%,Multi-Sector Holdings,US,---,"$28,318,646,396.88 ","56,328,612"
+JPM,JPMorgan Chase & Co,1.30%,Diversified Banks,US,---,"$26,344,769,431.11 ","83,520,177"
+LLY,Eli Lilly & Co,1.01%,Pharmaceuticals,US,---,"$20,453,087,872.00 ","26,806,144"
+V,Visa Inc,0.89%,Transaction & Payment Processing Services,US,---,"$18,015,388,315.34 ","52,772,243"
+NFLX,Netflix Inc,0.79%,Movies & Entertainment,US,---,"$16,031,728,047.36 ","13,371,808"
+XOM,Exxon Mobil Corp,0.75%,Integrated Oil & Gas,US,---,"$15,124,164,808.50 ","134,138,934"
+ORCL,Oracle Corp,0.74%,Systems Software,US,---,"$14,915,241,098.96 ","53,033,854"
+MA,Mastercard Inc,0.71%,Transaction & Payment Processing Services,US,---,"$14,448,920,152.15 ","25,402,015"
+WMT,Walmart Inc,0.70%,Consumer Staples Merchandise Retail,US,---,"$14,233,683,589.00 ","138,110,650"
+JNJ,Johnson & Johnson,0.69%,Pharmaceuticals,US,---,"$14,052,118,855.32 ","75,785,346"
+COST,Costco Wholesale Corp,0.64%,Consumer Staples Merchandise Retail,US,---,"$12,915,371,853.43 ","13,953,061"
+ABBV,AbbVie Inc,0.64%,Biotechnology,US,---,"$12,872,130,798.54 ","55,593,551"
+HD,Home Depot Inc/The,0.63%,Home Improvement Retail,US,---,"$12,685,843,707.77 ","31,308,383"
+PLTR,Palantir Technologies Inc,0.61%,Application Software,US,---,"$12,402,947,954.46 ","67,991,163"
+PG,Procter & Gamble Co/The,0.56%,Household Products,US,---,"$11,325,651,667.05 ","73,710,717"
+UNH,UnitedHealth Group Inc,0.49%,Managed Health Care,US,---,"$9,841,361,805.90 ","28,500,903"
+BAC,Bank of America Corp,0.49%,Diversified Banks,US,---,"$9,827,608,417.55 ","190,494,445"
+GE,General Electric Co,0.47%,Aerospace & Defense,US,---,"$9,536,411,538.16 ","31,701,388"
+CVX,Chevron Corp,0.47%,Integrated Oil & Gas,US,---,"$9,503,141,903.13 ","61,196,097"
+WFC,Wells Fargo & Co,0.42%,Diversified Banks,US,---,"$8,447,938,176.48 ","100,786,664"
+IBM,International Business Machines Corp,0.41%,IT Consulting & Other Services,US,---,"$8,271,303,983.28 ","29,314,233"
+AMD,Advanced Micro Devices Inc,0.41%,Semiconductors,US,---,"$8,262,826,597.74 ","51,071,306"
+PM,Philip Morris International Inc,0.39%,Tobacco,US,---,"$7,947,253,061.60 ","48,996,628"
+CSCO,Cisco Systems Inc,0.38%,Communications Equipment,US,---,"$7,672,059,192.82 ","112,131,821"
+ABT,Abbott Laboratories,0.36%,Health Care Equipment,US,---,"$7,334,876,257.82 ","54,762,403"
+GS,Goldman Sachs Group Inc/The,0.36%,Investment Banking & Brokerage,US,---,"$7,210,642,655.25 ","9,054,615"
+KO,Coca-Cola Co/The,0.35%,Soft Drinks & Non-alcoholic Beverages,US,---,"$7,181,507,491.36 ","108,285,698"
+RTX,RTX Corp,0.35%,Aerospace & Defense,US,---,"$7,047,844,054.57 ","42,119,429"
+CAT,Caterpillar Inc,0.35%,Construction Machinery & Heavy Transportation Equipment,US,---,"$7,033,269,729.75 ","14,740,165"
+LIN,Linde PLC,0.35%,Industrial Gases,US,---,"$7,005,376,950.00 ","14,748,162"
+MCD,McDonald's Corp,0.34%,Restaurants,US,---,"$6,821,892,290.62 ","22,448,558"
+CRM,Salesforce Inc,0.33%,Application Software,US,---,"$6,772,618,887.00 ","28,576,451"
+MRK,Merck & Co Inc,0.33%,Pharmaceuticals,US,---,"$6,597,914,644.09 ","78,612,113"
+DIS,Walt Disney Co/The,0.32%,Movies & Entertainment,US,---,"$6,477,149,813.00 ","56,568,994"
+UBER,Uber Technologies Inc,0.32%,Passenger Ground Transportation,US,---,"$6,429,414,881.08 ","65,626,364"
+T,AT&T Inc,0.31%,Integrated Telecommunication Services,US,---,"$6,354,705,124.56 ","225,024,969"
+PEP,PepsiCo Inc,0.30%,Soft Drinks & Non-alcoholic Beverages,US,---,"$6,049,837,524.72 ","43,077,738"
+NOW,ServiceNow Inc,0.30%,Systems Software,US,---,"$6,023,562,060.24 ","6,545,358"
+INTU,Intuit Inc,0.30%,Application Software,US,---,"$5,994,097,748.08 ","8,777,288"
+MS,Morgan Stanley,0.30%,Investment Banking & Brokerage,US,---,"$5,986,577,776.72 ","37,660,907"
+MU,Micron Technology Inc,0.29%,Semiconductors,US,---,"$5,892,484,680.56 ","35,216,858"
+TMO,Thermo Fisher Scientific Inc,0.28%,Life Sciences Tools & Services,US,---,"$5,763,657,566.80 ","11,883,340"
+QCOM,QUALCOMM Inc,0.28%,Semiconductors,US,---,"$5,647,091,031.80 ","33,945,005"
+APP,AppLovin Corp,0.27%,Application Software,US,---,"$5,564,829,314.36 ","7,744,634"
+BKNG,Booking Holdings Inc,0.27%,"Hotels, Resorts & Cruise Lines",US,---,"$5,504,658,351.13 ","1,019,519"
+LRCX,Lam Research Corp,0.26%,Semiconductor Materials & Equipment,US,---,"$5,332,415,121.80 ","39,823,862"
+C,Citigroup Inc,0.26%,Diversified Banks,US,---,"$5,288,730,783.00 ","52,105,722"
+GEV,GE Vernova Inc,0.26%,Heavy Electrical Equipment,US,---,"$5,269,124,832.40 ","8,569,076"
+TXN,Texas Instruments Inc,0.26%,Semiconductors,US,---,"$5,256,005,265.52 ","28,607,224"
+VZ,Verizon Communications Inc,0.26%,Integrated Telecommunication Services,US,---,"$5,246,545,094.25 ","119,375,315"
+SCHW,Charles Schwab Corp/The,0.26%,Investment Banking & Brokerage,US,---,"$5,180,409,942.72 ","54,262,176"
+BA,Boeing Co/The,0.25%,Aerospace & Defense,US,---,"$5,136,769,755.59 ","23,800,073"
+AMAT,Applied Materials Inc,0.25%,Semiconductor Materials & Equipment,US,---,"$5,132,379,938.82 ","25,067,793"
+BLK,Blackrock Inc,0.25%,Asset Management & Custody Banks,US,---,"$5,113,280,807.09 ","4,385,807"
+AXP,American Express Co,0.25%,Consumer Finance,US,---,"$5,091,432,184.32 ","15,328,252"
+TJX,TJX Cos Inc/The,0.25%,Apparel Retail,US,---,"$5,070,492,397.08 ","35,080,202"
+ISRG,Intuitive Surgical Inc,0.25%,Health Care Equipment,US,---,"$5,044,683,737.66 ","11,279,842"
+NEE,NextEra Energy Inc,0.24%,Electric Utilities,US,---,"$4,947,211,030.46 ","65,534,654"
+ACN,Accenture PLC,0.24%,IT Consulting & Other Services,US,---,"$4,833,121,044.60 ","19,599,031"
+SPGI,S&P Global Inc,0.24%,Financial Exchanges & Data,US,---,"$4,785,251,926.14 ","9,831,834"
+AMGN,Amgen Inc,0.24%,Biotechnology,US,---,"$4,782,359,868.80 ","16,946,704"
+APH,Amphenol Corp,0.23%,Electronic Components,US,---,"$4,754,953,046.25 ","38,423,863"
+ADBE,Adobe Inc,0.23%,Application Software,US,---,"$4,707,111,873.75 ","13,344,045"
+ANET,Arista Networks Inc,0.23%,Communications Equipment,US,---,"$4,611,327,063.03 ","31,647,293"
+ETN,Eaton Corp PLC,0.23%,Electrical Components & Equipment,US,---,"$4,585,222,677.00 ","12,251,764"
+PFE,Pfizer Inc,0.23%,Pharmaceuticals,US,---,"$4,559,256,181.48 ","178,934,701"
+PGR,Progressive Corp/The,0.22%,Property & Casualty Insurance,US,---,"$4,555,223,401.30 ","18,445,934"
+BSX,Boston Scientific Corp,0.22%,Health Care Equipment,US,---,"$4,551,270,332.57 ","46,617,539"
+KLAC,KLA Corp,0.22%,Semiconductor Materials & Equipment,US,---,"$4,478,602,828.20 ","4,152,237"
+LOW,Lowe's Cos Inc,0.22%,Home Improvement Retail,US,---,"$4,429,587,044.28 ","17,625,988"
+UNP,Union Pacific Corp,0.22%,Rail Transportation,US,---,"$4,408,459,104.27 ","18,650,671"
+GILD,Gilead Sciences Inc,0.21%,Biotechnology,US,---,"$4,335,955,482.00 ","39,062,662"
+COF,Capital One Financial Corp,0.21%,Consumer Finance,US,---,"$4,277,757,543.84 ","20,123,048"
+PANW,Palo Alto Networks Inc,0.21%,Systems Software,US,---,"$4,272,801,989.52 ","20,984,196"
+HON,Honeywell International Inc,0.21%,Industrial Conglomerates,US,---,"$4,205,440,359.50 ","19,978,339"
+INTC,Intel Corp,0.21%,Semiconductors,US,---,"$4,174,843,333.65 ","124,436,463"
+DHR,Danaher Corp,0.20%,Life Sciences Tools & Services,US,---,"$4,020,572,828.44 ","20,279,294"
+SYK,Stryker Corp,0.20%,Health Care Equipment,US,---,"$4,000,555,801.55 ","10,821,965"
+BX,Blackstone Inc,0.20%,Asset Management & Custody Banks,US,---,"$3,963,686,855.10 ","23,199,806"
+MDT,Medtronic PLC,0.19%,Health Care Equipment,US,---,"$3,843,006,858.60 ","40,350,765"
+ADI,Analog Devices Inc,0.19%,Semiconductors,US,---,"$3,803,305,041.90 ","15,479,467"
+WELL,Welltower Inc,0.19%,Health Care REITs,US,---,"$3,750,756,226.56 ","21,055,104"
+ADP,Automatic Data Processing Inc,0.18%,Human Resource & Employment Services,US,---,"$3,739,855,658.00 ","12,742,268"
+COP,ConocoPhillips,0.18%,Oil & Gas Exploration & Production,US,---,"$3,717,343,299.42 ","39,299,538"
+DE,Deere & Co,0.18%,Agricultural & Farm Machinery,US,---,"$3,702,511,039.68 ","8,097,168"
+LMT,Lockheed Martin Corp,0.18%,Aerospace & Defense,US,---,"$3,666,965,525.77 ","7,345,537"
+CRWD,Crowdstrike Holdings Inc,0.18%,Systems Software,US,---,"$3,653,714,477.16 ","7,450,782"
+CMCSA,Comcast Corp,0.18%,Cable & Satellite,US,---,"$3,637,481,711.76 ","115,769,628"
+MO,Altria Group Inc,0.17%,Tobacco,US,---,"$3,492,078,187.14 ","52,862,219"
+HOOD,Robinhood Markets Inc,0.17%,Investment Banking & Brokerage,US,---,"$3,488,075,847.32 ","24,361,474"
+TMUS,T-Mobile US Inc,0.17%,Wireless Telecommunication Services,US,---,"$3,392,148,892.18 ","14,170,561"
+CB,Chubb Ltd,0.17%,Property & Casualty Insurance,US,---,"$3,361,425,892.00 ","11,909,392"
+PLD,Prologis Inc,0.16%,Industrial REITs,US,---,"$3,338,160,199.92 ","29,149,146"
+SO,Southern Co/The,0.16%,Electric Utilities,US,---,"$3,280,432,370.67 ","34,614,671"
+CEG,Constellation Energy Corp,0.16%,Electric Utilities,US,---,"$3,236,036,866.02 ","9,833,886"
+VRTX,Vertex Pharmaceuticals Inc,0.16%,Biotechnology,US,---,"$3,161,896,532.28 ","8,073,477"
+MMC,Marsh & McLennan Cos Inc,0.15%,Insurance Brokers,US,---,"$3,117,977,843.96 ","15,471,532"
+CME,CME Group Inc,0.15%,Financial Exchanges & Data,US,---,"$3,065,406,871.25 ","11,345,375"
+ICE,Intercontinental Exchange Inc,0.15%,Financial Exchanges & Data,US,---,"$3,034,263,136.32 ","18,009,634"
+SBUX,Starbucks Corp,0.15%,Restaurants,US,---,"$3,025,872,210.60 ","35,766,811"
+DUK,Duke Energy Corp,0.15%,Electric Utilities,US,---,"$3,024,785,115.00 ","24,442,708"
+MCK,McKesson Corp,0.15%,Health Care Distributors,US,---,"$3,022,103,088.70 ","3,911,905"
+PH,Parker-Hannifin Corp,0.15%,Industrial Machinery & Supplies & Components,US,---,"$3,021,002,579.45 ","3,984,703"
+CDNS,Cadence Design Systems Inc,0.15%,Application Software,US,---,"$3,012,303,543.34 ","8,575,709"
+CVS,CVS Health Corp,0.15%,Health Care Services,US,---,"$3,008,610,593.10 ","39,907,290"
+TT,Trane Technologies PLC,0.15%,Building Products,US,---,"$2,953,068,493.76 ","6,998,456"
+NEM,Newmont Corp,0.14%,Gold,US,---,"$2,915,138,054.51 ","34,576,421"
+DASH,DoorDash Inc,0.14%,Restaurants,US,---,"$2,901,513,434.79 ","10,667,721"
+BMY,Bristol-Myers Squibb Co,0.14%,Pharmaceuticals,US,---,"$2,890,285,725.80 ","64,086,158"
+ORLY,O'Reilly Automotive Inc,0.14%,Automotive Retail,US,---,"$2,878,564,733.50 ","26,700,350"
+SNPS,Synopsys Inc,0.14%,Application Software,US,---,"$2,873,476,716.94 ","5,823,946"
+AMT,American Tower Corp,0.14%,Telecom Tower REITs,US,---,"$2,834,590,056.00 ","14,738,925"
+WM,Waste Management Inc,0.14%,Environmental & Facilities Services,US,---,"$2,797,506,902.01 ","12,668,147"
+NOC,Northrop Grumman Corp,0.14%,Aerospace & Defense,US,---,"$2,745,800,042.20 ","4,506,335"
+KKR,KKR & Co Inc,0.13%,Asset Management & Custody Banks,US,---,"$2,733,541,003.55 ","21,035,329"
+MSTR,Strategy Inc,0.13%,Application Software,US,---,"$2,676,137,709.70 ","8,305,570"
+RBLX,ROBLOX Corp,0.13%,Interactive Home Entertainment,US,---,"$2,672,613,052.68 ","19,294,059"
+NKE,NIKE Inc,0.13%,Footwear,US,---,"$2,607,329,935.08 ","37,391,796"
+MMM,3M Co,0.13%,Industrial Conglomerates,US,---,"$2,601,578,423.44 ","16,764,908"
+GD,General Dynamics Corp,0.13%,Aerospace & Defense,US,---,"$2,595,101,388.00 ","7,610,268"
+MDLZ,Mondelez International Inc,0.13%,Packaged Foods & Meats,US,---,"$2,545,036,795.68 ","40,740,144"
+CRH,CRH PLC,0.13%,Construction Materials,US,---,"$2,537,502,930.60 ","21,163,494"
+AJG,Arthur J Gallagher & Co,0.12%,Insurance Brokers,US,---,"$2,501,723,209.26 ","8,076,849"
+HWM,Howmet Aerospace Inc,0.12%,Aerospace & Defense,US,---,"$2,490,151,047.03 ","12,689,961"
+RCL,Royal Caribbean Cruises Ltd,0.12%,"Hotels, Resorts & Cruise Lines",US,---,"$2,489,731,948.56 ","7,694,332"
+PNC,PNC Financial Services Group Inc/The,0.12%,Diversified Banks,US,---,"$2,485,028,297.76 ","12,367,632"
+SHW,Sherwin-Williams Co/The,0.12%,Specialty Chemicals,US,---,"$2,444,153,425.98 ","7,058,723"
+WMB,Williams Cos Inc/The,0.12%,Oil & Gas Storage & Transportation,US,---,"$2,434,601,506.05 ","38,430,963"
+CI,Cigna Group/The,0.12%,Health Care Services,US,---,"$2,420,262,588.25 ","8,396,401"
+BK,Bank of New York Mellon Corp/The,0.12%,Asset Management & Custody Banks,US,---,"$2,417,344,828.32 ","22,185,617"
+EQIX,Equinix Inc,0.12%,Data Center REITs,US,---,"$2,412,311,058.12 ","3,079,913"
+MSI,Motorola Solutions Inc,0.12%,Communications Equipment,US,---,"$2,395,935,743.67 ","5,239,423"
+USB,US Bancorp,0.12%,Diversified Banks,US,---,"$2,362,783,089.87 ","48,888,539"
+TDG,TransDigm Group Inc,0.12%,Aerospace & Defense,US,---,"$2,337,014,212.50 ","1,773,125"
+EMR,Emerson Electric Co,0.11%,Electrical Components & Equipment,US,---,"$2,323,498,989.28 ","17,712,296"
+AON,Aon PLC,0.11%,Insurance Brokers,US,---,"$2,300,821,752.60 ","6,452,470"
+ELV,Elevance Health Inc,0.11%,Managed Health Care,US,---,"$2,290,089,735.36 ","7,087,428"
+COIN,Coinbase Global Inc,0.11%,Financial Exchanges & Data,US,---,"$2,282,237,651.14 ","6,762,386"
+MRVL,Marvell Technology Inc,0.11%,Semiconductors,US,---,"$2,281,526,380.91 ","27,138,413"
+MCO,Moody's Corp,0.11%,Financial Exchanges & Data,US,---,"$2,279,800,991.04 ","4,784,673"
+ITW,Illinois Tool Works Inc,0.11%,Industrial Machinery & Supplies & Components,US,---,"$2,266,234,911.84 ","8,690,884"
+JCI,Johnson Controls International plc,0.11%,Building Products,US,---,"$2,262,981,224.40 ","20,581,912"
+AZO,AutoZone Inc,0.11%,Automotive Retail,US,---,"$2,258,601,138.24 ","526,451"
+CTAS,Cintas Corp,0.11%,Diversified Support Services,US,---,"$2,209,387,440.48 ","10,763,848"
+FI,Fiserv Inc,0.11%,Transaction & Payment Processing Services,US,---,"$2,206,807,266.53 ","17,116,321"
+ECL,Ecolab Inc,0.11%,Specialty Chemicals,US,---,"$2,198,567,797.92 ","8,028,072"
+HCA,HCA Healthcare Inc,0.11%,Health Care Facilities,US,---,"$2,195,966,944.60 ","5,152,433"
+ADSK,Autodesk Inc,0.11%,Application Software,US,---,"$2,138,849,237.76 ","6,732,928"
+SNOW,Snowflake Inc,0.11%,Internet Services & Infrastructure,US,---,"$2,133,029,507.70 ","9,457,014"
+NSC,Norfolk Southern Corp,0.10%,Rail Transportation,US,---,"$2,121,615,283.59 ","7,062,399"
+VST,Vistra Corp,0.10%,Independent Power Producers & Energy Traders,US,---,"$2,089,682,132.24 ","10,665,997"
+CSX,CSX Corp,0.10%,Rail Transportation,US,---,"$2,082,135,703.43 ","58,635,193"
+TEL,TE Connectivity PLC,0.10%,Electronic Manufacturing Services,US,---,"$2,041,651,831.12 ","9,300,104"
+CL,Colgate-Palmolive Co,0.10%,Household Products,US,---,"$2,030,091,248.78 ","25,395,187"
+PYPL,PayPal Holdings Inc,0.10%,Transaction & Payment Processing Services,US,---,"$2,016,660,106.44 ","30,072,474"
+NET,Cloudflare Inc,0.10%,Internet Services & Infrastructure,US,---,"$2,008,561,541.64 ","9,359,996"
+GLW,Corning Inc,0.10%,Electronic Components,US,---,"$1,990,763,839.87 ","24,268,729"
+TRV,Travelers Cos Inc/The,0.10%,Property & Casualty Insurance,US,---,"$1,977,815,499.98 ","7,083,359"
+PWR,Quanta Services Inc,0.10%,Construction & Engineering,US,---,"$1,943,962,164.84 ","4,690,802"
+URI,United Rentals Inc,0.10%,Trading Companies & Distributors,US,---,"$1,933,245,688.92 ","2,025,062"
+UPS,United Parcel Service Inc,0.10%,Air Freight & Logistics,US,---,"$1,932,862,565.73 ","23,139,741"
+EOG,EOG Resources Inc,0.10%,Oil & Gas Exploration & Production,US,---,"$1,925,218,350.24 ","17,171,052"
+HLT,Hilton Worldwide Holdings Inc,0.09%,"Hotels, Resorts & Cruise Lines",US,---,"$1,919,610,569.76 ","7,399,054"
+APD,Air Products and Chemicals Inc,0.09%,Industrial Gases,US,---,"$1,909,811,252.16 ","7,002,828"
+AEP,American Electric Power Co Inc,0.09%,Electric Utilities,US,---,"$1,893,197,137.50 ","16,828,419"
+ALNY,Alnylam Pharmaceuticals Inc,0.09%,Biotechnology,US,---,"$1,883,021,904.00 ","4,129,434"
+AFL,Aflac Inc,0.09%,Life & Health Insurance,US,---,"$1,881,078,265.00 ","16,840,450"
+DLR,Digital Realty Trust Inc,0.09%,Data Center REITs,US,---,"$1,855,436,155.92 ","10,732,509"
+TFC,Truist Financial Corp,0.09%,Regional Banks,US,---,"$1,851,670,652.76 ","40,500,233"
+SRE,Sempra,0.09%,Multi-Utilities,US,---,"$1,847,041,055.20 ","20,527,240"
+MPC,Marathon Petroleum Corp,0.09%,Oil & Gas Refining & Marketing,US,---,"$1,843,415,086.92 ","9,564,258"
+ZTS,Zoetis Inc,0.09%,Pharmaceuticals,US,---,"$1,837,661,997.68 ","12,559,199"
+CMI,Cummins Inc,0.09%,Construction Machinery & Heavy Transportation Equipment,US,---,"$1,831,031,392.32 ","4,335,136"
+SPG,Simon Property Group Inc,0.09%,Retail REITs,US,---,"$1,829,192,277.85 ","9,746,855"
+GM,General Motors Co,0.09%,Automobile Manufacturers,US,---,"$1,825,777,378.88 ","29,945,504"
+VRT,Vertiv Holdings Co,0.09%,Electrical Components & Equipment,US,---,"$1,813,691,117.56 ","12,022,346"
+COR,Cencora Inc,0.09%,Health Care Distributors,US,---,"$1,808,256,700.98 ","5,785,866"
+LHX,L3Harris Technologies Inc,0.09%,Aerospace & Defense,US,---,"$1,797,556,523.56 ","5,885,716"
+ALL,Allstate Corp/The,0.09%,Property & Casualty Insurance,US,---,"$1,779,837,875.10 ","8,291,814"
+MAR,Marriott International Inc/MD,0.09%,"Hotels, Resorts & Cruise Lines",US,---,"$1,778,901,562.80 ","6,830,370"
+FCX,Freeport-McMoRan Inc,0.09%,Copper,US,---,"$1,773,081,958.74 ","45,208,617"
+FAST,Fastenal Co,0.09%,Trading Companies & Distributors,US,---,"$1,770,691,105.12 ","36,107,078"
+REGN,Regeneron Pharmaceuticals Inc,0.09%,Biotechnology,US,---,"$1,752,720,413.94 ","3,117,222"
+O,Realty Income Corp,0.09%,Retail REITs,US,---,"$1,747,714,810.02 ","28,750,038"
+PSX,Phillips 66,0.09%,Oil & Gas Refining & Marketing,US,---,"$1,729,629,639.90 ","12,715,995"
+FTNT,Fortinet Inc,0.09%,Systems Software,US,---,"$1,723,298,214.80 ","20,495,935"
+APO,Apollo Global Management Inc,0.08%,Diversified Financial Services,US,---,"$1,690,012,462.59 ","12,681,117"
+BDX,Becton Dickinson & Co,0.08%,Health Care Equipment,US,---,"$1,688,311,395.51 ","9,020,203"
+ROP,Roper Technologies Inc,0.08%,Application Software,US,---,"$1,687,366,985.31 ","3,383,599"
+AXON,Axon Enterprise Inc,0.08%,Aerospace & Defense,US,---,"$1,685,117,036.68 ","2,348,137"
+KMI,Kinder Morgan Inc,0.08%,Oil & Gas Storage & Transportation,US,---,"$1,682,005,215.89 ","59,413,819"
+VLO,Valero Energy Corp,0.08%,Oil & Gas Refining & Marketing,US,---,"$1,664,716,298.70 ","9,777,495"
+CMG,Chipotle Mexican Grill Inc,0.08%,Restaurants,US,---,"$1,653,678,209.27 ","42,196,433"
+WDAY,Workday Inc,0.08%,Application Software,US,---,"$1,644,258,359.73 ","6,830,301"
+D,Dominion Energy Inc,0.08%,Multi-Utilities,US,---,"$1,643,757,548.52 ","26,871,956"
+PCAR,PACCAR Inc,0.08%,Construction Machinery & Heavy Transportation Equipment,US,---,"$1,624,845,660.40 ","16,526,095"
+SLB,Schlumberger NV,0.08%,Oil & Gas Equipment & Services,US,---,"$1,623,487,846.96 ","47,235,608"
+IDXX,IDEXX Laboratories Inc,0.08%,Health Care Equipment,US,---,"$1,608,440,075.06 ","2,517,554"
+EA,Electronic Arts Inc,0.08%,Interactive Home Entertainment,US,---,"$1,587,885,872.10 ","7,872,513"
+STX,Seagate Technology Holdings PLC,0.08%,"Technology Hardware, Storage & Peripherals",US,---,"$1,581,087,389.20 ","6,697,820"
+FDX,FedEx Corp,0.08%,Air Freight & Logistics,US,---,"$1,575,024,981.72 ","6,679,212"
+ROST,Ross Stores Inc,0.08%,Apparel Retail,US,---,"$1,568,493,123.75 ","10,292,625"
+CVNA,Carvana Co,0.08%,Automotive Retail,US,---,"$1,557,529,272.76 ","4,128,749"
+LNG,Cheniere Energy Inc,0.08%,Oil & Gas Storage & Transportation,US,---,"$1,543,992,250.22 ","6,570,739"
+CARR,Carrier Global Corp,0.07%,Building Products,US,---,"$1,518,970,860.60 ","25,443,398"
+BKR,Baker Hughes Co,0.07%,Oil & Gas Equipment & Services,US,---,"$1,511,810,052.48 ","31,030,584"
+XEL,Xcel Energy Inc,0.07%,Electric Utilities,US,---,"$1,501,764,455.30 ","18,620,762"
+CBRE,CBRE Group Inc,0.07%,Real Estate Services,US,---,"$1,475,768,250.84 ","9,366,389"
+ABNB,Airbnb Inc,0.07%,"Hotels, Resorts & Cruise Lines",US,---,"$1,475,333,622.88 ","12,150,664"
+F,Ford Motor Co,0.07%,Automobile Manufacturers,US,---,"$1,470,809,106.00 ","122,977,350"
+RSG,Republic Services Inc,0.07%,Environmental & Facilities Services,US,---,"$1,464,105,806.96 ","6,380,102"
+MET,MetLife Inc,0.07%,Life & Health Insurance,US,---,"$1,462,963,191.38 ","17,760,874"
+AMP,Ameriprise Financial Inc,0.07%,Asset Management & Custody Banks,US,---,"$1,456,407,892.50 ","2,964,698"
+CTVA,Corteva Inc,0.07%,Fertilizers & Agricultural Chemicals,US,---,"$1,452,435,203.11 ","21,476,197"
+DDOG,Datadog Inc,0.07%,Application Software,US,---,"$1,449,043,460.80 ","10,175,867"
+MNST,Monster Beverage Corp,0.07%,Soft Drinks & Non-alcoholic Beverages,US,---,"$1,448,210,795.47 ","21,515,537"
+WBD,Warner Bros Discovery Inc,0.07%,Movies & Entertainment,US,---,"$1,445,962,100.94 ","74,037,998"
+OKE,ONEOK Inc,0.07%,Oil & Gas Storage & Transportation,US,---,"$1,445,538,035.04 ","19,810,032"
+NDAQ,Nasdaq Inc,0.07%,Financial Exchanges & Data,US,---,"$1,437,069,174.05 ","16,247,249"
+EW,Edwards Lifesciences Corp,0.07%,Health Care Equipment,US,---,"$1,436,945,091.12 ","18,476,856"
+PSA,Public Storage,0.07%,Self-Storage REITs,US,---,"$1,435,410,323.45 ","4,969,397"
+DHI,DR Horton Inc,0.07%,Homebuilding,US,---,"$1,432,417,551.39 ","8,452,337"
+EXC,Exelon Corp,0.07%,Electric Utilities,US,---,"$1,430,733,950.24 ","31,787,024"
+WCN,Waste Connections Inc,0.07%,Environmental & Facilities Services,US,---,"$1,429,256,812.80 ","8,130,016"
+TTWO,Take-Two Interactive Software Inc,0.07%,Interactive Home Entertainment,US,---,"$1,427,338,497.96 ","5,524,611"
+FLUT,Flutter Entertainment PLC,0.07%,Casinos & Gaming,US,---,"$1,406,063,482.00 ","5,535,683"
+FERG,Ferguson Enterprises Inc,0.07%,Trading Companies & Distributors,US,---,"$1,393,586,049.42 ","6,205,299"
+VEEV,Veeva Systems Inc,0.07%,Health Care Technology,US,---,"$1,381,130,719.97 ","4,636,067"
+AIG,American International Group Inc,0.07%,Property & Casualty Insurance,US,---,"$1,367,415,564.90 ","17,410,435"
+AME,AMETEK Inc,0.07%,Electrical Components & Equipment,US,---,"$1,366,390,956.00 ","7,268,037"
+DELL,Dell Technologies Inc,0.07%,"Technology Hardware, Storage & Peripherals",US,---,"$1,364,621,170.23 ","9,625,599"
+GWW,WW Grainger Inc,0.07%,Trading Companies & Distributors,US,---,"$1,360,831,644.80 ","1,428,005"
+CCI,Crown Castle Inc,0.07%,Telecom Tower REITs,US,---,"$1,327,307,755.90 ","13,755,910"
+YUM,Yum! Brands Inc,0.07%,Restaurants,US,---,"$1,326,220,976.00 ","8,725,138"
+MPWR,Monolithic Power Systems Inc,0.07%,Semiconductors,US,---,"$1,318,404,353.28 ","1,432,052"
+MSCI,MSCI Inc,0.06%,Financial Exchanges & Data,US,---,"$1,312,108,956.73 ","2,312,453"
+PEG,Public Service Enterprise Group Inc,0.06%,Multi-Utilities,US,---,"$1,311,894,887.16 ","15,718,846"
+WDC,Western Digital Corp,0.06%,"Technology Hardware, Storage & Peripherals",US,---,"$1,311,585,625.08 ","10,924,418"
+ETR,Entergy Corp,0.06%,Electric Utilities,US,---,"$1,310,149,916.09 ","14,058,911"
+EBAY,eBay Inc,0.06%,Broadline Retail,US,---,"$1,308,827,707.55 ","14,390,629"
+KMB,Kimberly-Clark Corp,0.06%,Household Products,US,---,"$1,297,312,580.60 ","10,433,590"
+PAYX,Paychex Inc,0.06%,Human Resource & Employment Services,US,---,"$1,294,229,614.04 ","10,210,079"
+TGT,Target Corp,0.06%,Consumer Staples Merchandise Retail,US,---,"$1,283,618,661.00 ","14,310,130"
+VMC,Vulcan Materials Co,0.06%,Construction Materials,US,---,"$1,279,307,292.12 ","4,158,726"
+GRMN,Garmin Ltd,0.06%,Consumer Electronics,US,---,"$1,267,339,398.26 ","5,147,183"
+KR,Kroger Co/The,0.06%,Food Retail,US,---,"$1,264,042,794.42 ","18,751,562"
+RMD,ResMed Inc,0.06%,Health Care Equipment,US,---,"$1,260,847,461.56 ","4,606,172"
+XYZ,Block Inc,0.06%,Transaction & Payment Processing Services,US,---,"$1,250,573,955.84 ","17,304,192"
+SYY,Sysco Corp,0.06%,Food Distributors,US,---,"$1,239,319,595.64 ","15,051,246"
+ROK,Rockwell Automation Inc,0.06%,Electrical Components & Equipment,US,---,"$1,237,390,027.62 ","3,540,154"
+CPRT,Copart Inc,0.06%,Diversified Support Services,US,---,"$1,231,780,690.05 ","27,391,165"
+MLM,Martin Marietta Materials Inc,0.06%,Construction Materials,US,---,"$1,196,132,778.40 ","1,897,780"
+HIG,Hartford Insurance Group Inc/The,0.06%,Property & Casualty Insurance,US,---,"$1,179,704,227.97 ","8,844,023"
+CAH,Cardinal Health Inc,0.06%,Health Care Distributors,US,---,"$1,177,658,951.04 ","7,502,924"
+DAL,Delta Air Lines Inc,0.06%,Passenger Airlines,US,---,"$1,165,487,462.00 ","20,537,224"
+WEC,WEC Energy Group Inc,0.06%,Multi-Utilities,US,---,"$1,162,190,572.76 ","10,142,164"
+PRU,Prudential Financial Inc,0.06%,Life & Health Insurance,US,---,"$1,147,894,511.40 ","11,065,110"
+A,Agilent Technologies Inc,0.06%,Life Sciences Tools & Services,US,---,"$1,147,443,352.60 ","8,939,956"
+ED,Consolidated Edison Inc,0.06%,Multi-Utilities,US,---,"$1,142,722,718.76 ","11,368,113"
+TRGP,Targa Resources Corp,0.06%,Oil & Gas Storage & Transportation,US,---,"$1,134,596,628.76 ","6,772,094"
+XYL,Xylem Inc/NY,0.06%,Industrial Machinery & Supplies & Components,US,---,"$1,130,188,512.50 ","7,662,295"
+OTIS,Otis Worldwide Corp,0.06%,Industrial Machinery & Supplies & Components,US,---,"$1,129,542,494.54 ","12,354,178"
+CSGP,CoStar Group Inc,0.06%,Real Estate Services,US,---,"$1,125,845,176.17 ","13,344,141"
+VRSK,Verisk Analytics Inc,0.05%,Research & Consulting Services,US,---,"$1,104,250,127.82 ","4,390,482"
+OXY,Occidental Petroleum Corp,0.05%,Integrated Oil & Gas,US,---,"$1,099,156,810.50 ","23,262,578"
+MCHP,Microchip Technology Inc,0.05%,Semiconductors,US,---,"$1,091,162,790.64 ","16,991,012"
+FIS,Fidelity National Information Services Inc,0.05%,Transaction & Payment Processing Services,US,---,"$1,085,096,441.10 ","16,455,815"
+WAB,Westinghouse Air Brake Technologies Corp,0.05%,Construction Machinery & Heavy Transportation Equipment,US,---,"$1,078,227,895.00 ","5,378,500"
+FICO,Fair Isaac Corp,0.05%,Application Software,US,---,"$1,073,921,900.24 ","717,608"
+EQT,EQT Corp,0.05%,Oil & Gas Exploration & Production,US,---,"$1,069,731,731.64 ","19,653,348"
+WTW,Willis Towers Watson PLC,0.05%,Insurance Brokers,US,---,"$1,061,987,571.75 ","3,074,215"
+KDP,Keurig Dr Pepper Inc,0.05%,Soft Drinks & Non-alcoholic Beverages,US,---,"$1,036,287,423.92 ","40,622,792"
+IR,Ingersoll Rand Inc,0.05%,Industrial Machinery & Supplies & Components,US,---,"$1,034,932,489.92 ","12,526,416"
+ARES,Ares Management Corp,0.05%,Asset Management & Custody Banks,US,---,"$1,032,997,645.53 ","6,460,677"
+CTSH,Cognizant Technology Solutions Corp,0.05%,IT Consulting & Other Services,US,---,"$1,030,315,054.09 ","15,361,787"
+DD,DuPont de Nemours Inc,0.05%,Specialty Chemicals,US,---,"$1,026,082,285.20 ","13,171,788"
+GEHC,GE HealthCare Technologies Inc,0.05%,Health Care Equipment,US,---,"$1,024,988,456.50 ","13,648,315"
+PCG,PG&E Corp,0.05%,Electric Utilities,US,---,"$1,016,282,609.68 ","67,392,746"
+HPE,Hewlett Packard Enterprise Co,0.05%,"Technology Hardware, Storage & Peripherals",US,---,"$1,014,909,433.44 ","41,323,674"
+ACGL,Arch Capital Group Ltd,0.05%,Property & Casualty Insurance,US,---,"$1,012,434,657.72 ","11,158,764"
+EFX,Equifax Inc,0.05%,Research & Consulting Services,US,---,"$999,194,611.20 ","3,895,040"
+VTR,Ventas Inc,0.05%,Health Care REITs,US,---,"$998,841,637.95 ","14,271,205"
+VICI,VICI Properties Inc,0.05%,Other Specialized REITs,US,---,"$995,637,660.87 ","30,531,667"
+UAL,United Airlines Holdings Inc,0.05%,Passenger Airlines,US,---,"$995,254,969.50 ","10,313,523"
+NRG,NRG Energy Inc,0.05%,Electric Utilities,US,---,"$986,319,874.30 ","6,090,274"
+HUM,Humana Inc,0.05%,Managed Health Care,US,---,"$984,906,056.25 ","3,785,625"
+STT,State Street Corp,0.05%,Asset Management & Custody Banks,US,---,"$984,363,179.58 ","8,485,158"
+KVUE,Kenvue Inc,0.05%,Personal Care Products,US,---,"$979,545,517.38 ","60,354,006"
+RJF,Raymond James Financial Inc,0.05%,Investment Banking & Brokerage,US,---,"$975,639,105.20 ","5,652,602"
+MTB,M&T Bank Corp,0.05%,Regional Banks,US,---,"$969,969,155.48 ","4,908,254"
+IQV,IQVIA Holdings Inc,0.05%,Life Sciences Tools & Services,US,---,"$966,404,653.18 ","5,087,947"
+INSM,Insmed Inc,0.05%,Biotechnology,US,---,"$960,850,705.11 ","6,672,111"
+CCL,Carnival Corp,0.05%,"Hotels, Resorts & Cruise Lines",US,---,"$955,803,165.94 ","33,061,334"
+ZS,Zscaler Inc,0.05%,Systems Software,US,---,"$955,275,925.56 ","3,187,866"
+TSCO,Tractor Supply Co,0.05%,Other Specialty Retail,US,---,"$948,724,846.41 ","16,682,343"
+SOFI,SoFi Technologies Inc,0.05%,Consumer Finance,US,---,"$947,916,522.16 ","35,878,748"
+KEYS,Keysight Technologies Inc,0.05%,Electronic Equipment & Instruments,US,---,"$947,356,749.56 ","5,415,943"
+IRM,Iron Mountain Inc,0.05%,Other Specialized REITs,US,---,"$947,296,410.84 ","9,292,686"
+EXR,Extra Space Storage Inc,0.05%,Self-Storage REITs,US,---,"$942,547,102.38 ","6,687,577"
+NUE,Nucor Corp,0.05%,Steel,US,---,"$929,636,889.05 ","6,864,335"
+FITB,Fifth Third Bancorp,0.05%,Diversified Banks,US,---,"$926,892,553.95 ","20,805,669"
+FIX,Comfort Systems USA Inc,0.05%,Construction & Engineering,US,---,"$917,466,480.84 ","1,111,838"
+IBKR,Interactive Brokers Group Inc,0.05%,Investment Banking & Brokerage,US,---,"$916,227,719.68 ","13,315,328"
+EME,EMCOR Group Inc,0.05%,Construction & Engineering,US,---,"$915,214,201.26 ","1,409,019"
+ADM,Archer-Daniels-Midland Co,0.04%,Agricultural Products & Services,US,---,"$903,743,075.86 ","15,127,939"
+AWK,American Water Works Co Inc,0.04%,Water Utilities,US,---,"$892,653,864.76 ","6,413,204"
+AEE,Ameren Corp,0.04%,Multi-Utilities,US,---,"$887,325,090.18 ","8,500,911"
+BR,Broadridge Financial Solutions Inc,0.04%,Data Processing & Outsourced Services,US,---,"$878,359,051.50 ","3,687,950"
+RDDT,Reddit Inc,0.04%,Interactive Media & Services,US,---,"$877,155,871.13 ","3,813,887"
+BRK/A,Berkshire Hathaway Inc,0.04%,Multi-Sector Holdings,US,---,"$875,626,200.00 ","1,161"
+HSY,Hershey Co/The,0.04%,Packaged Foods & Meats,US,---,"$872,791,760.40 ","4,666,088"
+AVB,AvalonBay Communities Inc,0.04%,Multi-Family Residential REITs,US,---,"$865,213,838.76 ","4,479,028"
+TDY,Teledyne Technologies Inc,0.04%,Electronic Equipment & Instruments,US,---,"$864,912,994.40 ","1,475,860"
+ATO,Atmos Energy Corp,0.04%,Gas Utilities,US,---,"$863,582,468.00 ","5,057,584"
+GIS,General Mills Inc,0.04%,Packaged Foods & Meats,US,---,"$848,800,582.42 ","16,834,601"
+FANG,Diamondback Energy Inc,0.04%,Oil & Gas Exploration & Production,US,---,"$847,769,190.30 ","5,924,313"
+LYV,Live Nation Entertainment Inc,0.04%,Movies & Entertainment,US,---,"$842,909,847.80 ","5,158,567"
+ODFL,Old Dominion Freight Line Inc,0.04%,Cargo Ground Transportation,US,---,"$839,548,005.88 ","5,963,546"
+LPLA,LPL Financial Holdings Inc,0.04%,Investment Banking & Brokerage,US,---,"$838,890,809.91 ","2,521,539"
+TEAM,Atlassian Corp,0.04%,Application Software,US,---,"$836,327,500.20 ","5,236,866"
+SYF,Synchrony Financial,0.04%,Consumer Finance,US,---,"$830,836,106.10 ","11,693,682"
+DXCM,Dexcom Inc,0.04%,Health Care Equipment,US,---,"$830,800,964.46 ","12,346,574"
+ES,Eversource Energy,0.04%,Electric Utilities,US,---,"$830,185,445.88 ","11,669,742"
+BRO,Brown & Brown Inc,0.04%,Insurance Brokers,US,---,"$830,174,588.01 ","8,851,419"
+PPL,PPL Corp,0.04%,Electric Utilities,US,---,"$823,339,516.12 ","22,156,607"
+PHM,PulteGroup Inc,0.04%,Homebuilding,US,---,"$820,509,198.19 ","6,209,863"
+ALAB,Astera Labs Inc,0.04%,Semiconductors,US,---,"$819,856,109.60 ","4,187,212"
+PSTG,Pure Storage Inc. Class A,0.04%,"Technology Hardware, Storage & Peripherals",US,---,"$819,588,550.06 ","9,779,126"
+CBOE,Cboe Global Markets Inc,0.04%,Financial Exchanges & Data,US,---,"$809,125,366.50 ","3,299,186"
+HPQ,HP Inc,0.04%,"Technology Hardware, Storage & Peripherals",US,---,"$805,507,485.37 ","29,581,619"
+CNP,CenterPoint Energy Inc,0.04%,Multi-Utilities,US,---,"$797,493,027.20 ","20,553,944"
+MTD,Mettler-Toledo International Inc,0.04%,Life Sciences Tools & Services,US,---,"$795,599,309.68 ","648,088"
+EXPE,Expedia Group Inc,0.04%,"Hotels, Resorts & Cruise Lines",US,---,"$794,946,296.25 ","3,719,047"
+HBAN,Huntington Bancshares Inc/OH,0.04%,Regional Banks,US,---,"$792,259,367.57 ","45,874,891"
+HEI/A,HEICO Corp,0.04%,Aerospace & Defense,US,---,"$790,865,796.78 ","3,112,542"
+FE,FirstEnergy Corp,0.04%,Electric Utilities,US,---,"$790,137,491.60 ","17,244,380"
+VLTO,Veralto Corp,0.04%,Environmental & Facilities Services,US,---,"$789,860,696.80 ","7,408,880"
+DTE,DTE Energy Co,0.04%,Multi-Utilities,US,---,"$785,017,680.82 ","5,550,574"
+CINF,Cincinnati Financial Corp,0.04%,Property & Casualty Insurance,US,---,"$779,146,680.90 ","4,928,189"
+ULTA,Ulta Beauty Inc,0.04%,Other Specialty Retail,US,---,"$772,462,068.75 ","1,412,825"
+IP,International Paper Co,0.04%,Paper & Plastic Packaging Products & Materials,US,---,"$771,966,497.60 ","16,637,209"
+NTRS,Northern Trust Corp,0.04%,Asset Management & Custody Banks,US,---,"$771,068,887.00 ","5,728,595"
+CHTR,Charter Communications Inc,0.04%,Cable & Satellite,US,---,"$768,530,301.85 ","2,793,589"
+STE,STERIS PLC,0.04%,Health Care Equipment,US,---,"$766,101,458.40 ","3,096,110"
+PTC,PTC Inc,0.04%,Application Software,US,---,"$765,605,270.66 ","3,771,083"
+SMCI,Super Micro Computer Inc,0.04%,"Technology Hardware, Storage & Peripherals",US,---,"$765,346,950.96 ","15,964,684"
+LEN,Lennar Corp,0.04%,Homebuilding,US,---,"$764,425,541.76 ","6,064,944"
+LDOS,Leidos Holdings Inc,0.04%,Research & Consulting Services,US,---,"$762,809,411.68 ","4,036,883"
+WSM,Williams-Sonoma Inc,0.04%,Homefurnishing Retail,US,---,"$757,300,537.95 ","3,874,651"
+EXE,Expand Energy Corp,0.04%,Oil & Gas Exploration & Production,US,---,"$757,095,243.52 ","7,126,273"
+MDB,MongoDB Inc,0.04%,Internet Services & Infrastructure,US,---,"$755,162,299.50 ","2,433,025"
+LH,Labcorp Holdings Inc,0.04%,Health Care Services,US,---,"$750,939,774.08 ","2,615,968"
+PPG,PPG Industries Inc,0.04%,Specialty Chemicals,US,---,"$746,388,737.75 ","7,101,025"
+TPR,Tapestry Inc,0.04%,"Apparel, Accessories & Luxury Goods",US,---,"$740,586,398.94 ","6,541,127"
+RF,Regions Financial Corp,0.04%,Regional Banks,US,---,"$739,451,797.11 ","28,041,403"
+EQR,Equity Residential,0.04%,Multi-Family Residential REITs,US,---,"$739,251,683.66 ","11,420,542"
+VRSN,VeriSign Inc,0.04%,Internet Services & Infrastructure,US,---,"$738,934,821.84 ","2,643,112"
+HUBS,HubSpot Inc,0.04%,Application Software,US,---,"$738,042,914.20 ","1,577,689"
+MKL,Markel Group Inc,0.04%,Property & Casualty Insurance,US,---,"$722,673,747.84 ","378,094"
+NTAP,NetApp Inc,0.04%,"Technology Hardware, Storage & Peripherals",US,---,"$719,913,759.58 ","6,077,273"
+HUBB,Hubbell Inc,0.04%,Electrical Components & Equipment,US,---,"$719,433,998.07 ","1,671,897"
+DOV,Dover Corp,0.04%,Industrial Machinery & Supplies & Components,US,---,"$719,299,223.10 ","4,311,570"
+DG,Dollar General Corp,0.04%,Consumer Staples Merchandise Retail,US,---,"$718,013,790.00 ","6,947,400"
+K,Kellanova,0.04%,Packaged Foods & Meats,US,---,"$714,892,963.62 ","8,716,081"
+TYL,Tyler Technologies Inc,0.04%,Application Software,US,---,"$711,179,518.72 ","1,359,392"
+TROW,T Rowe Price Group Inc,0.04%,Asset Management & Custody Banks,US,---,"$709,426,433.52 ","6,911,793"
+FSLR,First Solar Inc,0.03%,Semiconductors,US,---,"$707,563,889.10 ","3,208,470"
+DVN,Devon Energy Corp,0.03%,Oil & Gas Exploration & Production,US,---,"$700,247,875.58 ","19,972,843"
+SW,Smurfit WestRock PLC,0.03%,Paper & Plastic Packaging Products & Materials,US,---,"$699,887,623.05 ","16,440,865"
+DRI,Darden Restaurants Inc,0.03%,Restaurants,US,---,"$697,617,812.44 ","3,664,729"
+JBL,Jabil Inc,0.03%,Electronic Manufacturing Services,US,---,"$697,083,341.67 ","3,209,851"
+RKLB,Rocket Lab Corp,0.03%,Aerospace & Defense,US,---,"$692,206,698.33 ","14,448,063"
+FWONK,Liberty Media Corp-Liberty Formula One,0.03%,Movies & Entertainment,US,---,"$691,852,463.15 ","6,623,767"
+CMS,CMS Energy Corp,0.03%,Multi-Utilities,US,---,"$691,162,385.76 ","9,434,376"
+TER,Teradyne Inc,0.03%,Semiconductor Materials & Equipment,US,---,"$689,309,103.12 ","5,008,058"
+NVR,NVR Inc,0.03%,Homebuilding,US,---,"$688,313,252.88 ","85,668"
+WRB,W R Berkley Corp,0.03%,Property & Casualty Insurance,US,---,"$688,094,797.92 ","8,980,616"
+TTD,Trade Desk Inc/The,0.03%,Advertising,US,---,"$686,540,656.75 ","14,008,175"
+PODD,Insulet Corp,0.03%,Health Care Equipment,US,---,"$684,815,315.37 ","2,218,169"
+CFG,Citizens Financial Group Inc,0.03%,Regional Banks,US,---,"$683,858,958.24 ","12,864,164"
+KHC,Kraft Heinz Co/The,0.03%,Packaged Foods & Meats,US,---,"$680,017,283.40 ","26,114,335"
+CHD,Church & Dwight Co Inc,0.03%,Household Products,US,---,"$675,423,034.47 ","7,707,669"
+CRDO,Credo Technology Group Holding Ltd,0.03%,Semiconductors,US,---,"$674,040,921.24 ","4,629,084"
+DGX,Quest Diagnostics Inc,0.03%,Health Care Services,US,---,"$669,557,090.80 ","3,513,260"
+EIX,Edison International,0.03%,Electric Utilities,US,---,"$669,335,325.76 ","12,108,092"
+NTRA,Natera Inc,0.03%,Biotechnology,US,---,"$662,090,214.16 ","4,113,128"
+CASY,Casey's General Stores Inc,0.03%,Food Retail,US,---,"$661,837,648.92 ","1,170,731"
+CDW,CDW Corp/DE,0.03%,Technology Distributors,US,---,"$656,306,868.80 ","4,120,460"
+SBAC,SBA Communications Corp,0.03%,Telecom Tower REITs,US,---,"$654,791,376.00 ","3,386,560"
+CIEN,Ciena Corp,0.03%,Communications Equipment,US,---,"$647,735,639.32 ","4,446,596"
+BIIB,Biogen Inc,0.03%,Biotechnology,US,---,"$647,726,137.84 ","4,623,973"
+CW,Curtiss-Wright Corp,0.03%,Aerospace & Defense,US,---,"$643,886,119.50 ","1,185,925"
+KEY,KeyCorp,0.03%,Diversified Banks,US,---,"$642,219,518.85 ","34,361,665"
+NI,NiSource Inc,0.03%,Multi-Utilities,US,---,"$641,756,834.20 ","14,821,174"
+ON,ON Semiconductor Corp,0.03%,Semiconductors,US,---,"$635,249,980.42 ","12,882,782"
+RBA,RB Global Inc,0.03%,Diversified Support Services,US,---,"$632,766,919.68 ","5,839,488"
+ZM,Zoom Communications Inc,0.03%,Application Software,US,---,"$622,004,707.50 ","7,539,451"
+PKG,Packaging Corp of America,0.03%,Paper & Plastic Packaging Products & Materials,US,---,"$616,890,964.12 ","2,830,684"
+ZBH,Zimmer Biomet Holdings Inc,0.03%,Health Care Equipment,US,---,"$614,419,064.50 ","6,237,757"
+STLD,Steel Dynamics Inc,0.03%,Steel,US,---,"$614,098,241.64 ","4,404,348"
+TRMB,Trimble Inc,0.03%,Electronic Equipment & Instruments,US,---,"$611,815,615.85 ","7,493,149"
+TLN,Talen Energy Corp,0.03%,Independent Power Producers & Energy Traders,US,---,"$610,687,438.64 ","1,435,628"
+LULU,Lululemon Athletica Inc,0.03%,"Apparel, Accessories & Luxury Goods",US,---,"$610,317,693.00 ","3,430,100"
+CPAY,Corpay Inc,0.03%,Transaction & Payment Processing Services,US,---,"$608,930,034.00 ","2,113,900"
+GWRE,Guidewire Software Inc,0.03%,Application Software,US,---,"$607,958,552.88 ","2,644,908"
+GPC,Genuine Parts Co,0.03%,Distributors,US,---,"$606,468,832.20 ","4,375,677"
+STZ,Constellation Brands Inc,0.03%,Distillers & Vintners,US,---,"$598,663,230.03 ","4,445,409"
+GDDY,GoDaddy Inc,0.03%,Internet Services & Infrastructure,US,---,"$595,675,858.83 ","4,353,401"
+UTHR,United Therapeutics Corp,0.03%,Biotechnology,US,---,"$595,553,620.97 ","1,420,657"
+IT,Gartner Inc,0.03%,IT Consulting & Other Services,US,---,"$595,152,137.85 ","2,264,055"
+NTNX,Nutanix Inc,0.03%,Application Software,US,---,"$595,061,529.46 ","7,999,214"
+WST,West Pharmaceutical Services Inc,0.03%,Life Sciences Tools & Services,US,---,"$593,573,828.67 ","2,262,699"
+HAL,Halliburton Co,0.03%,Oil & Gas Equipment & Services,US,---,"$593,074,758.00 ","24,108,730"
+APTV,Aptiv PLC,0.03%,Automotive Parts & Equipment,US,---,"$592,027,129.62 ","6,866,471"
+DLTR,Dollar Tree Inc,0.03%,Consumer Staples Merchandise Retail,US,---,"$588,923,817.71 ","6,240,583"
+EL,Estee Lauder Cos Inc/The,0.03%,Personal Care Products,US,---,"$585,442,315.28 ","6,643,694"
+AFRM,Affirm Holdings Inc,0.03%,Transaction & Payment Processing Services,US,---,"$584,234,186.76 ","7,994,447"
+FFIV,F5 Inc,0.03%,Communications Equipment,US,---,"$584,095,146.39 ","1,807,281"
+SSNC,SS&C Technologies Holdings Inc,0.03%,Data Processing & Outsourced Services,US,---,"$579,890,826.20 ","6,533,245"
+PFG,Principal Financial Group Inc,0.03%,Life & Health Insurance,US,---,"$579,820,555.43 ","6,993,373"
+PINS,Pinterest Inc,0.03%,Interactive Media & Services,US,---,"$576,315,159.09 ","17,914,677"
+TPL,Texas Pacific Land Corp,0.03%,Oil & Gas Exploration & Production,US,---,"$574,798,266.92 ","615,653"
+PNR,Pentair PLC,0.03%,Industrial Machinery & Supplies & Components,US,---,"$571,693,388.76 ","5,161,551"
+SNA,Snap-on Inc,0.03%,Industrial Machinery & Supplies & Components,US,---,"$568,388,208.84 ","1,640,228"
+THC,Tenet Healthcare Corp,0.03%,Health Care Facilities,US,---,"$564,531,400.80 ","2,780,395"
+J,Jacobs Solutions Inc,0.03%,Research & Consulting Services,US,---,"$562,089,942.62 ","3,750,767"
+WY,Weyerhaeuser Co,0.03%,Timber REITs,US,---,"$562,049,019.11 ","22,672,409"
+WAT,Waters Corp,0.03%,Life Sciences Tools & Services,US,---,"$561,882,615.49 ","1,874,129"
+BE,Bloom Energy Corp,0.03%,Heavy Electrical Equipment,US,---,"$561,285,000.96 ","6,636,928"
+TOST,Toast Inc,0.03%,Transaction & Payment Processing Services,US,---,"$557,329,202.61 ","15,265,111"
+DKNG,DraftKings Inc,0.03%,Casinos & Gaming,US,---,"$556,089,716.60 ","14,868,709"
+CNC,Centene Corp,0.03%,Managed Health Care,US,---,"$551,592,640.80 ","15,459,435"
+EVRG,Evergy Inc,0.03%,Electric Utilities,US,---,"$548,154,449.22 ","7,210,661"
+LNT,Alliant Energy Corp,0.03%,Electric Utilities,US,---,"$545,019,085.17 ","8,085,137"
+USFD,US Foods Holding Corp,0.03%,Food Distributors,US,---,"$542,942,881.74 ","7,086,177"
+ACM,AECOM,0.03%,Construction & Engineering,US,---,"$542,783,642.46 ","4,160,218"
+ESS,Essex Property Trust Inc,0.03%,Multi-Family Residential REITs,US,---,"$542,400,945.30 ","2,026,455"
+FTAI,FTAI Aviation Ltd,0.03%,Trading Companies & Distributors,US,---,"$539,014,532.40 ","3,230,340"
+CTRA,Coterra Energy Inc,0.03%,Oil & Gas Exploration & Production,US,---,"$538,540,535.50 ","22,771,270"
+ROL,Rollins Inc,0.03%,Environmental & Facilities Services,US,---,"$537,976,457.70 ","9,158,605"
+INVH,Invitation Homes Inc,0.03%,Single-Family Residential REITs,US,---,"$536,757,712.54 ","18,300,638"
+MKC,McCormick & Co Inc/MD,0.03%,Packaged Foods & Meats,US,---,"$533,955,382.73 ","7,980,203"
+BWXT,BWX Technologies Inc,0.03%,Aerospace & Defense,US,---,"$530,414,237.37 ","2,876,901"
+SGI,Somnigroup International Inc,0.03%,Home Furnishings,US,---,"$528,848,609.40 ","6,271,180"
+COHR,Coherent Corp,0.03%,Electronic Components,US,---,"$527,862,578.12 ","4,900,321"
+LUV,Southwest Airlines Co,0.03%,Passenger Airlines,US,---,"$527,112,833.85 ","16,518,735"
+LII,Lennox International Inc,0.03%,Building Products,US,---,"$526,014,974.16 ","993,681"
+LVS,Las Vegas Sands Corp,0.03%,Casinos & Gaming,US,---,"$523,219,955.94 ","9,727,086"
+EXPD,Expeditors International of Washington Inc,0.03%,Air Freight & Logistics,US,---,"$522,018,867.50 ","4,258,250"
+FTV,Fortive Corp,0.03%,Industrial Machinery & Supplies & Components,US,---,"$520,899,549.27 ","10,632,773"
+L,Loews Corp,0.03%,Property & Casualty Insurance,US,---,"$519,464,641.74 ","5,174,466"
+MAA,Mid-America Apartment Communities Inc,0.03%,Multi-Family Residential REITs,US,---,"$514,213,386.50 ","3,680,050"
+TRU,TransUnion,0.03%,Research & Consulting Services,US,---,"$513,219,775.34 ","6,125,803"
+PFGC,Performance Food Group Co,0.03%,Food Distributors,US,---,"$511,619,821.20 ","4,917,530"
+DOW,Dow Inc,0.03%,Commodity Chemicals,US,---,"$510,760,521.96 ","22,274,772"
+FTI,TechnipFMC PLC,0.03%,Oil & Gas Equipment & Services,US,---,"$510,183,653.40 ","12,932,412"
+SUI,Sun Communities Inc,0.03%,Single-Family Residential REITs,US,---,"$509,283,228.00 ","3,947,932"
+BURL,Burlington Stores Inc,0.02%,Apparel Retail,US,---,"$505,902,226.00 ","1,987,828"
+FCNCA,First Citizens BancShares Inc/NC,0.02%,Diversified Banks,US,---,"$503,215,563.28 ","281,258"
+NVT,nVent Electric PLC,0.02%,Electrical Components & Equipment,US,---,"$500,603,918.40 ","5,075,060"
+CG,Carlyle Group Inc/The,0.02%,Asset Management & Custody Banks,US,---,"$500,153,260.20 ","7,976,926"
+IFF,International Flavors & Fragrances Inc,0.02%,Specialty Chemicals,US,---,"$497,171,321.28 ","8,078,832"
+OMC,Omnicom Group Inc,0.02%,Advertising,US,---,"$495,790,207.81 ","6,081,077"
+GEN,Gen Digital Inc,0.02%,Systems Software,US,---,"$494,223,879.81 ","17,408,379"
+FNF,Fidelity National Financial Inc,0.02%,Property & Casualty Insurance,US,---,"$490,531,375.53 ","8,109,297"
+SNDK,SANDISK CORP,0.02%,"Technology Hardware, Storage & Peripherals",US,---,"$490,107,888.60 ","4,368,163"
+IONQ,IonQ Inc,0.02%,"Technology Hardware, Storage & Peripherals",US,---,"$489,036,130.50 ","7,951,807"
+OKTA,Okta Inc,0.02%,Internet Services & Infrastructure,US,---,"$487,208,977.50 ","5,313,075"
+KTOS,Kratos Defense & Security Solutions Inc,0.02%,Aerospace & Defense,US,---,"$486,059,709.82 ","5,319,686"
+TSN,Tyson Foods Inc,0.02%,Packaged Foods & Meats,US,---,"$484,849,532.70 ","8,929,089"
+GPN,Global Payments Inc,0.02%,Transaction & Payment Processing Services,US,---,"$483,640,167.32 ","5,821,379"
+EQH,Equitable Holdings Inc,0.02%,Diversified Financial Services,US,---,"$480,266,271.52 ","9,457,784"
+ALLE,Allegion plc,0.02%,Building Products,US,---,"$477,999,749.90 ","2,695,234"
+WWD,Woodward Inc,0.02%,Aerospace & Defense,US,---,"$477,064,169.03 ","1,887,793"
+ZBRA,Zebra Technologies Corp,0.02%,Electronic Equipment & Instruments,US,---,"$475,830,421.60 ","1,601,260"
+RPM,RPM International Inc,0.02%,Specialty Chemicals,US,---,"$475,257,031.76 ","4,031,702"
+DECK,Deckers Outdoor Corp,0.02%,Footwear,US,---,"$473,561,612.55 ","4,671,615"
+CLX,Clorox Co/The,0.02%,Household Products,US,---,"$473,141,186.10 ","3,837,317"
+TXT,Textron Inc,0.02%,Aerospace & Defense,US,---,"$472,695,020.14 ","5,594,686"
+HOLX,Hologic Inc,0.02%,Health Care Equipment,US,---,"$472,587,319.19 ","7,002,331"
+KIM,Kimco Realty Corp,0.02%,Retail REITs,US,---,"$466,482,729.40 ","21,349,324"
+CHRW,CH Robinson Worldwide Inc,0.02%,Air Freight & Logistics,US,---,"$465,877,336.40 ","3,518,711"
+RS,Reliance Inc,0.02%,Steel,US,---,"$464,814,932.01 ","1,655,147"
+WPC,WP Carey Inc,0.02%,Diversified REITs,US,---,"$464,685,309.15 ","6,877,095"
+MAS,Masco Corp,0.02%,Building Products,US,---,"$461,954,858.49 ","6,562,791"
+EWBC,East West Bancorp Inc,0.02%,Regional Banks,US,---,"$461,858,021.40 ","4,338,732"
+EG,Everest Group Ltd,0.02%,Reinsurance,US,---,"$461,474,955.82 ","1,317,634"
+DT,Dynatrace Inc,0.02%,Application Software,US,---,"$459,659,152.05 ","9,487,289"
+DOCU,Docusign Inc,0.02%,Application Software,US,---,"$458,924,579.55 ","6,365,995"
+CF,CF Industries Holdings Inc,0.02%,Fertilizers & Agricultural Chemicals,US,---,"$456,958,710.00 ","5,094,300"
+XPO,XPO Inc,0.02%,Cargo Ground Transportation,US,---,"$455,376,067.98 ","3,522,674"
+ARE,Alexandria Real Estate Equities Inc,0.02%,Health Care REITs,US,---,"$453,630,370.86 ","5,443,129"
+BBY,Best Buy Co Inc,0.02%,Computer & Electronics Retail,US,---,"$452,564,072.68 ","5,984,714"
+DKS,Dick's Sporting Goods Inc,0.02%,Other Specialty Retail,US,---,"$444,703,997.36 ","2,001,188"
+WSO,Watsco Inc,0.02%,Trading Companies & Distributors,US,---,"$444,667,737.80 ","1,099,846"
+INCY,Incyte Corp,0.02%,Biotechnology,US,---,"$444,407,622.78 ","5,240,038"
+JLL,Jones Lang LaSalle Inc,0.02%,Real Estate Services,US,---,"$443,795,599.72 ","1,487,849"
+CSL,Carlisle Cos Inc,0.02%,Building Products,US,---,"$442,928,849.92 ","1,346,452"
+ENTG,Entegris Inc,0.02%,Semiconductor Materials & Equipment,US,---,"$441,648,319.32 ","4,776,642"
+GGG,Graco Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$441,451,310.40 ","5,195,990"
+NBIX,Neurocrine Biosciences Inc,0.02%,Biotechnology,US,---,"$438,382,033.12 ","3,122,824"
+ITT,ITT Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$438,186,880.08 ","2,451,258"
+ILMN,Illumina Inc,0.02%,Life Sciences Tools & Services,US,---,"$436,139,943.09 ","4,592,397"
+TWLO,Twilio Inc,0.02%,Internet Services & Infrastructure,US,---,"$434,020,867.54 ","4,336,306"
+BALL,Ball Corp,0.02%,"Metal, Glass & Plastic Containers",US,---,"$432,044,795.14 ","8,568,917"
+COO,Cooper Cos Inc/The,0.02%,Health Care Supplies,US,---,"$430,814,037.12 ","6,283,752"
+COOP,Mr Cooper Group Inc,0.02%,Commercial & Residential Mortgage Finance,US,---,"$425,816,668.21 ","2,020,099"
+TOL,Toll Brothers Inc,0.02%,Homebuilding,US,---,"$425,053,188.36 ","3,076,974"
+MTZ,MasTec Inc,0.02%,Construction & Engineering,US,---,"$421,424,876.47 ","1,980,287"
+RIVN,Rivian Automotive Inc,0.02%,Automobile Manufacturers,US,---,"$421,026,848.04 ","28,680,303"
+DOC,Healthpeak Properties Inc,0.02%,Health Care REITs,US,---,"$418,858,298.40 ","21,872,496"
+Z,Zillow Group Inc,0.02%,Real Estate Services,US,---,"$418,305,066.40 ","5,429,008"
+RGLD,Royal Gold Inc,0.02%,Gold,US,---,"$417,073,616.04 ","2,079,338"
+TKO,TKO Group Holdings Inc,0.02%,Movies & Entertainment,US,---,"$416,905,624.08 ","2,064,298"
+REG,Regency Centers Corp,0.02%,Retail REITs,US,---,"$415,016,419.50 ","5,692,955"
+DPZ,Domino's Pizza Inc,0.02%,Restaurants,US,---,"$413,667,975.68 ","958,208"
+ROKU,Roku Inc,0.02%,Movies & Entertainment,US,---,"$410,883,455.00 ","4,103,500"
+FN,Fabrinet,0.02%,Electronic Manufacturing Services,US,---,"$410,413,355.04 ","1,125,592"
+NWSA,News Corp,0.02%,Publishing,US,---,"$410,311,365.69 ","13,360,839"
+OKLO,Oklo Inc,0.02%,Electric Utilities,US,---,"$410,028,599.52 ","3,673,104"
+LECO,Lincoln Electric Holdings Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$409,973,946.90 ","1,738,430"
+TW,Tradeweb Markets Inc,0.02%,Financial Exchanges & Data,US,---,"$407,588,144.46 ","3,672,627"
+NLY,Annaly Capital Management Inc,0.02%,Mortgage REITs,US,---,"$405,149,607.27 ","20,046,987"
+APG,API Group Corp,0.02%,Construction & Engineering,US,---,"$404,849,694.83 ","11,779,159"
+EHC,Encompass Health Corp,0.02%,Health Care Facilities,US,---,"$401,738,601.96 ","3,162,798"
+BLDR,Builders FirstSource Inc,0.02%,Building Products,US,---,"$401,654,690.00 ","3,312,616"
+U,Unity Software Inc,0.02%,Application Software,US,---,"$399,780,461.08 ","9,984,527"
+AVY,Avery Dennison Corp,0.02%,Paper & Plastic Packaging Products & Materials,US,---,"$397,638,731.79 ","2,451,987"
+RGA,Reinsurance Group of America Inc,0.02%,Reinsurance,US,---,"$397,637,243.38 ","2,069,626"
+LYB,LyondellBasell Industries NV,0.02%,Commodity Chemicals,US,---,"$397,181,237.12 ","8,099,128"
+FOXA,Fox Corp,0.02%,Broadcasting,US,---,"$395,634,593.34 ","6,273,939"
+UNM,Unum Group,0.02%,Life & Health Insurance,US,---,"$395,456,309.54 ","5,084,293"
+GLPI,Gaming and Leisure Properties Inc,0.02%,Other Specialized REITs,US,---,"$392,468,505.04 ","8,420,264"
+OHI,Omega Healthcare Investors Inc,0.02%,Health Care REITs,US,---,"$391,633,057.76 ","9,276,008"
+MANH,Manhattan Associates Inc,0.02%,Application Software,US,---,"$389,225,248.10 ","1,898,845"
+EVR,Evercore Inc,0.02%,Investment Banking & Brokerage,US,---,"$389,175,866.28 ","1,153,729"
+UDR,UDR Inc,0.02%,Multi-Family Residential REITs,US,---,"$388,988,065.80 ","10,439,830"
+BJ,BJ's Wholesale Club Holdings Inc,0.02%,Consumer Staples Merchandise Retail,US,---,"$388,865,088.75 ","4,170,135"
+RBC,RBC Bearings Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$387,431,125.75 ","992,675"
+BAH,Booz Allen Hamilton Holding Corp,0.02%,Research & Consulting Services,US,---,"$386,452,377.15 ","3,866,457"
+IEX,IDEX Corp,0.02%,Industrial Machinery & Supplies & Components,US,---,"$386,009,102.96 ","2,371,646"
+QXO,QXO Inc,0.02%,Trading Companies & Distributors,US,---,"$384,585,322.84 ","20,177,614"
+DUOL,Duolingo Inc,0.02%,Education Services,US,---,"$382,255,482.96 ","1,187,719"
+SNX,TD SYNNEX Corp,0.02%,Technology Distributors,US,---,"$381,955,390.00 ","2,332,552"
+RNR,RenaissanceRe Holdings Ltd,0.02%,Reinsurance,US,---,"$375,310,571.44 ","1,478,008"
+OC,Owens Corning,0.02%,Building Products,US,---,"$372,172,630.94 ","2,630,939"
+AVAV,AeroVironment Inc,0.02%,Aerospace & Defense,US,---,"$371,506,277.33 ","1,179,797"
+BXP,BXP Inc,0.02%,Office REITs,US,---,"$369,893,835.36 ","4,975,704"
+BAX,Baxter International Inc,0.02%,Health Care Equipment,US,---,"$368,919,494.46 ","16,201,998"
+HST,Host Hotels & Resorts Inc,0.02%,Hotel & Resort REITs,US,---,"$367,165,549.88 ","21,572,594"
+CRS,Carpenter Technology Corp,0.02%,Aerospace & Defense,US,---,"$366,013,218.84 ","1,490,646"
+MEDP,Medpace Holdings Inc,0.02%,Life Sciences Tools & Services,US,---,"$363,721,411.44 ","707,409"
+VTRS,Viatris Inc,0.02%,Pharmaceuticals,US,---,"$363,565,620.00 ","36,723,800"
+RL,Ralph Lauren Corp,0.02%,"Apparel, Accessories & Luxury Goods",US,---,"$362,162,740.68 ","1,155,003"
+NDSN,Nordson Corp,0.02%,Industrial Machinery & Supplies & Components,US,---,"$361,768,058.85 ","1,594,043"
+DTM,DT Midstream Inc,0.02%,Oil & Gas Storage & Transportation,US,---,"$361,764,978.66 ","3,199,761"
+SWK,Stanley Black & Decker Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$361,284,384.18 ","4,860,546"
+FHN,First Horizon Corp,0.02%,Regional Banks,US,---,"$360,803,122.19 ","15,957,679"
+CDE,Coeur Mining Inc,0.02%,Gold,US,---,"$360,161,721.36 ","19,198,386"
+CPT,Camden Property Trust,0.02%,Multi-Family Residential REITs,US,---,"$359,214,967.48 ","3,364,066"
+SWKS,Skyworks Solutions Inc,0.02%,Semiconductors,US,---,"$358,976,831.04 ","4,663,248"
+BG,Bunge Global SA,0.02%,Agricultural Products & Services,US,---,"$358,606,462.50 ","4,413,618"
+HII,Huntington Ingalls Industries Inc,0.02%,Aerospace & Defense,US,---,"$355,295,335.50 ","1,234,050"
+CCK,Crown Holdings Inc,0.02%,"Metal, Glass & Plastic Containers",US,---,"$353,099,330.09 ","3,655,651"
+ATI,ATI Inc,0.02%,Aerospace & Defense,US,---,"$353,015,355.98 ","4,339,997"
+RMBS,Rambus Inc,0.02%,Semiconductors,US,---,"$352,411,173.00 ","3,382,065"
+CLH,Clean Harbors Inc,0.02%,Environmental & Facilities Services,US,---,"$351,415,507.14 ","1,513,287"
+HLI,Houlihan Lokey Inc,0.02%,Investment Banking & Brokerage,US,---,"$351,205,403.64 ","1,710,527"
+NCLH,Norwegian Cruise Line Holdings Ltd,0.02%,"Hotels, Resorts & Cruise Lines",US,---,"$350,832,281.52 ","14,244,104"
+WTRG,Essential Utilities Inc,0.02%,Water Utilities,US,---,"$350,179,078.20 ","8,776,418"
+SCI,Service Corp International/US,0.02%,Specialized Consumer Services,US,---,"$350,051,115.48 ","4,206,334"
+SJM,J M Smucker Co/The,0.02%,Packaged Foods & Meats,US,---,"$347,300,085.00 ","3,197,975"
+SF,Stifel Financial Corp,0.02%,Investment Banking & Brokerage,US,---,"$347,181,322.25 ","3,059,675"
+TXRH,Texas Roadhouse Inc,0.02%,Restaurants,US,---,"$346,726,306.05 ","2,086,827"
+GME,GameStop Corp,0.02%,Computer & Electronics Retail,US,---,"$346,396,638.72 ","12,697,824"
+BLD,TopBuild Corp,0.02%,Homebuilding,US,---,"$346,338,700.84 ","886,094"
+CACI,CACI International Inc,0.02%,Research & Consulting Services,US,---,"$346,274,523.54 ","694,243"
+GL,Globe Life Inc,0.02%,Life & Health Insurance,US,---,"$346,237,597.50 ","2,421,750"
+MOS,Mosaic Co/The,0.02%,Fertilizers & Agricultural Chemicals,US,---,"$346,094,192.64 ","9,979,648"
+AIZ,Assurant Inc,0.02%,Property & Casualty Insurance,US,---,"$344,612,766.00 ","1,591,010"
+UHS,Universal Health Services Inc,0.02%,Health Care Facilities,US,---,"$343,914,692.32 ","1,682,228"
+JKHY,Jack Henry & Associates Inc,0.02%,Transaction & Payment Processing Services,US,---,"$341,979,172.13 ","2,296,241"
+AKAM,Akamai Technologies Inc,0.02%,Internet Services & Infrastructure,US,---,"$341,685,176.00 ","4,510,100"
+PAYC,Paycom Software Inc,0.02%,Human Resource & Employment Services,US,---,"$341,561,070.24 ","1,641,016"
+FDS,FactSet Research Systems Inc,0.02%,Financial Exchanges & Data,US,---,"$341,321,321.10 ","1,191,390"
+WMS,Advanced Drainage Systems Inc,0.02%,Building Products,US,---,"$339,925,960.00 ","2,450,800"
+SOLV,Solventum Corp,0.02%,Health Care Supplies,US,---,"$338,944,475.00 ","4,643,075"
+LITE,Lumentum Holdings Inc,0.02%,Communications Equipment,US,---,"$338,404,258.00 ","2,079,800"
+ALLY,Ally Financial Inc,0.02%,Consumer Finance,US,---,"$336,696,052.00 ","8,589,185"
+SFM,Sprouts Farmers Market Inc,0.02%,Food Retail,US,---,"$335,952,096.00 ","3,087,795"
+PNW,Pinnacle West Capital Corp,0.02%,Electric Utilities,US,---,"$335,864,925.44 ","3,745,984"
+MLI,Mueller Industries Inc,0.02%,Industrial Machinery & Supplies & Components,US,---,"$334,348,728.02 ","3,306,782"
+ELS,Equity LifeStyle Properties Inc,0.02%,Single-Family Residential REITs,US,---,"$334,229,496.40 ","5,506,252"
+LAMR,Lamar Advertising Co,0.02%,Other Specialized REITs,US,---,"$334,223,371.54 ","2,730,137"
+OWL,Blue Owl Capital Inc,0.02%,Asset Management & Custody Banks,US,---,"$332,819,370.01 ","19,658,557"
+EXEL,Exelixis Inc,0.02%,Biotechnology,US,---,"$332,129,107.10 ","8,041,867"
+AYI,Acuity Inc,0.02%,Electrical Components & Equipment,US,---,"$330,903,343.21 ","960,839"
+HIMS,Hims & Hers Health Inc,0.02%,Health Care Services,US,---,"$330,200,925.12 ","5,821,596"
+POOL,Pool Corp,0.02%,Distributors,US,---,"$329,309,533.43 ","1,062,049"
+AMH,American Homes 4 Rent,0.02%,Single-Family Residential REITs,US,---,"$329,221,550.00 ","9,901,400"
+JBHT,JB Hunt Transport Services Inc,0.02%,Cargo Ground Transportation,US,---,"$327,502,395.67 ","2,440,951"
+NXT,NEXTracker Inc,0.02%,Electrical Components & Equipment,US,---,"$327,388,732.30 ","4,424,770"
+CELH,Celsius Holdings Inc,0.02%,Soft Drinks & Non-alcoholic Beverages,US,---,"$327,340,471.32 ","5,693,868"
+BMRN,BioMarin Pharmaceutical Inc,0.02%,Biotechnology,US,---,"$327,050,900.96 ","6,038,606"
+MOH,Molina Healthcare Inc,0.02%,Managed Health Care,US,---,"$326,893,781.76 ","1,708,266"
+EXAS,Exact Sciences Corp,0.02%,Biotechnology,US,---,"$326,891,374.64 ","5,974,984"
+AFG,American Financial Group Inc/OH,0.02%,Property & Casualty Insurance,US,---,"$326,177,316.48 ","2,238,384"
+DAY,Dayforce Inc,0.02%,Human Resource & Employment Services,US,---,"$325,754,562.91 ","4,728,619"
+OVV,Ovintiv Inc,0.02%,Oil & Gas Exploration & Production,US,---,"$325,731,125.10 ","8,066,645"
+WCC,WESCO International Inc,0.02%,Trading Companies & Distributors,US,---,"$324,116,559.00 ","1,532,466"
+IPG,Interpublic Group of Cos Inc/The,0.02%,Advertising,US,---,"$322,296,976.84 ","11,547,724"
+IVZ,Invesco Ltd,0.02%,Asset Management & Custody Banks,US,---,"$321,049,888.00 ","13,995,200"
+CNM,Core & Main Inc,0.02%,Trading Companies & Distributors,US,---,"$320,982,637.85 ","5,962,895"
+RVTY,Revvity Inc,0.02%,Life Sciences Tools & Services,US,---,"$320,564,799.20 ","3,657,328"
+AGNC,AGNC Investment Corp,0.02%,Mortgage REITs,US,---,"$319,968,518.21 ","32,683,199"
+MP,MP Materials Corp,0.02%,Diversified Metals & Mining,US,---,"$318,856,413.88 ","4,754,084"
+SATS,EchoStar Corp,0.02%,Cable & Satellite,US,---,"$318,827,587.92 ","4,175,322"
+HAS,Hasbro Inc,0.02%,Leisure Products,US,---,"$317,371,797.55 ","4,184,203"
+IOT,Samsara Inc,0.02%,Application Software,US,---,"$317,009,755.25 ","8,510,329"
+ARMK,Aramark,0.02%,Restaurants,US,---,"$316,836,172.80 ","8,250,942"
+LSCC,Lattice Semiconductor Corp,0.02%,Semiconductors,US,---,"$316,052,532.12 ","4,310,591"
+WYNN,Wynn Resorts Ltd,0.02%,Casinos & Gaming,US,---,"$315,568,186.49 ","2,460,187"
+SSB,SOUTHSTATE BANK CORP,0.02%,Regional Banks,US,---,"$315,313,929.99 ","3,189,177"
+ELAN,Elanco Animal Health Inc,0.02%,Pharmaceuticals,US,---,"$314,456,111.54 ","15,613,511"
+ENSG,Ensign Group Inc/The,0.02%,Health Care Facilities,US,---,"$313,654,087.11 ","1,815,443"
+IONS,Ionis Pharmaceuticals Inc,0.02%,Biotechnology,US,---,"$312,720,029.80 ","4,780,190"
+ASTS,AST SpaceMobile Inc,0.02%,Alternative Carriers,US,---,"$312,607,256.28 ","6,369,341"
+AIT,Applied Industrial Technologies Inc,0.02%,Trading Companies & Distributors,US,---,"$310,493,131.05 ","1,189,401"
+AR,Antero Resources Corp,0.02%,Oil & Gas Exploration & Production,US,---,"$310,048,523.48 ","9,238,633"
+STRL,Sterling Infrastructure Inc,0.02%,Construction & Engineering,US,---,"$309,648,891.20 ","911,590"
+GNRC,Generac Holdings Inc,0.02%,Electrical Components & Equipment,US,---,"$309,565,287.00 ","1,849,255"
+WBS,Webster Financial Corp,0.02%,Regional Banks,US,---,"$309,330,871.84 ","5,204,086"
+REXR,Rexford Industrial Realty Inc,0.02%,Industrial REITs,US,---,"$307,114,392.72 ","7,470,552"
+RBRK,Rubrik Inc,0.02%,Systems Software,US,---,"$304,674,233.50 ","3,704,246"
+ALB,Albemarle Corp,0.01%,Specialty Chemicals,US,---,"$300,965,230.32 ","3,711,954"
+RRX,Regal Rexnord Corp,0.01%,Electrical Components & Equipment,US,---,"$299,816,279.84 ","2,090,186"
+DCI,Donaldson Co Inc,0.01%,Industrial Machinery & Supplies & Components,US,---,"$299,376,197.00 ","3,657,620"
+BWA,BorgWarner Inc,0.01%,Automotive Parts & Equipment,US,---,"$298,746,049.56 ","6,795,861"
+KNSL,Kinsale Capital Group Inc,0.01%,Property & Casualty Insurance,US,---,"$297,541,664.20 ","699,670"
+JEF,Jefferies Financial Group Inc,0.01%,Investment Banking & Brokerage,US,---,"$297,444,852.32 ","4,546,696"
+ORI,Old Republic International Corp,0.01%,Property & Casualty Insurance,US,---,"$296,701,917.91 ","6,986,153"
+PEN,Penumbra Inc,0.01%,Health Care Equipment,US,---,"$295,785,044.88 ","1,167,634"
+AES,AES Corp/The,0.01%,Independent Power Producers & Energy Traders,US,---,"$295,218,306.32 ","22,433,002"
+SEIC,SEI Investments Co,0.01%,Asset Management & Custody Banks,US,---,"$295,216,398.90 ","3,479,274"
+OGE,OGE Energy Corp,0.01%,Electric Utilities,US,---,"$292,005,759.43 ","6,310,909"
+FYBR,Frontier Communications Parent Inc,0.01%,Integrated Telecommunication Services,US,---,"$291,943,996.65 ","7,816,439"
+CUBE,CubeSmart,0.01%,Self-Storage REITs,US,---,"$291,722,204.18 ","7,174,673"
+RGTI,Rigetti Computing Inc,0.01%,Semiconductors,US,---,"$288,896,151.24 ","9,697,756"
+WAL,Western Alliance Bancorp,0.01%,Regional Banks,US,---,"$287,828,102.72 ","3,319,051"
+EGP,EastGroup Properties Inc,0.01%,Industrial REITs,US,---,"$284,918,912.46 ","1,683,321"
+PR,Permian Resources Corp,0.01%,Oil & Gas Exploration & Production,US,---,"$284,695,820.80 ","22,241,861"
+MRNA,Moderna Inc,0.01%,Biotechnology,US,---,"$283,976,853.93 ","10,994,071"
+PRI,Primerica Inc,0.01%,Life & Health Insurance,US,---,"$283,592,050.98 ","1,021,622"
+DOCS,Doximity Inc,0.01%,Health Care Technology,US,---,"$283,410,384.95 ","3,874,373"
+GTLS,Chart Industries Inc,0.01%,Industrial Machinery & Supplies & Components,US,---,"$283,216,253.00 ","1,415,020"
+CR,Crane Co,0.01%,Industrial Machinery & Supplies & Components,US,---,"$283,194,614.34 ","1,537,931"
+BBIO,Bridgebio Pharma Inc,0.01%,Biotechnology,US,---,"$281,419,282.34 ","5,418,161"
+W,Wayfair Inc,0.01%,Homefurnishing Retail,US,---,"$280,562,036.21 ","3,140,737"
+IDCC,InterDigital Inc,0.01%,Application Software,US,---,"$280,434,816.99 ","812,313"
+CNH,CNH Industrial NV,0.01%,Agricultural & Farm Machinery,US,---,"$278,589,308.90 ","25,676,434"
+WTFC,Wintrust Financial Corp,0.01%,Regional Banks,US,---,"$277,782,834.56 ","2,097,424"
+NYT,New York Times Co/The,0.01%,Publishing,US,---,"$277,619,864.20 ","4,836,583"
+CMA,Comerica Inc,0.01%,Diversified Banks,US,---,"$277,500,244.32 ","4,049,916"
+CRBG,Corebridge Financial Inc,0.01%,Diversified Financial Services,US,---,"$277,477,105.60 ","8,657,632"
+ATR,AptarGroup Inc,0.01%,"Metal, Glass & Plastic Containers",US,---,"$276,466,086.48 ","2,068,428"
+SPXC,SPX Technologies Inc,0.01%,Industrial Machinery & Supplies & Components,US,---,"$276,241,643.04 ","1,478,968"
+TTEK,Tetra Tech Inc,0.01%,Environmental & Facilities Services,US,---,"$275,945,049.64 ","8,266,778"
+CAG,Conagra Brands Inc,0.01%,Packaged Foods & Meats,US,---,"$275,532,999.75 ","15,048,225"
+FRT,Federal Realty Investment Trust,0.01%,Retail REITs,US,---,"$274,658,906.94 ","2,711,074"
+PLNT,Planet Fitness Inc,0.01%,Leisure Facilities,US,---,"$274,562,210.40 ","2,645,108"
+APA,Apa Corp,0.01%,Oil & Gas Exploration & Production,US,---,"$274,186,707.44 ","11,292,698"
+TECH,Bio-Techne Corp,0.01%,Life Sciences Tools & Services,US,---,"$273,895,473.23 ","4,923,521"
+ALGN,Align Technology Inc,0.01%,Health Care Supplies,US,---,"$271,881,671.04 ","2,171,232"
+HALO,Halozyme Therapeutics Inc,0.01%,Biotechnology,US,---,"$271,106,223.78 ","3,696,567"
+AA,Alcoa Corp,0.01%,Aluminum,US,---,"$269,345,780.99 ","8,189,291"
+RRC,Range Resources Corp,0.01%,Oil & Gas Exploration & Production,US,---,"$269,004,347.52 ","7,146,768"
+FIVE,Five Below Inc,0.01%,Other Specialty Retail,US,---,"$268,316,166.30 ","1,734,429"
+AVTR,Avantor Inc,0.01%,Life Sciences Tools & Services,US,---,"$268,167,082.56 ","21,487,747"
+MTCH,Match Group Inc,0.01%,Interactive Media & Services,US,---,"$267,759,295.28 ","7,580,954"
+BRX,Brixmor Property Group Inc,0.01%,Retail REITs,US,---,"$267,021,043.52 ","9,646,714"
+QRVO,Qorvo Inc,0.01%,Semiconductors,US,---,"$265,255,289.64 ","2,912,333"
+AWI,Armstrong World Industries Inc,0.01%,Building Products,US,---,"$265,163,112.04 ","1,352,804"
+AOS,A O Smith Corp,0.01%,Building Products,US,---,"$263,083,234.32 ","3,583,752"
+NFG,National Fuel Gas Co,0.01%,Gas Utilities,US,---,"$262,799,393.01 ","2,845,073"
+DINO,HF Sinclair Corp,0.01%,Oil & Gas Refining & Marketing,US,---,"$262,793,958.34 ","5,020,901"
+ZION,Zions Bancorp NA,0.01%,Regional Banks,US,---,"$262,383,299.88 ","4,637,386"
+SNAP,Snap Inc,0.01%,Interactive Media & Services,US,---,"$262,270,229.61 ","34,016,891"
+MKSI,MKS Inc,0.01%,Semiconductor Materials & Equipment,US,---,"$262,217,760.53 ","2,118,589"
+CVLT,Commvault Systems Inc,0.01%,Systems Software,US,---,"$262,121,596.34 ","1,388,503"
+LYFT,Lyft Inc,0.01%,Passenger Ground Transportation,US,---,"$262,049,299.20 ","11,905,920"
+JOBY,Joby Aviation Inc,0.01%,Passenger Airlines,US,---,"$261,443,935.26 ","16,198,509"
+OSK,Oshkosh Corp,0.01%,Construction Machinery & Heavy Transportation Equipment,US,---,"$261,199,717.20 ","2,013,876"
+MDGL,Madrigal Pharmaceuticals Inc,0.01%,Biotechnology,US,---,"$258,836,515.12 ","564,332"
+HQY,HealthEquity Inc,0.01%,Managed Health Care,US,---,"$258,756,596.28 ","2,730,364"
+PCOR,Procore Technologies Inc,0.01%,Application Software,US,---,"$257,635,620.84 ","3,533,127"
+TEM,Tempus AI Inc,0.01%,Life Sciences Tools & Services,US,---,"$257,235,360.76 ","3,187,156"
+ERIE,Erie Indemnity Co,0.01%,Property & Casualty Insurance,US,---,"$255,350,761.76 ","802,586"
+UMBF,UMB Financial Corp,0.01%,Regional Banks,US,---,"$255,193,489.35 ","2,156,261"
+BPOP,Popular Inc,0.01%,Regional Banks,US,---,"$254,693,280.01 ","2,005,301"
+LAD,Lithia Motors Inc,0.01%,Automotive Retail,US,---,"$254,011,228.00 ","803,833"
+DY,Dycom Industries Inc,0.01%,Construction & Engineering,US,---,"$253,400,854.00 ","868,525"
+LW,Lamb Weston Holdings Inc,0.01%,Packaged Foods & Meats,US,---,"$252,950,654.88 ","4,355,211"
+SAIA,Saia Inc,0.01%,Cargo Ground Transportation,US,---,"$251,756,072.16 ","840,981"
+CHWY,Chewy Inc,0.01%,Other Specialty Retail,US,---,"$251,396,709.55 ","6,214,999"
+NNN,NNN REIT Inc,0.01%,Retail REITs,US,---,"$251,212,381.20 ","5,901,160"
+EPAM,EPAM Systems Inc,0.01%,IT Consulting & Other Services,US,---,"$251,109,079.10 ","1,665,290"
+FND,Floor & Decor Holdings Inc,0.01%,Home Improvement Retail,US,---,"$250,239,948.20 ","3,395,386"
+QBTS,D-Wave Quantum Inc,0.01%,Application Software,US,---,"$250,184,228.07 ","10,124,817"
+OLLI,Ollie's Bargain Outlet Holdings Inc,0.01%,Broadline Retail,US,---,"$248,727,877.20 ","1,937,133"
+MTSI,MACOM Technology Solutions Holdings Inc,0.01%,Semiconductors,US,---,"$248,133,094.53 ","1,993,197"
+LKQ,LKQ Corp,0.01%,Distributors,US,---,"$247,770,653.52 ","8,112,988"
+LIF,Life360 Inc,0.01%,Application Software,US,---,"$247,416,757.90 ","2,327,533"
+RVMD,Revolution Medicines Inc,0.01%,Biotechnology,US,---,"$247,136,213.20 ","5,291,996"
+BF/B,Brown-Forman Corp,0.01%,Distillers & Vintners,US,---,"$247,074,751.64 ","9,123,883"
+ADC,Agree Realty Corp,0.01%,Retail REITs,US,---,"$246,415,879.68 ","3,468,692"
+INGR,Ingredion Inc,0.01%,Agricultural Products & Services,US,---,"$244,455,183.86 ","2,001,926"
+ONB,Old National Bancorp/IN,0.01%,Regional Banks,US,---,"$244,392,968.20 ","11,134,076"
+HL,Hecla Mining Co,0.01%,Silver,US,---,"$243,245,852.30 ","20,102,963"
+CFR,Cullen/Frost Bankers Inc,0.01%,Regional Banks,US,---,"$243,139,789.20 ","1,917,960"
+COLB,Columbia Banking System Inc,0.01%,Regional Banks,US,---,"$242,462,743.38 ","9,419,687"
+CRL,Charles River Laboratories International Inc,0.01%,Life Sciences Tools & Services,US,---,"$242,408,171.80 ","1,549,330"
+WTS,Watts Water Technologies Inc,0.01%,Industrial Machinery & Supplies & Components,US,---,"$241,914,570.24 ","866,208"
+AUR,Aurora Innovation Inc,0.01%,Application Software,US,---,"$241,238,257.26 ","44,756,634"
+MASI,Masimo Corp,0.01%,Health Care Equipment,US,---,"$241,046,680.55 ","1,633,661"
+CTRE,CareTrust REIT Inc,0.01%,Health Care REITs,US,---,"$240,684,332.64 ","6,940,148"
+LNC,Lincoln National Corp,0.01%,Life & Health Insurance,US,---,"$240,682,220.93 ","5,967,821"
+VMI,Valmont Industries Inc,0.01%,Construction & Engineering,US,---,"$240,266,975.48 ","619,676"
+CGNX,Cognex Corp,0.01%,Electronic Equipment & Instruments,US,---,"$239,493,081.90 ","5,286,823"
+ESTC,Elastic NV,0.01%,Application Software,US,---,"$238,981,063.37 ","2,828,513"
+EXP,Eagle Materials Inc,0.01%,Construction Materials,US,---,"$238,769,521.44 ","1,024,586"
+JAZZ,Jazz Pharmaceuticals PLC,0.01%,Pharmaceuticals,US,---,"$238,621,000.40 ","1,810,478"
+CBSH,Commerce Bancshares Inc/MO,0.01%,Regional Banks,US,---,"$237,965,276.16 ","3,982,016"
+LBRDK,Liberty Broadband Corp,0.01%,Cable & Satellite,US,---,"$237,868,598.16 ","3,743,604"
+BSY,Bentley Systems Inc,0.01%,Application Software,US,---,"$236,535,156.00 ","4,594,700"
+HRL,Hormel Foods Corp,0.01%,Packaged Foods & Meats,US,---,"$236,385,430.38 ","9,554,787"
+ZWS,Zurn Elkay Water Solutions Corp,0.01%,Building Products,US,---,"$236,150,328.10 ","5,021,270"
+TAP,Molson Coors Beverage Co,0.01%,Brewers,US,---,"$236,026,896.00 ","5,216,064"
+MOD,Modine Manufacturing Co,0.01%,Automotive Parts & Equipment,US,---,"$235,562,389.68 ","1,657,023"
+CORT,Corcept Therapeutics Inc,0.01%,Pharmaceuticals,US,---,"$235,085,195.33 ","2,828,603"
+TTC,Toro Co/The,0.01%,Agricultural & Farm Machinery,US,---,"$234,764,122.80 ","3,080,894"
+AAL,American Airlines Group Inc,0.01%,Passenger Airlines,US,---,"$234,017,193.40 ","20,820,035"
+FOX,Fox Corp,0.01%,Broadcasting,US,---,"$233,916,903.28 ","4,083,032"
+AN,AutoNation Inc,0.01%,Automotive Retail,US,---,"$232,684,647.08 ","1,063,604"
+HEI,HEICO Corp,0.01%,Aerospace & Defense,US,---,"$232,325,160.68 ","719,674"
+GH,Guardant Health Inc,0.01%,Health Care Services,US,---,"$231,848,659.68 ","3,710,766"
+G,Genpact Ltd,0.01%,Data Processing & Outsourced Services,US,---,"$230,705,027.89 ","5,507,401"
+JBTM,JBT Marel Corp,0.01%,Industrial Machinery & Supplies & Components,US,---,"$230,665,388.95 ","1,642,331"
+TPG,TPG Inc,0.01%,Asset Management & Custody Banks,US,---,"$229,626,615.90 ","3,996,982"
+R,Ryder System Inc,0.01%,Cargo Ground Transportation,US,---,"$228,787,496.64 ","1,212,826"
+PNFP,Pinnacle Financial Partners Inc,0.01%,Regional Banks,US,---,"$228,694,534.72 ","2,438,368"
+EMN,Eastman Chemical Co,0.01%,Specialty Chemicals,US,---,"$228,024,044.95 ","3,616,559"
+CART,Maplebear Inc,0.01%,Food Retail,US,---,"$227,031,671.52 ","6,176,052"
+BEN,Franklin Resources Inc,0.01%,Asset Management & Custody Banks,US,---,"$226,772,973.27 ","9,804,279"
+VOYA,Voya Financial Inc,0.01%,Diversified Financial Services,US,---,"$226,305,006.40 ","3,025,468"
+RGEN,Repligen Corp,0.01%,Life Sciences Tools & Services,US,---,"$224,853,792.52 ","1,682,156"
+IDA,IDACORP Inc,0.01%,Electric Utilities,US,---,"$224,759,398.50 ","1,700,790"
+AHR,American Healthcare REIT Inc,0.01%,Health Care REITs,US,---,"$224,496,398.80 ","5,343,880"
+UGI,UGI Corp,0.01%,Gas Utilities,US,---,"$224,185,038.80 ","6,740,380"
+ELF,elf Beauty Inc,0.01%,Personal Care Products,US,---,"$223,864,968.96 ","1,689,802"
+AXS,Axis Capital Holdings Ltd,0.01%,Property & Casualty Insurance,US,---,"$223,352,718.40 ","2,331,448"
+ALSN,Allison Transmission Holdings Inc,0.01%,Construction Machinery & Heavy Transportation Equipment,US,---,"$222,506,299.36 ","2,621,422"
+LNW,Light & Wonder Inc,0.01%,Casinos & Gaming,US,---,"$222,363,103.68 ","2,649,072"
+PRIM,Primoris Services Corp,0.01%,Construction & Engineering,US,---,"$222,328,206.22 ","1,618,934"
+PCTY,Paylocity Holding Corp,0.01%,Human Resource & Employment Services,US,---,"$221,734,897.65 ","1,392,195"
+WING,Wingstop Inc,0.01%,Restaurants,US,---,"$221,232,256.96 ","879,022"
+JXN,Jackson Financial Inc,0.01%,Diversified Financial Services,US,---,"$221,084,194.17 ","2,183,979"
+CRCL,Circle Internet Group Inc,0.01%,Application Software,US,---,"$220,959,418.96 ","1,666,612"
+VNO,Vornado Realty Trust,0.01%,Office REITs,US,---,"$220,355,327.85 ","5,436,845"
+SSD,Simpson Manufacturing Co Inc,0.01%,Building Products,US,---,"$219,166,121.82 ","1,308,767"
+FLS,Flowserve Corp,0.01%,Industrial Machinery & Supplies & Components,US,---,"$218,659,143.50 ","4,114,775"
+KD,Kyndryl Holdings Inc,0.01%,IT Consulting & Other Services,US,---,"$218,473,715.46 ","7,275,182"
+FSS,Federal Signal Corp,0.01%,Construction Machinery & Heavy Transportation Equipment,US,---,"$217,482,663.61 ","1,827,739"
+CADE,Cadence Bank,0.01%,Regional Banks,US,---,"$216,534,586.62 ","5,768,103"
+HSIC,Henry Schein Inc,0.01%,Health Care Distributors,US,---,"$214,744,648.16 ","3,235,568"
+AGCO,AGCO Corp,0.01%,Agricultural & Farm Machinery,US,---,"$214,372,556.04 ","2,002,172"
+FR,First Industrial Realty Trust Inc,0.01%,Industrial REITs,US,---,"$214,246,602.91 ","4,162,553"
+RYTM,Rhythm Pharmaceuticals Inc,0.01%,Biotechnology,US,---,"$213,608,089.59 ","2,115,141"
+EXLS,ExlService Holdings Inc,0.01%,Data Processing & Outsourced Services,US,---,"$213,529,561.14 ","4,849,638"
+FLR,Fluor Corp,0.01%,Construction & Engineering,US,---,"$213,072,475.91 ","5,064,713"
+HRB,H&R Block Inc,0.01%,Specialized Consumer Services,US,---,"$212,734,538.38 ","4,206,734"
+MUSA,Murphy USA Inc,0.01%,Automotive Retail,US,---,"$211,944,921.84 ","545,884"
+KMX,CarMax Inc,0.01%,Automotive Retail,US,---,"$211,830,866.17 ","4,720,991"
+STWD,Starwood Property Trust Inc,0.01%,Mortgage REITs,US,---,"$211,826,077.97 ","10,935,781"
+MHK,Mohawk Industries Inc,0.01%,Home Furnishings,US,---,"$211,739,755.04 ","1,642,412"
+OMF,OneMain Holdings Inc,0.01%,Consumer Finance,US,---,"$209,780,743.44 ","3,715,564"
+NEU,NewMarket Corp,0.01%,Specialty Chemicals,US,---,"$208,151,534.67 ","251,327"
+MGM,MGM Resorts International,0.01%,Casinos & Gaming,US,---,"$208,049,700.08 ","6,002,588"
+STAG,STAG Industrial Inc,0.01%,Industrial REITs,US,---,"$207,479,050.11 ","5,879,259"
+CYTK,Cytokinetics Inc,0.01%,Biotechnology,US,---,"$206,080,104.48 ","3,749,638"
+CHE,Chemed Corp,0.01%,Health Care Services,US,---,"$205,490,273.00 ","458,950"
+AM,Antero Midstream Corp,0.01%,Oil & Gas Storage & Transportation,US,---,"$205,105,880.16 ","10,550,714"
+MTG,MGIC Investment Corp,0.01%,Commercial & Residential Mortgage Finance,US,---,"$204,653,321.51 ","7,213,723"
+AAON,AAON Inc,0.01%,Building Products,US,---,"$204,319,828.48 ","2,186,642"
+OLED,Universal Display Corp,0.01%,Semiconductors,US,---,"$204,257,515.67 ","1,422,109"
+ESAB,Esab Corp,0.01%,Industrial Machinery & Supplies & Components,US,---,"$203,424,234.36 ","1,820,514"
+VNOM,Viper Energy Inc,0.01%,Oil & Gas Exploration & Production,US,---,"$203,219,638.44 ","5,317,102"
+GMED,Globus Medical Inc,0.01%,Health Care Equipment,US,---,"$203,193,730.92 ","3,547,996"
+SNV,Synovus Financial Corp,0.01%,Regional Banks,US,---,"$203,021,579.52 ","4,136,544"
+MARA,MARA Holdings Inc,0.01%,Application Software,US,---,"$202,981,647.66 ","11,116,191"
+CMC,Commercial Metals Co,0.01%,Steel,US,---,"$202,815,706.56 ","3,540,777"
+AMG,Affiliated Managers Group Inc,0.01%,Asset Management & Custody Banks,US,---,"$202,561,544.52 ","849,564"
+FBIN,Fortune Brands Innovations Inc,<0.01%,Building Products,US,---,"$202,406,615.44 ","3,791,096"
+AEIS,Advanced Energy Industries Inc,<0.01%,Electronic Equipment & Instruments,US,---,"$202,316,536.52 ","1,189,118"
+CRUS,Cirrus Logic Inc,<0.01%,Semiconductors,US,---,"$202,047,790.89 ","1,612,641"
+GTES,Gates Industrial Corp PLC,<0.01%,Industrial Machinery & Supplies & Components,US,---,"$201,902,683.14 ","8,134,677"
+LFUS,Littelfuse Inc,<0.01%,Electronic Components,US,---,"$201,314,745.47 ","777,247"
+MSA,MSA Safety Inc,<0.01%,Office Services & Supplies,US,---,"$200,830,984.29 ","1,167,147"
+HR,Healthcare Realty Trust Inc,<0.01%,Health Care REITs,US,---,"$200,219,255.52 ","11,104,784"
+AL,Air Lease Corp,<0.01%,Trading Companies & Distributors,US,---,"$200,122,919.75 ","3,144,115"
+BROS,Dutch Bros Inc,<0.01%,Restaurants,US,---,"$199,255,501.30 ","3,806,945"
+ONTO,Onto Innovation Inc,<0.01%,Semiconductor Materials & Equipment,US,---,"$199,224,418.12 ","1,541,746"
+RIOT,Riot Platforms Inc,<0.01%,Application Software,US,---,"$198,300,345.21 ","10,420,407"
+SITM,SiTime Corp,<0.01%,Semiconductors,US,---,"$198,183,639.40 ","657,740"
+ETSY,Etsy Inc,<0.01%,Broadline Retail,US,---,"$197,591,644.14 ","2,976,226"
+FAF,First American Financial Corp,<0.01%,Property & Casualty Insurance,US,---,"$196,597,269.44 ","3,060,356"
+GATX,GATX Corp,<0.01%,Trading Companies & Distributors,US,---,"$195,737,369.20 ","1,119,779"
+MKTX,MarketAxess Holdings Inc,<0.01%,Financial Exchanges & Data,US,---,"$195,298,354.50 ","1,120,794"
+ARW,Arrow Electronics Inc,<0.01%,Technology Distributors,US,---,"$195,072,933.00 ","1,612,173"
+BFAM,Bright Horizons Family Solutions Inc,<0.01%,Education Services,US,---,"$194,933,526.48 ","1,795,464"
+AXTA,Axalta Coating Systems Ltd,<0.01%,Specialty Chemicals,US,---,"$194,702,203.44 ","6,803,012"
+SMTC,Semtech Corp,<0.01%,Semiconductors,US,---,"$194,625,941.70 ","2,723,946"
+TMHC,Taylor Morrison Home Corp,<0.01%,Homebuilding,US,---,"$194,579,591.29 ","2,947,729"
+LOPE,Grand Canyon Education Inc,<0.01%,Education Services,US,---,"$194,415,692.80 ","885,640"
+LRN,Stride Inc,<0.01%,Education Services,US,---,"$194,399,615.74 ","1,305,221"
+GNTX,Gentex Corp,<0.01%,Automotive Parts & Equipment,US,---,"$193,904,723.10 ","6,851,757"
+ROIV,Roivant Sciences Ltd,<0.01%,Biotechnology,US,---,"$193,756,867.94 ","12,806,138"
+CPB,Campbell's Company/The,<0.01%,Packaged Foods & Meats,US,---,"$193,748,005.42 ","6,135,149"
+VNT,Vontier Corp,<0.01%,Electronic Equipment & Instruments,US,---,"$193,385,462.79 ","4,607,707"
+CHDN,Churchill Downs Inc,<0.01%,Casinos & Gaming,US,---,"$193,210,839.59 ","1,991,659"
+VRNS,Varonis Systems Inc,<0.01%,Systems Software,US,---,"$193,160,060.73 ","3,361,059"
+KNX,Knight-Swift Transportation Holdings Inc,<0.01%,Cargo Ground Transportation,US,---,"$191,981,539.62 ","4,859,062"
+WH,Wyndham Hotels & Resorts Inc,<0.01%,"Hotels, Resorts & Cruise Lines",US,---,"$191,922,676.40 ","2,402,036"
+RYAN,Ryan Specialty Holdings Inc,<0.01%,Insurance Brokers,US,---,"$191,512,858.08 ","3,398,028"
+CLF,Cleveland-Cliffs Inc,<0.01%,Steel,US,---,"$191,473,119.60 ","15,694,518"
+MIDD,Middleby Corp/The,<0.01%,Industrial Machinery & Supplies & Components,US,---,"$191,459,743.65 ","1,440,305"
+KBR,KBR Inc,<0.01%,Research & Consulting Services,US,---,"$191,202,124.07 ","4,043,183"
+GXO,GXO Logistics Inc,<0.01%,Air Freight & Logistics,US,---,"$191,077,078.14 ","3,612,726"
+ROAD,Construction Partners Inc,<0.01%,Construction & Engineering,US,---,"$189,848,871.00 ","1,494,873"
+RITM,Rithm Capital Corp,<0.01%,Mortgage REITs,US,---,"$189,050,354.36 ","16,597,924"
+FCFS,FirstCash Holdings Inc,<0.01%,Consumer Finance,US,---,"$188,648,120.20 ","1,190,810"
+PSKY,Paramount Skydance Corp,<0.01%,Broadcasting,US,---,"$187,875,410.80 ","9,929,990"
+CAVA,Cava Group Inc,<0.01%,Restaurants,US,---,"$187,768,778.40 ","3,108,240"
+UEC,Uranium Energy Corp,<0.01%,Coal & Consumable Fuels,US,---,"$187,558,198.90 ","14,059,835"
+RNA,Avidity Biosciences Inc,<0.01%,Biotechnology,US,---,"$187,435,220.81 ","4,301,933"
+LAZ,Lazard Inc,<0.01%,Investment Banking & Brokerage,US,---,"$187,424,207.88 ","3,551,046"
+GTLB,Gitlab Inc,<0.01%,Systems Software,US,---,"$187,401,256.56 ","4,157,082"
+CWST,Casella Waste Systems Inc,<0.01%,Environmental & Facilities Services,US,---,"$185,856,162.40 ","1,958,855"
+PB,Prosperity Bancshares Inc,<0.01%,Regional Banks,US,---,"$185,790,815.05 ","2,800,163"
+ESNT,Essent Group Ltd,<0.01%,Commercial & Residential Mortgage Finance,US,---,"$185,777,108.72 ","2,922,862"
+TXNM,TXNM Energy Inc,<0.01%,Electric Utilities,US,---,"$185,562,321.75 ","3,281,385"
+MOG/A,Moog Inc,<0.01%,Aerospace & Defense,US,---,"$185,419,820.86 ","892,858"
+EPRT,Essential Properties Realty Trust Inc,<0.01%,Diversified REITs,US,---,"$184,896,231.36 ","6,212,911"
+TRNO,Terreno Realty Corp,<0.01%,Industrial REITs,US,---,"$184,862,841.25 ","3,257,495"
+THG,Hanover Insurance Group Inc/The,<0.01%,Property & Casualty Insurance,US,---,"$184,606,189.18 ","1,016,386"
+MORN,Morningstar Inc,<0.01%,Financial Exchanges & Data,US,---,"$184,350,969.82 ","794,582"
+COKE,Coca-Cola Consolidated Inc,<0.01%,Soft Drinks & Non-alcoholic Beverages,US,---,"$184,264,444.44 ","1,572,759"
+PIPR,Piper Sandler Cos,<0.01%,Investment Banking & Brokerage,US,---,"$184,048,006.87 ","530,413"
+SANM,Sanmina Corp,<0.01%,Electronic Manufacturing Services,US,---,"$183,739,617.99 ","1,596,209"
+REZI,Resideo Technologies Inc,<0.01%,Building Products,US,---,"$183,511,804.68 ","4,249,926"
+ESI,Element Solutions Inc,<0.01%,Specialty Chemicals,US,---,"$182,632,764.90 ","7,255,970"
+SITE,SiteOne Landscape Supply Inc,<0.01%,Trading Companies & Distributors,US,---,"$182,507,796.80 ","1,416,986"
+IBP,Installed Building Products Inc,<0.01%,Homebuilding,US,---,"$181,418,183.34 ","735,499"
+SOUN,SoundHound AI Inc,<0.01%,Application Software,US,---,"$181,136,279.52 ","11,264,694"
+FNB,FNB Corp/PA,<0.01%,Regional Banks,US,---,"$180,948,776.58 ","11,232,078"
+GPK,Graphic Packaging Holding Co,<0.01%,Paper & Plastic Packaging Products & Materials,US,---,"$180,754,978.10 ","9,236,330"
+ALK,Alaska Air Group Inc,<0.01%,Passenger Airlines,US,---,"$180,734,453.92 ","3,630,664"
+APPF,Appfolio Inc,<0.01%,Application Software,US,---,"$179,735,006.22 ","652,017"
+CHRD,Chord Energy Corp,<0.01%,Oil & Gas Exploration & Production,US,---,"$179,550,261.82 ","1,806,886"
+RLI,RLI Corp,<0.01%,Property & Casualty Insurance,US,---,"$179,469,591.54 ","2,751,757"
+ITRI,Itron Inc,<0.01%,Electronic Equipment & Instruments,US,---,"$178,987,114.80 ","1,436,955"
+GPI,Group 1 Automotive Inc,<0.01%,Automotive Retail,US,---,"$178,312,888.13 ","407,563"
+S,SentinelOne Inc,<0.01%,Systems Software,US,---,"$177,881,744.58 ","10,101,178"
+VFC,VF Corp,<0.01%,"Apparel, Accessories & Luxury Goods",US,---,"$177,837,599.94 ","12,324,158"
+LUMN,Lumen Technologies Inc,<0.01%,Alternative Carriers,US,---,"$177,833,387.16 ","29,057,743"
+NXST,Nexstar Media Group Inc,<0.01%,Broadcasting,US,---,"$177,521,875.96 ","897,754"
+H,Hyatt Hotels Corp,<0.01%,"Hotels, Resorts & Cruise Lines",US,---,"$177,434,783.01 ","1,250,157"
+GBCI,Glacier Bancorp Inc,<0.01%,Regional Banks,US,---,"$176,899,680.92 ","3,634,676"
+TTMI,TTM Technologies Inc,<0.01%,Electronic Manufacturing Services,US,---,"$175,973,760.00 ","3,055,100"
+ORA,Ormat Technologies Inc,<0.01%,Renewable Electricity,US,---,"$175,796,775.00 ","1,826,460"
+LPX,Louisiana-Pacific Corp,<0.01%,Forest Products,US,---,"$175,298,288.44 ","1,973,191"
+MTN,Vail Resorts Inc,<0.01%,Leisure Facilities,US,---,"$175,004,079.36 ","1,170,048"
+GLXY,Galaxy Digital Inc,<0.01%,Asset Management & Custody Banks,US,---,"$174,985,041.21 ","5,175,541"
+TREX,Trex Co Inc,<0.01%,Building Products,US,---,"$174,927,854.94 ","3,385,482"
+JHG,Janus Henderson Group PLC,<0.01%,Asset Management & Custody Banks,US,---,"$174,028,447.23 ","3,909,873"
+SLM,SLM Corp,<0.01%,Consumer Finance,US,---,"$173,689,840.96 ","6,274,922"
+IRTC,iRhythm Technologies Inc,<0.01%,Health Care Equipment,US,---,"$173,535,502.14 ","1,008,986"
+ESE,ESCO Technologies Inc,<0.01%,Industrial Machinery & Supplies & Components,US,---,"$173,238,765.99 ","820,609"
+DBX,Dropbox Inc,<0.01%,Application Software,US,---,"$173,180,728.23 ","5,732,563"
+OZK,Bank OZK,<0.01%,Regional Banks,US,---,"$172,384,740.62 ","3,381,419"
+BBWI,Bath & Body Works Inc,<0.01%,Other Specialty Retail,US,---,"$172,017,861.12 ","6,677,712"
+TFX,Teleflex Inc,<0.01%,Health Care Equipment,US,---,"$170,944,506.32 ","1,397,062"
+MAT,Mattel Inc,<0.01%,Leisure Products,US,---,"$170,693,882.37 ","10,142,239"
+MIR,Mirion Technologies Inc,<0.01%,Electronic Equipment & Instruments,US,---,"$170,664,807.16 ","7,337,266"
+PEGA,Pegasystems Inc,<0.01%,Application Software,US,---,"$170,540,975.00 ","2,965,930"
+ACI,Albertsons Cos Inc,<0.01%,Food Retail,US,---,"$170,310,542.23 ","9,726,473"
+WEX,WEX Inc,<0.01%,Transaction & Payment Processing Services,US,---,"$169,346,010.24 ","1,075,008"
+ACIW,ACI Worldwide Inc,<0.01%,Application Software,US,---,"$169,300,091.28 ","3,208,264"
+PRMB,Primo Brands Corp,<0.01%,Soft Drinks & Non-alcoholic Beverages,US,---,"$169,068,801.20 ","7,650,172"
+CZR,Caesars Entertainment Inc,<0.01%,Casinos & Gaming,US,---,"$169,057,292.73 ","6,255,589"
+EAT,Brinker International Inc,<0.01%,Restaurants,US,---,"$168,681,387.40 ","1,331,555"
+LEA,Lear Corp,<0.01%,Automotive Parts & Equipment,US,---,"$168,466,012.06 ","1,674,446"
+CCCS,CCC Intelligent Solutions Holdings Inc,<0.01%,Application Software,US,---,"$167,872,584.57 ","18,427,287"
+RHP,Ryman Hospitality Properties Inc,<0.01%,Hotel & Resort REITs,US,---,"$167,852,688.35 ","1,873,565"
+ATGE,Adtalem Global Education Inc,<0.01%,Education Services,US,---,"$167,061,614.75 ","1,081,655"
+HLNE,Hamilton Lane Inc,<0.01%,Asset Management & Custody Banks,US,---,"$166,646,268.60 ","1,236,340"
+ACHR,Archer Aviation Inc,<0.01%,Aerospace & Defense,US,---,"$166,444,328.26 ","17,374,147"
+RDNT,RadNet Inc,<0.01%,Health Care Services,US,---,"$166,410,555.59 ","2,183,579"
+MC,Moelis & Co,<0.01%,Investment Banking & Brokerage,US,---,"$166,160,979.40 ","2,329,795"
+BMI,Badger Meter Inc,<0.01%,Electronic Equipment & Instruments,US,---,"$165,752,420.02 ","928,169"
+UBSI,United Bankshares Inc/WV,<0.01%,Regional Banks,US,---,"$165,288,829.34 ","4,442,054"
+THO,Thor Industries Inc,<0.01%,Automobile Manufacturers,US,---,"$165,119,896.22 ","1,592,438"
+PATH,UiPath Inc,<0.01%,Systems Software,US,---,"$165,029,535.48 ","12,334,046"
+FCN,FTI Consulting Inc,<0.01%,Research & Consulting Services,US,---,"$164,964,956.55 ","1,020,507"
+CFLT,Confluent Inc,<0.01%,Application Software,US,---,"$164,782,233.00 ","8,322,335"
+AXSM,Axsome Therapeutics Inc,<0.01%,Pharmaceuticals,US,---,"$164,557,098.65 ","1,354,937"
+CWAN,Clearwater Analytics Holdings Inc,<0.01%,Application Software,US,---,"$163,979,765.52 ","9,099,876"
+GAP,Gap Inc/The,<0.01%,Apparel Retail,US,---,"$163,835,271.87 ","7,659,433"
+TGTX,TG Therapeutics Inc,<0.01%,Biotechnology,US,---,"$163,680,604.88 ","4,530,951"
+BIO,Bio-Rad Laboratories Inc,<0.01%,Life Sciences Tools & Services,US,---,"$163,412,413.56 ","582,804"
+UFPI,UFP Industries Inc,<0.01%,Building Products,US,---,"$163,378,729.97 ","1,747,553"
+MMS,Maximus Inc,<0.01%,Data Processing & Outsourced Services,US,---,"$163,041,084.85 ","1,784,405"
+LEU,Centrus Energy Corp,<0.01%,Coal & Consumable Fuels,US,---,"$162,821,167.77 ","525,111"
+SEE,Sealed Air Corp,<0.01%,Paper & Plastic Packaging Products & Materials,US,---,"$162,820,968.80 ","4,605,968"
+APLD,Applied Digital Corp,<0.01%,Internet Services & Infrastructure,US,---,"$161,207,707.22 ","7,027,363"
+TTAN,ServiceTitan Inc,<0.01%,Application Software,US,---,"$160,520,049.21 ","1,591,987"
+BOOT,Boot Barn Holdings Inc,<0.01%,Apparel Retail,US,---,"$160,476,287.76 ","968,358"
+AUB,Atlantic Union Bankshares Corp,<0.01%,Regional Banks,US,---,"$160,083,450.83 ","4,536,227"
+SWX,Southwest Gas Holdings Inc,<0.01%,Gas Utilities,US,---,"$159,777,406.92 ","2,039,538"
+HWC,Hancock Whitney Corp,<0.01%,Regional Banks,US,---,"$158,342,943.96 ","2,529,036"
+MTDR,Matador Resources Co,<0.01%,Oil & Gas Exploration & Production,US,---,"$158,138,728.17 ","3,519,669"
+KRC,Kilroy Realty Corp,<0.01%,Office REITs,US,---,"$158,108,245.75 ","3,742,207"
+HOMB,Home BancShares Inc/AR,<0.01%,Regional Banks,US,---,"$157,801,932.00 ","5,576,040"
+HXL,Hexcel Corp,<0.01%,Aerospace & Defense,US,---,"$157,763,294.70 ","2,516,161"
+VLY,Valley National Bancorp,<0.01%,Regional Banks,US,---,"$156,762,859.40 ","14,788,949"
+FOUR,Shift4 Payments Inc,<0.01%,Transaction & Payment Processing Services,US,---,"$156,483,063.00 ","2,021,745"
+POST,Post Holdings Inc,<0.01%,Packaged Foods & Meats,US,---,"$156,417,148.72 ","1,455,314"
+ALKS,Alkermes PLC,<0.01%,Biotechnology,US,---,"$156,405,150.00 ","5,213,505"
+WFRD,Weatherford International PLC,<0.01%,Oil & Gas Equipment & Services,US,---,"$156,259,699.71 ","2,283,497"
+CORZ,Core Scientific Inc,<0.01%,Application Software,US,---,"$156,182,428.74 ","8,705,821"
+RAL,Ralliant Corp,<0.01%,Electronic Equipment & Instruments,US,---,"$155,840,426.08 ","3,563,696"
+OPEN,Opendoor Technologies Inc,<0.01%,Real Estate Services,US,---,"$155,672,877.32 ","19,532,356"
+NOV,NOV Inc,<0.01%,Oil & Gas Equipment & Services,US,---,"$155,380,921.50 ","11,726,862"
+SIGI,Selective Insurance Group Inc,<0.01%,Property & Casualty Insurance,US,---,"$155,299,880.89 ","1,915,627"
+BILL,BILL Holdings Inc,<0.01%,Application Software,US,---,"$155,274,245.14 ","2,931,362"
+MMSI,Merit Medical Systems Inc,<0.01%,Health Care Supplies,US,---,"$155,224,615.84 ","1,865,008"
+MTH,Meritage Homes Corp,<0.01%,Homebuilding,US,---,"$154,917,774.66 ","2,138,862"
+FTDR,Frontdoor Inc,<0.01%,Specialized Consumer Services,US,---,"$154,864,772.37 ","2,301,453"
+UHAL/B,U-Haul Holding Co,<0.01%,Cargo Ground Transportation,US,---,"$154,520,438.50 ","3,035,765"
+PTCT,PTC Therapeutics Inc,<0.01%,Biotechnology,US,---,"$154,070,366.92 ","2,510,516"
+RDN,Radian Group Inc,<0.01%,Commercial & Residential Mortgage Finance,US,---,"$153,292,746.96 ","4,232,268"
+BCPC,Balchem Corp,<0.01%,Specialty Chemicals,US,---,"$153,084,909.48 ","1,020,158"
+OGS,ONE Gas Inc,<0.01%,Gas Utilities,US,---,"$152,927,793.18 ","1,889,397"
+CUZ,Cousins Properties Inc,<0.01%,Office REITs,US,---,"$152,606,176.48 ","5,273,192"
+KRG,Kite Realty Group Trust,<0.01%,Retail REITs,US,---,"$152,018,564.80 ","6,816,976"
+NJR,New Jersey Resources Corp,<0.01%,Gas Utilities,US,---,"$151,910,601.75 ","3,154,945"
+ABCB,Ameris Bancorp,<0.01%,Regional Banks,US,---,"$151,819,438.44 ","2,070,924"
+ABG,Asbury Automotive Group Inc,<0.01%,Automotive Retail,US,---,"$151,759,449.00 ","620,820"
+POR,Portland General Electric Co,<0.01%,Electric Utilities,US,---,"$151,755,604.00 ","3,448,991"
+BYD,Boyd Gaming Corp,<0.01%,Casinos & Gaming,US,---,"$151,432,822.45 ","1,751,681"
+NPO,Enpro Inc,<0.01%,Industrial Machinery & Supplies & Components,US,---,"$151,346,098.00 ","669,673"
+QS,QuantumScape Corp,<0.01%,Automotive Parts & Equipment,US,---,"$150,285,520.00 ","12,198,500"
+QLYS,Qualys Inc,<0.01%,Systems Software,US,---,"$150,208,444.65 ","1,135,105"
+GVA,Granite Construction Inc,<0.01%,Construction & Engineering,US,---,"$150,157,231.95 ","1,369,423"
+LLYVK,Liberty Media Corp-Liberty Live,<0.01%,Movies & Entertainment,US,---,"$149,982,335.36 ","1,546,688"
+PCVX,Vaxcyte Inc,<0.01%,Biotechnology,US,---,"$149,785,568.00 ","4,158,400"
+TKR,Timken Co/The,<0.01%,Industrial Machinery & Supplies & Components,US,---,"$149,388,749.58 ","1,987,081"
+BDC,Belden Inc,<0.01%,Electronic Components,US,---,"$149,358,983.28 ","1,241,864"
+DVA,DaVita Inc,<0.01%,Health Care Services,US,---,"$148,604,332.53 ","1,118,419"
+WMG,Warner Music Group Corp,<0.01%,Movies & Entertainment,US,---,"$148,558,446.14 ","4,361,669"
+PI,Impinj Inc,<0.01%,Semiconductors,US,---,"$148,523,178.75 ","821,705"
+CRWV,CoreWeave Inc,<0.01%,Internet Services & Infrastructure,US,---,"$148,438,594.85 ","1,084,681"
+ADT,ADT Inc,<0.01%,Specialized Consumer Services,US,---,"$147,724,735.60 ","16,960,360"
+SAIC,Science Applications International Corp,<0.01%,Research & Consulting Services,US,---,"$147,235,734.04 ","1,481,692"
+RKT,Rocket Cos Inc,<0.01%,Commercial & Residential Mortgage Finance,US,---,"$146,974,935.48 ","7,583,846"
+MAC,Macerich Co/The,<0.01%,Retail REITs,US,---,"$146,938,064.00 ","8,073,520"
+DAR,Darling Ingredients Inc,<0.01%,Agricultural Products & Services,US,---,"$146,682,385.92 ","4,751,616"
+KEX,Kirby Corp,<0.01%,Marine Transportation,US,---,"$146,680,816.05 ","1,757,709"
+BCO,Brink's Co/The,<0.01%,Security & Alarm Services,US,---,"$146,179,355.98 ","1,250,893"
+CE,Celanese Corp,<0.01%,Specialty Chemicals,US,---,"$145,528,630.40 ","3,458,380"
+KRYS,Krystal Biotech Inc,<0.01%,Biotechnology,US,---,"$144,858,223.11 ","820,587"
+ACA,Arcosa Inc,<0.01%,Construction & Engineering,US,---,"$144,760,396.70 ","1,544,770"
+VVV,Valvoline Inc,<0.01%,Automotive Retail,US,---,"$144,364,986.99 ","4,020,189"
+ARWR,Arrowhead Pharmaceuticals Inc,<0.01%,Biotechnology,US,---,"$143,998,233.28 ","4,175,072"
+BRBR,BellRing Brands Inc,<0.01%,Personal Care Products,US,---,"$143,993,000.55 ","3,961,293"
+M,Macy's Inc,<0.01%,Broadline Retail,US,---,"$143,988,783.51 ","8,030,607"
+AX,Axos Financial Inc,<0.01%,Regional Banks,US,---,"$143,718,516.05 ","1,697,797"
+SPR,Spirit AeroSystems Holdings Inc,<0.01%,Aerospace & Defense,US,---,"$143,258,727.60 ","3,711,366"
+SR,Spire Inc,<0.01%,Gas Utilities,US,---,"$143,217,759.84 ","1,756,842"
+ACLX,Arcellx Inc,<0.01%,Biotechnology,US,---,"$142,992,174.30 ","1,741,683"
+OPCH,Option Care Health Inc,<0.01%,Health Care Services,US,---,"$142,333,542.64 ","5,127,289"
+CVCO,Cavco Industries Inc,<0.01%,Homebuilding,US,---,"$142,077,917.42 ","244,654"
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,

@@ -96,7 +96,7 @@ class BaseCollector:
         # Check if the symbol has exchange='INDEX' in companies table
         try:
             company = self.session.query(Company).filter(Company.symbol == symbol).first()
-            if company and company.exchange == 'INDEX':
+            if company and company.exchange == 'INDEX': # type: ignore
                 return True
         except Exception:
             pass
@@ -144,9 +144,9 @@ class BaseCollector:
         self.session.add(log_entry)
         self.session.commit()
         
-        self.run_id = log_entry.run_id
+        self.run_id = log_entry.run_id # type: ignore
         logger.info(f"Started collection run {self.run_id} for {job_name}")
-        return self.run_id
+        return self.run_id # type: ignore
     
     def end_collection_run(self, status: str = 'success'):
         """
@@ -163,23 +163,23 @@ class BaseCollector:
             .first()
         
         if log_entry:
-            log_entry.end_time = datetime.now()
-            log_entry.status = status
-            log_entry.companies_processed = self.companies_processed
-            log_entry.companies_failed = self.companies_failed
-            log_entry.records_inserted = self.records_inserted
-            log_entry.records_updated = self.records_updated
-            log_entry.records_failed = self.records_failed
+            log_entry.end_time = datetime.now() # type: ignore
+            log_entry.status = status # type: ignore
+            log_entry.companies_processed = self.companies_processed # type: ignore
+            log_entry.companies_failed = self.companies_failed # type: ignore
+            log_entry.records_inserted = self.records_inserted # type: ignore
+            log_entry.records_updated = self.records_updated # type: ignore
+            log_entry.records_failed = self.records_failed # type: ignore
             
             if self.errors:
                 import json
-                log_entry.error_details = json.dumps(self.errors)
-                log_entry.error_message = f"{len(self.errors)} errors occurred"
+                log_entry.error_details = json.dumps(self.errors) # type: ignore
+                log_entry.error_message = f"{len(self.errors)} errors occurred" # type: ignore
             
             self.session.commit()
             logger.info(f"Ended collection run {self.run_id} with status: {status}")
     
-    def _get(self, url: str, params: Dict = None) -> Optional[requests.Response]:
+    def _get(self, url: str, params: Dict = None) -> Optional[requests.Response]: # type: ignore
         """
         Make HTTP GET request with retry logic
         
@@ -308,7 +308,7 @@ class BaseCollector:
                 return True
 
         # Check if next update is due
-        if tracking.next_update_due and datetime.now() >= tracking.next_update_due:
+        if tracking.next_update_due and datetime.now() >= tracking.next_update_due: # type: ignore
             return True
 
         return False
@@ -333,7 +333,7 @@ class BaseCollector:
             .filter(TableUpdateTracking.symbol == symbol)\
             .first()
         
-        return tracking.last_api_date if tracking else None
+        return tracking.last_api_date if tracking else None # type: ignore
     
     def update_tracking(
         self,
@@ -369,18 +369,18 @@ class BaseCollector:
             )
             self.session.add(tracking)
         else:
-            tracking.last_update_timestamp = datetime.now()
+            tracking.last_update_timestamp = datetime.now() # type: ignore
             if last_api_date:
-                tracking.last_api_date = last_api_date
+                tracking.last_api_date = last_api_date # type: ignore
             if record_count is not None:
-                tracking.record_count = record_count
-            tracking.consecutive_errors = 0
-            tracking.last_error = None
+                tracking.record_count = record_count # type: ignore
+            tracking.consecutive_errors = 0 # type: ignore
+            tracking.last_error = None # type: ignore
         
         # Calculate next update due date
         if next_update_frequency:
-            tracking.update_frequency = next_update_frequency
-            tracking.next_update_due = self._calculate_next_update(next_update_frequency)
+            tracking.update_frequency = next_update_frequency # type: ignore
+            tracking.next_update_due = self._calculate_next_update(next_update_frequency) # type: ignore
         
         self.session.commit()
     
@@ -404,8 +404,8 @@ class BaseCollector:
             .first()
         
         if tracking:
-            tracking.last_error = error_message
-            tracking.consecutive_errors = (tracking.consecutive_errors or 0) + 1
+            tracking.last_error = error_message # type: ignore
+            tracking.consecutive_errors = (tracking.consecutive_errors or 0) + 1 # type: ignore
             self.session.commit()
         
         # Also add to run errors list
@@ -419,15 +419,15 @@ class BaseCollector:
     def _calculate_next_update(self, frequency: str) -> datetime:
         """
         Calculate next update due date based on frequency
-        
+
         Args:
-            frequency: 'daily', 'weekly', 'monthly', 'quarterly'
-        
+            frequency: 'daily', 'weekly', 'monthly', 'quarterly', or custom like '15days'
+
         Returns:
             Next update datetime
         """
         now = datetime.now()
-        
+
         if frequency == 'daily':
             return now + timedelta(days=1)
         elif frequency == 'weekly':
@@ -436,6 +436,13 @@ class BaseCollector:
             return now + timedelta(days=30)
         elif frequency == 'quarterly':
             return now + timedelta(days=90)
+        elif frequency.endswith('days'):
+            # Support custom day counts like '15days', '30days', etc.
+            try:
+                days = int(frequency[:-4])
+                return now + timedelta(days=days)
+            except ValueError:
+                return now + timedelta(days=1)
         else:
             return now + timedelta(days=1)
     
@@ -498,7 +505,7 @@ class BaseCollector:
             'errors': len(self.errors)
         }
 
-    def sanitize_record(self, record: Dict[str, Any], model: Any, symbol: str = None) -> Dict[str, Any]:
+    def sanitize_record(self, record: Dict[str, Any], model: Any, symbol: str = None) -> Dict[str, Any]: # type: ignore
         """
         Sanitize a record to prevent database constraint violations.
         Only modifies values that would cause actual database errors.

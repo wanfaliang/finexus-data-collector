@@ -177,4 +177,6 @@ FMP_ENDPOINTS = {
     "institutional_ownership_summary": "https://financialmodelingprep.com/stable/institutional-ownership/symbol-positions-summary",
     "institutional_13f_extract": "https://financialmodelingprep.com/stable/institutional-ownership/extract",
     "insider_trading_statistics": "https://financialmodelingprep.com/stable/insider-trading/statistics",
+    "economic_calendar": "https://financialmodelingprep.com/stable/economic-calendar",
+    "earnings_calendar": "https://financialmodelingprep.com/stable/earnings-calendar",
 }

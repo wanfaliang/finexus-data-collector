@@ -133,7 +133,7 @@ class FinancialCollector(BaseCollector):
             tracking_key, symbol,
             last_api_date=latest_date,
             record_count=record_count,
-            next_update_frequency='daily'
+            next_update_frequency='quarterly'
         )
 
         logger.info(f"✓ {symbol} {table_name} ({period}): {inserted} inserted, {updated} updated")

@@ -66,12 +66,16 @@ class CompanyCollector(BaseCollector):
             # Transform API data from camelCase to snake_case
             record = transform_keys(profile)
 
-            # Handle date fields
-            if 'ipo_date' in record and record['ipo_date']:
-                try:
-                    record['ipo_date'] = pd.to_datetime(record['ipo_date']).date()
-                except:
+            # Handle date fields - convert empty strings to None
+            if 'ipo_date' in record:
+                # Empty string or None should become None
+                if not record['ipo_date'] or record['ipo_date'] == '':
                     record['ipo_date'] = None
+                else:
+                    try:
+                        record['ipo_date'] = pd.to_datetime(record['ipo_date']).date()
+                    except:
+                        record['ipo_date'] = None
 
             # Sanitize record
             record = self.sanitize_record(record, Company, symbol)
