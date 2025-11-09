@@ -113,6 +113,14 @@ class FinancialCollector(BaseCollector):
 
         # The API already returns a 'period' field, no need to add it
         # Just ensure date conversion
+
+        # Drop duplicates on primary key to avoid "cannot affect row a second time" error
+        # Keep the last occurrence (most recent data)
+        before_dedup = len(df)
+        df = df.drop_duplicates(subset=['date', 'period'], keep='last')
+        if len(df) < before_dedup:
+            logger.warning(f"Removed {before_dedup - len(df)} duplicate (date, period) pairs for {symbol}")
+
         records = df.to_dict('records')
         inserted, updated = self._upsert_records(model, records, symbol)
 
