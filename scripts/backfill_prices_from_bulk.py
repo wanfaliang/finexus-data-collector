@@ -4,8 +4,8 @@ Backfill prices_daily from prices_daily_bulk
 For each symbol in prices_daily:
 - Check if prices_daily_bulk has more recent data
 - If bulk has newer dates, copy those records to prices_daily
-- Calculate change/change_percent from previous day's close
-- Skip vwap (bulk doesn't have it, set to NULL)
+- Maps bulk's adj_close to daily's adj_close (dividend-adjusted)
+- Note: Bulk doesn't have adj_open, adj_high, adj_low (set to NULL)
 """
 import sys
 import argparse
@@ -76,8 +76,8 @@ def get_symbols_to_backfill(session, limit=None):
 
 
 def get_previous_close(session, symbol, date):
-    """Get the previous trading day's close price for a symbol"""
-    result = session.query(PriceDaily.close)\
+    """Get the previous trading day's adj_close price for a symbol"""
+    result = session.query(PriceDaily.adj_close)\
         .filter(PriceDaily.symbol == symbol)\
         .filter(PriceDaily.date < date)\
         .order_by(PriceDaily.date.desc())\
@@ -107,36 +107,20 @@ def backfill_symbol(session, symbol, daily_max_date, bulk_max_date, dry_run=Fals
 
     records_to_insert = []
 
-    # Get the last close price from prices_daily to calculate change for first record
-    prev_close = get_previous_close(session, symbol, bulk_records[0].date)
-
-    for i, bulk_record in enumerate(bulk_records):
-        # Calculate change and change_percent
-        if prev_close is not None and bulk_record.close is not None:
-            change = bulk_record.close - prev_close
-            change_percent = (change / prev_close * 100) if prev_close != 0 else None
-        else:
-            change = None
-            change_percent = None
-
-        # Build record for prices_daily
+    for bulk_record in bulk_records:
+        # Build record for prices_daily (dividend-adjusted)
+        # Note: Bulk only has adj_close, not adj_open/high/low
         record = {
             'symbol': symbol,
             'date': bulk_record.date,
-            'open': bulk_record.open,
-            'high': bulk_record.high,
-            'low': bulk_record.low,
-            'close': bulk_record.close,
-            'volume': bulk_record.volume,
-            'change': change,
-            'change_percent': change_percent,
-            'vwap': None  # Bulk doesn't have vwap
+            'adj_open': None,  # Bulk doesn't have adj_open
+            'adj_high': None,  # Bulk doesn't have adj_high
+            'adj_low': None,   # Bulk doesn't have adj_low
+            'adj_close': bulk_record.adj_close,
+            'volume': bulk_record.volume
         }
 
         records_to_insert.append(record)
-
-        # Update prev_close for next iteration
-        prev_close = bulk_record.close if bulk_record.close is not None else prev_close
 
     if dry_run:
         logger.info(f"  {symbol}: Would insert {len(records_to_insert)} records ({bulk_records[0].date} to {bulk_records[-1].date})")
@@ -150,14 +134,9 @@ def backfill_symbol(session, symbol, daily_max_date, bulk_max_date, dry_run=Fals
         stmt = stmt.on_conflict_do_update(
             index_elements=['symbol', 'date'],
             set_={
-                'open': stmt.excluded.open,
-                'high': stmt.excluded.high,
-                'low': stmt.excluded.low,
-                'close': stmt.excluded.close,
-                'volume': stmt.excluded.volume,
-                'change': stmt.excluded.change,
-                'change_percent': stmt.excluded.change_percent,
-                'vwap': stmt.excluded.vwap
+                'adj_close': stmt.excluded.adj_close,
+                'volume': stmt.excluded.volume
+                # Note: adj_open, adj_high, adj_low remain NULL (bulk doesn't have them)
             }
         )
 

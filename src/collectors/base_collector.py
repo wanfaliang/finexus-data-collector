@@ -43,7 +43,7 @@ class BaseCollector:
         self.backoff = settings.api.backoff
         
         self.http_session = requests.Session()
-        self.http_session.headers.update({"User-Agent": "FinExusCollector/1.0"})
+        self.http_session.headers.update({"User-Agent": "FinancialCollector/1.0"})
 
         # Tracking
         self.run_id: Optional[int] = None

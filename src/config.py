@@ -46,6 +46,8 @@ class DataCollectionSettings(BaseSettings):
 
     # Bulk data settings
     bulk_data_path: str = Field('data/bulk_csv', alias='BULK_DATA_PATH')
+    nasdaq_screener_path: str = Field('data/nasdaq_screener', alias='NASDAQ_SCREENER_PATH')
+    nasdaq_etf_screener_path: str = Field('data/nasdaq_etf_screener', alias='NASDAQ_ETF_SCREENER_PATH')
 
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
@@ -117,43 +119,43 @@ class Settings:
     @property
     def database(self) -> DatabaseSettings:
         if self._database is None:
-            self._database = DatabaseSettings()
+            self._database = DatabaseSettings() # type: ignore
         return self._database
     
     @property
     def api(self) -> APISettings:
         if self._api is None:
-            self._api = APISettings()
+            self._api = APISettings() # type: ignore
         return self._api
     
     @property
     def data_collection(self) -> DataCollectionSettings:
         if self._data_collection is None:
-            self._data_collection = DataCollectionSettings()
+            self._data_collection = DataCollectionSettings() # type: ignore
         return self._data_collection
     
     @property
     def schedule(self) -> ScheduleSettings:
         if self._schedule is None:
-            self._schedule = ScheduleSettings()
+            self._schedule = ScheduleSettings() # type: ignore
         return self._schedule
     
     @property
     def validation(self) -> ValidationSettings:
         if self._validation is None:
-            self._validation = ValidationSettings()
+            self._validation = ValidationSettings() # type: ignore
         return self._validation
     
     @property
     def monitoring(self) -> MonitoringSettings:
         if self._monitoring is None:
-            self._monitoring = MonitoringSettings()
+            self._monitoring = MonitoringSettings() # type: ignore
         return self._monitoring
     
     @property
     def app(self) -> AppSettings:
         if self._app is None:
-            self._app = AppSettings()
+            self._app = AppSettings() # type: ignore
         return self._app
 
 
@@ -170,7 +172,7 @@ FMP_ENDPOINTS = {
     "key_metrics": "https://financialmodelingprep.com/stable/key-metrics",
     "enterprise_values": "https://financialmodelingprep.com/stable/enterprise-values",
     "employee_history": "https://financialmodelingprep.com/stable/historical-employee-count",
-    "prices_full": "https://financialmodelingprep.com/stable/historical-price-eod/full",
+    "prices_full": "https://financialmodelingprep.com/stable/historical-price-eod/dividend-adjusted",
     "analyst_estimates": "https://financialmodelingprep.com/stable/analyst-estimates",
     "price_target_consensus": "https://financialmodelingprep.com/stable/price-target-consensus",
     "insider_trading_search": "https://financialmodelingprep.com/stable/insider-trading/search",

@@ -1345,6 +1345,37 @@ python scripts/regenerate_monthly_prices.py
 | Individual symbol updates (2000 symbols) | 2,000 | ~60 min | Portfolio only |
 | Bulk + sync (this approach) | 1 | ~2 min | Entire market (100K+ symbols) |
 
+ ## Nasdaq Stock Screener Collector
+
+  Collects daily snapshots of all stocks listed on Nasdaq's screener with comprehensive market data.
+
+  **Data Collected:**
+  - Company profile (symbol, name, sector, industry, country)
+  - Market metrics (last sale, net change, percent change, market cap, volume)
+  - IPO year
+  - Historical tracking with daily snapshots
+
+  **Scripts:**
+  - `scripts/download_nasdaq_screener_selenium.py` - Download CSV using Selenium (recommended)
+  - `scripts/collect_nasdaq_screener.py` - Full collection pipeline (download + process + database)
+
+  **Usage:**
+  ```bash
+  # Full collection (auto-downloads and processes)
+  python scripts/collect_nasdaq_screener.py
+
+  # Download only
+  python scripts/download_nasdaq_screener_selenium.py
+
+  # Process existing CSV
+  python scripts/collect_nasdaq_screener.py --csv-file data/nasdaq_screener/file.csv
+
+  # Collect only if data is stale (> 1 day)
+  python scripts/collect_nasdaq_screener.py --if-needed
+
+  Note: Uses Selenium for reliable downloads. Playwright version (download_nasdaq_screener.py) is available but less reliable due to Nasdaq's anti-bot protection.   
+```
+
 ## Priority Lists
 
 Create priority list files for backfilling:

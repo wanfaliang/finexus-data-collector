@@ -16,13 +16,18 @@ from src.collectors.economic_collector import EconomicCollector
 # Create logs directory if needed (BEFORE logging setup)
 Path('logs').mkdir(exist_ok=True)
 
-# Setup logging
+# Setup logging with UTF-8 encoding for Windows console
+import io
+
+# Create a UTF-8 wrapper for stdout to handle emojis on Windows
+utf8_stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/economic_updates.log'),
-        logging.StreamHandler()
+        logging.FileHandler('logs/economic_updates.log', encoding='utf-8'),
+        logging.StreamHandler(utf8_stdout)
     ]
 )
 

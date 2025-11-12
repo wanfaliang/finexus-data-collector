@@ -127,8 +127,8 @@ class PriceCollector(BaseCollector):
             return
         
         df = pd.DataFrame([{
-            'symbol': p.symbol, 'date': p.date, 'open': p.open,
-            'high': p.high, 'low': p.low, 'close': p.close,
+            'symbol': p.symbol, 'date': p.date, 'adj_open': p.adj_open,
+            'adj_high': p.adj_high, 'adj_low': p.adj_low, 'adj_close': p.adj_close,
             'volume': p.volume
         } for p in daily_prices])
 
@@ -159,8 +159,9 @@ class PriceCollector(BaseCollector):
             stmt = insert(PriceMonthly).values(sanitized_records)
             stmt = stmt.on_conflict_do_update(
                 index_elements=['symbol', 'date'],
-                set_={'close': stmt.excluded.close, 'high': stmt.excluded.high,
-                      'low': stmt.excluded.low, 'volume': stmt.excluded.volume}
+                set_={'adj_open': stmt.excluded.adj_open, 'adj_high': stmt.excluded.adj_high,
+                      'adj_low': stmt.excluded.adj_low, 'adj_close': stmt.excluded.adj_close,
+                      'volume': stmt.excluded.volume}
             )
             self.session.execute(stmt)
             self.session.commit()

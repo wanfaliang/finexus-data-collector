@@ -71,7 +71,7 @@ class EconomicCollector(BaseCollector):
             # Update tracking
             self.update_tracking(
                 'economic_data',
-                symbol=None,  # Economic data is global, no symbol
+                symbol=None,  # Economic data is global, no symbol # type: ignore
                 last_api_date=datetime.now().date(),
                 record_count=self._count_total_records(),
                 next_update_frequency='daily'
@@ -93,20 +93,20 @@ class EconomicCollector(BaseCollector):
             indicators_dict = {}
 
             # Process all indicators from raw_frames
-            for indicator_code, df in self.fred_collector.raw_frames.items():
+            for indicator_code, df in self.fred_collector.raw_frames.items(): # type: ignore
                 if df.empty:
                     continue
 
                 frequency = self._infer_frequency(df)
 
                 # Determine source and source_series_id
-                if indicator_code in self.fred_collector.DEFAULT_INDICATORS:
+                if indicator_code in self.fred_collector.DEFAULT_INDICATORS: # type: ignore
                     source = 'FRED'
-                    source_series_id = self.fred_collector.DEFAULT_INDICATORS[indicator_code]
+                    source_series_id = self.fred_collector.DEFAULT_INDICATORS[indicator_code] # type: ignore
                     description = f'FRED indicator: {source_series_id}'
-                elif indicator_code in self.fred_collector.FMP_ECON_SERIES:
+                elif indicator_code in self.fred_collector.FMP_ECON_SERIES: # type: ignore
                     source = 'FMP'
-                    source_series_id = self.fred_collector.FMP_ECON_SERIES[indicator_code]
+                    source_series_id = self.fred_collector.FMP_ECON_SERIES[indicator_code] # type: ignore
                     description = f'FMP indicator: {source_series_id}'
                 elif indicator_code.startswith('Treasury_'):
                     source = 'FMP'
@@ -172,7 +172,7 @@ class EconomicCollector(BaseCollector):
         try:
             all_records = []
 
-            for indicator_code, df in self.fred_collector.raw_frames.items():
+            for indicator_code, df in self.fred_collector.raw_frames.items(): # type: ignore
                 if df.empty or 'Date' not in df.columns:
                     continue
 
@@ -235,7 +235,7 @@ class EconomicCollector(BaseCollector):
     def _save_monthly_aggregations(self) -> None:
         """Generate and save monthly aggregations"""
         try:
-            monthly_panel = self.fred_collector.build_monthly_panel()
+            monthly_panel = self.fred_collector.build_monthly_panel() # type: ignore
 
             if monthly_panel.empty:
                 logger.warning("No monthly panel data to save")
@@ -298,7 +298,7 @@ class EconomicCollector(BaseCollector):
     def _save_quarterly_aggregations(self) -> None:
         """Generate and save quarterly aggregations"""
         try:
-            quarterly_panel = self.fred_collector.build_quarterly_panel()
+            quarterly_panel = self.fred_collector.build_quarterly_panel() # type: ignore
 
             if quarterly_panel.empty:
                 logger.warning("No quarterly panel data to save")

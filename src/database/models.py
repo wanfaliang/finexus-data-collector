@@ -491,20 +491,19 @@ class KeyMetric(Base):
 
 
 class PriceDaily(Base):
-    """Daily price data for companies and indices"""
+    """Daily price data for companies and indices - dividend-adjusted prices"""
     __tablename__ = 'prices_daily'
 
     symbol = Column(String(20), ForeignKey('companies.symbol'), primary_key=True)
     date = Column(Date, primary_key=True)
 
-    open = Column(Numeric(20, 4))
-    high = Column(Numeric(20, 4))
-    low = Column(Numeric(20, 4))
-    close = Column(Numeric(20, 4))
+    # Dividend-adjusted OHLC (split + dividend adjustments)
+    adj_open = Column(Numeric(20, 4))
+    adj_high = Column(Numeric(20, 4))
+    adj_low = Column(Numeric(20, 4))
+    adj_close = Column(Numeric(20, 4))
+
     volume = Column(BigInteger)
-    change = Column(Numeric(20, 4))
-    change_percent = Column(Numeric(20, 6))
-    vwap = Column(Numeric(20, 4))
 
     # Metadata
     created_at = Column(DateTime, default=func.now(), nullable=False)
@@ -515,20 +514,19 @@ class PriceDaily(Base):
 
 
 class PriceMonthly(Base):
-    """Monthly (month-end) price data"""
+    """Monthly (month-end) price data - dividend-adjusted prices"""
     __tablename__ = 'prices_monthly'
 
     symbol = Column(String(20), ForeignKey('companies.symbol'), primary_key=True)
     date = Column(Date, primary_key=True, index=True)  # Month-end date
 
-    open = Column(Numeric(20, 4))
-    high = Column(Numeric(20, 4))
-    low = Column(Numeric(20, 4))
-    close = Column(Numeric(20, 4))
+    # Dividend-adjusted OHLC (split + dividend adjustments)
+    adj_open = Column(Numeric(20, 4))
+    adj_high = Column(Numeric(20, 4))
+    adj_low = Column(Numeric(20, 4))
+    adj_close = Column(Numeric(20, 4))
+
     volume = Column(BigInteger)
-    change = Column(Numeric(20, 4))
-    change_percent = Column(Numeric(20, 6))
-    vwap = Column(Numeric(20, 4))
 
     created_at = Column(DateTime, default=func.now(), nullable=False)
 
@@ -998,6 +996,76 @@ class EarningsCalendar(Base):
         Index('ix_earnings_calendar_date', 'date'),
         Index('ix_earnings_calendar_symbol_date', 'symbol', 'date'),
     )
+
+
+class NasdaqScreenerProfile(Base):
+    """Nasdaq Stock Screener daily snapshot - comprehensive stock list with key metrics"""
+    __tablename__ = 'nasdaq_screener_profiles'
+
+    # Primary key: symbol + snapshot_date
+    # NO foreign key constraint - this is source of truth for active stocks
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+    snapshot_date = Column(Date, primary_key=True, nullable=False)  # Date of screener snapshot
+
+    # Company info
+    name = Column(String(500))  # Full company name
+
+    # Price data
+    last_sale = Column(Numeric(20, 4))  # Last sale price
+    net_change = Column(Numeric(20, 4))  # Net price change
+    percent_change = Column(Numeric(10, 6))  # Percentage change
+
+    # Market data
+    market_cap = Column(BigInteger)  # Market capitalization
+    volume = Column(BigInteger)  # Trading volume
+
+    # Company classification
+    country = Column(String(100))  # Country of origin
+    ipo_year = Column(Integer)  # IPO year
+    sector = Column(String(100), index=True)  # Business sector
+    industry = Column(String(200))  # Specific industry
+
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('ix_nasdaq_screener_snapshot_date', 'snapshot_date'),
+        Index('ix_nasdaq_screener_symbol_date', 'symbol', 'snapshot_date'),
+        Index('ix_nasdaq_screener_sector', 'sector'),
+    )
+
+    def __repr__(self):
+        return f"<NasdaqScreenerProfile(symbol='{self.symbol}', name='{self.name}', date='{self.snapshot_date}')>"
+
+
+class NasdaqETFScreenerProfile(Base):
+    """Nasdaq ETF Screener daily snapshot - comprehensive ETF list with key metrics"""
+    __tablename__ = 'nasdaq_etf_screener_profiles'
+
+    # Composite primary key for historical tracking
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+    snapshot_date = Column(Date, primary_key=True, nullable=False)
+
+    # ETF info and market data
+    name = Column(String(500))
+    last_price = Column(Numeric(20, 4))
+    net_change = Column(Numeric(20, 4))
+    percent_change = Column(Numeric(10, 6))
+    delta = Column(String(10))  # 'up' or 'down'
+    one_year_percent_change = Column(Numeric(10, 6))
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index('ix_nasdaq_etf_screener_snapshot_date', 'snapshot_date'),
+        Index('ix_nasdaq_etf_screener_symbol_date', 'symbol', 'snapshot_date'),
+    )
+
+    def __repr__(self):
+        return f"<NasdaqETFScreenerProfile(symbol='{self.symbol}', name='{self.name}', date='{self.snapshot_date}')>"
 
 
 # Helper function to create all tables
