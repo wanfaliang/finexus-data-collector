@@ -40,6 +40,10 @@ ENV/
 logs/
 *.log
 
+# Data folders
+data/nasdaq_screener/
+data/nasdaq_etf_screener/
+
 # Database
 *.db
 *.sqlite

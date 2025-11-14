@@ -125,10 +125,14 @@ class NasdaqETFScreenerCollector(BaseCollector):
         if 'percent_change' in df.columns:
             df['percent_change'] = df['percent_change'].astype(str).str.replace('%', '', regex=False).str.strip()
             df['percent_change'] = pd.to_numeric(df['percent_change'], errors='coerce')
+            # Cap at Numeric(10,6) limits: -9999.99 to 9999.99
+            df['percent_change'] = df['percent_change'].clip(-9999.99, 9999.99)
 
         if 'one_year_percent_change' in df.columns:
             df['one_year_percent_change'] = df['one_year_percent_change'].astype(str).str.replace('%', '', regex=False).str.strip()
             df['one_year_percent_change'] = pd.to_numeric(df['one_year_percent_change'], errors='coerce')
+            # Cap at Numeric(10,6) limits: -9999.99 to 9999.99
+            df['one_year_percent_change'] = df['one_year_percent_change'].clip(-9999.99, 9999.99)
 
         # Convert net_change to numeric
         if 'net_change' in df.columns:

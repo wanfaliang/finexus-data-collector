@@ -1068,6 +1068,281 @@ class NasdaqETFScreenerProfile(Base):
         return f"<NasdaqETFScreenerProfile(symbol='{self.symbol}', name='{self.name}', date='{self.snapshot_date}')>"
 
 
+class CompanyProfileBulk(Base):
+    """Company Profile - Current snapshot for all companies"""
+    __tablename__ = 'company_profile_bulk'
+
+    # Primary key
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+
+    # Price and market data
+    price = Column(Numeric(20, 4))
+    market_cap = Column(BigInteger)
+    beta = Column(Numeric(20, 4))
+    last_dividend = Column(Numeric(20, 4))
+    range = Column(String(50))
+    change = Column(Numeric(20, 4))
+    change_percentage = Column(Numeric(20, 4))
+    volume = Column(BigInteger)
+    average_volume = Column(BigInteger)
+
+    # Company information
+    company_name = Column(String(255))
+    currency = Column(String(10))
+    cik = Column(String(20))
+    isin = Column(String(20))
+    cusip = Column(String(20))
+    exchange = Column(String(20))
+    exchange_full_name = Column(String(100))
+    industry = Column(String(100))
+    sector = Column(String(100))
+    website = Column(String(255))
+    description = Column(Text)  # Can be very long
+    ceo = Column(String(100))
+    country = Column(String(10))
+    full_time_employees = Column(Integer)
+
+    # Contact information
+    phone = Column(String(50))
+    address = Column(String(255))
+    city = Column(String(100))
+    state = Column(String(50))
+    zip = Column(String(20))
+
+    # Image and metadata
+    image = Column(String(255))
+    ipo_date = Column(String(20))  # Keep as string (format varies)
+    default_image = Column(Boolean)
+    is_etf = Column(Boolean)
+    is_actively_trading = Column(Boolean)
+    is_adr = Column(Boolean)
+    is_fund = Column(Boolean)
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<CompanyProfileBulk(symbol='{self.symbol}', name='{self.company_name}')>"
+
+
+class PriceTargetSummaryBulk(Base):
+    """Price Target Summary - Current snapshot for all companies"""
+    __tablename__ = 'price_target_summary_bulk'
+
+    # Primary key - current snapshot per symbol
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+
+    # Last month statistics
+    last_month_count = Column(Integer)
+    last_month_avg_price_target = Column(Numeric(20, 4))
+
+    # Last quarter statistics
+    last_quarter_count = Column(Integer)
+    last_quarter_avg_price_target = Column(Numeric(20, 4))
+
+    # Last year statistics
+    last_year_count = Column(Integer)
+    last_year_avg_price_target = Column(Numeric(20, 4))
+
+    # All time statistics
+    all_time_count = Column(Integer)
+    all_time_avg_price_target = Column(Numeric(20, 4))
+
+    # Publishers (JSON array as text)
+    publishers = Column(Text)
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<PriceTargetSummaryBulk(symbol='{self.symbol}')>"
+
+
+class RatiosTTMBulk(Base):
+    """Financial Ratios TTM (Trailing Twelve Months) - Current snapshot for all companies"""
+    __tablename__ = 'ratios_ttm_bulk'
+
+    # Primary key - current snapshot per symbol
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+
+    # Profitability ratios
+    gross_profit_margin_ttm = Column(Numeric(20, 4))
+    ebit_margin_ttm = Column(Numeric(20, 4))
+    ebitda_margin_ttm = Column(Numeric(20, 4))
+    operating_profit_margin_ttm = Column(Numeric(20, 4))
+    pretax_profit_margin_ttm = Column(Numeric(20, 4))
+    continuous_operations_profit_margin_ttm = Column(Numeric(20, 4))
+    net_profit_margin_ttm = Column(Numeric(20, 4))
+    bottom_line_profit_margin_ttm = Column(Numeric(20, 4))
+
+    # Activity ratios
+    receivables_turnover_ttm = Column(Numeric(20, 4))
+    payables_turnover_ttm = Column(Numeric(20, 4))
+    inventory_turnover_ttm = Column(Numeric(20, 4))
+    fixed_asset_turnover_ttm = Column(Numeric(20, 4))
+    asset_turnover_ttm = Column(Numeric(20, 4))
+
+    # Liquidity ratios
+    current_ratio_ttm = Column(Numeric(20, 4))
+    quick_ratio_ttm = Column(Numeric(20, 4))
+    solvency_ratio_ttm = Column(Numeric(20, 4))
+    cash_ratio_ttm = Column(Numeric(20, 4))
+
+    # Valuation ratios
+    price_to_earnings_ratio_ttm = Column(Numeric(20, 4))
+    price_to_earnings_growth_ratio_ttm = Column(Numeric(20, 4))
+    forward_price_to_earnings_growth_ratio_ttm = Column(Numeric(20, 4))
+    price_to_book_ratio_ttm = Column(Numeric(20, 4))
+    price_to_sales_ratio_ttm = Column(Numeric(20, 4))
+    price_to_free_cash_flow_ratio_ttm = Column(Numeric(20, 4))
+    price_to_operating_cash_flow_ratio_ttm = Column(Numeric(20, 4))
+
+    # Leverage ratios
+    debt_to_assets_ratio_ttm = Column(Numeric(20, 4))
+    debt_to_equity_ratio_ttm = Column(Numeric(20, 4))
+    debt_to_capital_ratio_ttm = Column(Numeric(20, 4))
+    long_term_debt_to_capital_ratio_ttm = Column(Numeric(20, 4))
+    financial_leverage_ratio_ttm = Column(Numeric(20, 4))
+
+    # Other ratios
+    working_capital_turnover_ratio_ttm = Column(Numeric(20, 4))
+    operating_cash_flow_ratio_ttm = Column(Numeric(20, 4))
+    operating_cash_flow_sales_ratio_ttm = Column(Numeric(20, 4))
+    free_cash_flow_operating_cash_flow_ratio_ttm = Column(Numeric(20, 4))
+
+    # Coverage ratios
+    debt_service_coverage_ratio_ttm = Column(Numeric(20, 4))
+    interest_coverage_ratio_ttm = Column(Numeric(20, 4))
+    short_term_operating_cash_flow_coverage_ratio_ttm = Column(Numeric(20, 4))
+    operating_cash_flow_coverage_ratio_ttm = Column(Numeric(20, 4))
+    capital_expenditure_coverage_ratio_ttm = Column(Numeric(20, 4))
+    dividend_paid_and_capex_coverage_ratio_ttm = Column(Numeric(20, 4))
+
+    # Dividend ratios
+    dividend_payout_ratio_ttm = Column(Numeric(20, 4))
+    dividend_yield_ttm = Column(Numeric(20, 4))
+
+    # Enterprise value (dollar amount)
+    enterprise_value_ttm = Column(BigInteger)
+
+    # Per share metrics
+    revenue_per_share_ttm = Column(Numeric(20, 4))
+    net_income_per_share_ttm = Column(Numeric(20, 4))
+    interest_debt_per_share_ttm = Column(Numeric(20, 4))
+    cash_per_share_ttm = Column(Numeric(20, 4))
+    book_value_per_share_ttm = Column(Numeric(20, 4))
+    tangible_book_value_per_share_ttm = Column(Numeric(20, 4))
+    shareholders_equity_per_share_ttm = Column(Numeric(20, 4))
+    operating_cash_flow_per_share_ttm = Column(Numeric(20, 4))
+    capex_per_share_ttm = Column(Numeric(20, 4))
+    free_cash_flow_per_share_ttm = Column(Numeric(20, 4))
+    dividend_per_share_ttm = Column(Numeric(20, 4))
+
+    # Other metrics
+    net_income_per_ebt_ttm = Column(Numeric(20, 4))
+    ebt_per_ebit_ttm = Column(Numeric(20, 4))
+    price_to_fair_value_ttm = Column(Numeric(20, 4))
+    debt_to_market_cap_ttm = Column(Numeric(20, 4))
+    effective_tax_rate_ttm = Column(Numeric(20, 4))
+    enterprise_value_multiple_ttm = Column(Numeric(20, 4))
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<RatiosTTMBulk(symbol='{self.symbol}')>"
+
+
+class KeyMetricsTTMBulk(Base):
+    """Key Metrics TTM (Trailing Twelve Months) - Current snapshot for all companies"""
+    __tablename__ = 'key_metrics_ttm_bulk'
+
+    # Primary key - current snapshot per symbol
+    symbol = Column(String(20), primary_key=True, nullable=False, index=True)
+
+    # Market valuation
+    market_cap = Column(BigInteger)
+
+    # Enterprise value metrics
+    enterprise_value_ttm = Column(Numeric(20, 2))
+    ev_to_sales_ttm = Column(Numeric(20, 4))
+    ev_to_operating_cash_flow_ttm = Column(Numeric(20, 4))
+    ev_to_free_cash_flow_ttm = Column(Numeric(20, 4))
+    ev_to_ebitda_ttm = Column(Numeric(20, 4))
+    net_debt_to_ebitda_ttm = Column(Numeric(20, 4))
+
+    # Liquidity ratios
+    current_ratio_ttm = Column(Numeric(20, 4))
+
+    # Quality metrics
+    income_quality_ttm = Column(Numeric(20, 4))
+    graham_number_ttm = Column(Numeric(20, 4))
+    graham_net_net_ttm = Column(Numeric(20, 4))
+
+    # Tax and interest
+    tax_burden_ttm = Column(Numeric(20, 4))
+    interest_burden_ttm = Column(Numeric(20, 4))
+
+    # Capital metrics
+    working_capital_ttm = Column(Numeric(20, 2))
+    invested_capital_ttm = Column(Numeric(20, 2))
+
+    # Return metrics
+    return_on_assets_ttm = Column(Numeric(20, 4))
+    operating_return_on_assets_ttm = Column(Numeric(20, 4))
+    return_on_tangible_assets_ttm = Column(Numeric(20, 4))
+    return_on_equity_ttm = Column(Numeric(20, 4))
+    return_on_invested_capital_ttm = Column(Numeric(20, 4))
+    return_on_capital_employed_ttm = Column(Numeric(20, 4))
+
+    # Yield metrics
+    earnings_yield_ttm = Column(Numeric(20, 4))
+    free_cash_flow_yield_ttm = Column(Numeric(20, 4))
+
+    # CapEx metrics
+    capex_to_operating_cash_flow_ttm = Column(Numeric(20, 4))
+    capex_to_depreciation_ttm = Column(Numeric(20, 4))
+    capex_to_revenue_ttm = Column(Numeric(20, 4))
+
+    # Operating expense ratios
+    sales_general_and_administrative_to_revenue_ttm = Column(Numeric(20, 4))
+    research_and_developement_to_revenue_ttm = Column(Numeric(20, 4))
+    stock_based_compensation_to_revenue_ttm = Column(Numeric(20, 4))
+
+    # Asset composition
+    intangibles_to_total_assets_ttm = Column(Numeric(20, 4))
+
+    # Working capital components
+    average_receivables_ttm = Column(Numeric(20, 2))
+    average_payables_ttm = Column(Numeric(20, 2))
+    average_inventory_ttm = Column(Numeric(20, 2))
+
+    # Days metrics
+    days_of_sales_outstanding_ttm = Column(Numeric(20, 2))
+    days_of_payables_outstanding_ttm = Column(Numeric(20, 2))
+    days_of_inventory_outstanding_ttm = Column(Numeric(20, 2))
+    operating_cycle_ttm = Column(Numeric(20, 2))
+    cash_conversion_cycle_ttm = Column(Numeric(20, 2))
+
+    # Cash flow metrics
+    free_cash_flow_to_equity_ttm = Column(Numeric(20, 2))
+    free_cash_flow_to_firm_ttm = Column(Numeric(20, 2))
+
+    # Asset value metrics
+    tangible_asset_value_ttm = Column(Numeric(20, 2))
+    net_current_asset_value_ttm = Column(Numeric(20, 2))
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<KeyMetricsTTMBulk(symbol='{self.symbol}')>"
+
+
 # Helper function to create all tables
 def create_all_tables(engine):
     """Create all tables in the database"""

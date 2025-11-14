@@ -88,9 +88,7 @@ python scripts/update_economic_data.py
 
 # Schedule daily at 8:00 AM (Windows Task Scheduler)
 # Use: run_economic_update.bat
-
-# OR use Python scheduler
-pip install schedule
+or
 python scripts/scheduler.py
 ```
 
@@ -561,6 +559,7 @@ python scripts/backfill_priority_data.py priority.txt --collectors company,finan
 ### Manual update eonomic data (checks tracking, updates if needed)
 python scripts/update_economic_data.py
 
+
 ### Economic Calendar Collection
 
 **1. Upcoming Events (Default)**
@@ -587,60 +586,7 @@ python scripts/collect_economic_calendar.py --backfill-days 365
 python scripts/collect_economic_calendar.py --backfill-from 2020-01-01
 ```
 
-### Economic Calendar Collection
-
-The Economic Calendar tracks upcoming and historical economic data releases with estimates and actual values. Essential for anticipating market-moving events.
-
-### Quick Start
-
-**Collect upcoming 90 days (default):**
-```bash
-python scripts/collect_economic_calendar.py
-```
-
-**Backfill last year:**
-```bash
-python scripts/collect_economic_calendar.py --backfill-days 365
-```
-
-### Features
-
-- **Upcoming events**: Track estimates for future economic releases
-- **Historical data**: Full history of past releases with actual values
-- **Auto-updates**: Updates existing events when actuals are released
-- **Global coverage**: Events from all countries (US, JP, EU, etc.)
-- **Impact ratings**: "Low", "Medium", "High" impact classification
-
-### Collection Modes
-
-**1. Upcoming Events (Default)**
-```bash
-# Next 90 days
-python scripts/collect_economic_calendar.py
-
-# Next 30 days
-python scripts/collect_economic_calendar.py --upcoming 30
-```
-
-**2. Specific Date Range**
-```bash
-# Collect Q1 2024
-python scripts/collect_economic_calendar.py --from 2024-01-01 --to 2024-03-31
-```
-
-**3. Historical Backfill**
-```bash
-# Last 365 days
-python scripts/collect_economic_calendar.py --backfill-days 365
-
-# From specific date to today
-python scripts/collect_economic_calendar.py --backfill-from 2020-01-01
-```
-
-**Backfill last 2 years:**
-```bash
-python scripts/collect_earnings_calendar.py --backfill-days 730
-```
+### Earning Calendar Collection
 
 **1. Upcoming Earnings (Default)**
 ```bash
@@ -701,6 +647,7 @@ python scripts/collect_earnings_calendar.py --backfill-days 730
 ``` bash
 python scripts/collect_nasdaq_etf_screener.py
 ```
+
 ### Manual Download & Import for Nasdaq Screeners
 
   If the automated scrapers fail, you can manually download and import the CSV files:

@@ -181,4 +181,8 @@ FMP_ENDPOINTS = {
     "insider_trading_statistics": "https://financialmodelingprep.com/stable/insider-trading/statistics",
     "economic_calendar": "https://financialmodelingprep.com/stable/economic-calendar",
     "earnings_calendar": "https://financialmodelingprep.com/stable/earnings-calendar",
+    "key_metrics_ttm_bulk": "https://financialmodelingprep.com/stable/key-metrics-ttm-bulk",
+    "ratios_ttm_bulk": "https://financialmodelingprep.com/stable/ratios-ttm-bulk",
+    "price_target_summary_bulk": "https://financialmodelingprep.com/stable/price-target-summary-bulk",
+    "company_profile_bulk": "https://financialmodelingprep.com/stable/profile-bulk",
 }
