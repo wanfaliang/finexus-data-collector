@@ -27,7 +27,17 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 # --- Import your models Base for autogenerate support ---------------------
 from src.database.models import Base
-target_metadata = Base.metadata
+from src.database.bls_models import Base as BLSBase
+
+# Combine metadata from both Base objects for autogenerate
+from sqlalchemy import MetaData
+combined_metadata = MetaData()
+for table in Base.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in BLSBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+
+target_metadata = combined_metadata
 
 
 # other values from the config, defined by the needs of env.py,

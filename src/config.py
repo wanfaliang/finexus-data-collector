@@ -23,12 +23,14 @@ class APISettings(BaseSettings):
     """API configuration"""
     fmp_api_key: str = Field(..., alias='FMP_API_KEY')
     fred_api_key: str = Field(..., alias='FRED_API_KEY')
-    
+    bls_api_key: str = Field(..., alias='BLS_API_KEY')
+    census_api_key: str = Field(..., alias='CENSUS_API_KEY')
+
     sleep_sec: float = Field(0.2, alias='API_SLEEP_SEC')
     timeout: int = Field(30, alias='API_TIMEOUT')
     retries: int = Field(3, alias='API_RETRIES')
     backoff: float = Field(0.7, alias='API_BACKOFF')
-    
+
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
 

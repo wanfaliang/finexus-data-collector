@@ -43,6 +43,8 @@ logs/
 # Data folders
 data/nasdaq_screener/
 data/nasdaq_etf_screener/
+data/bls/
+data/bulk_csv/
 
 # Database
 *.db

@@ -1489,3 +1489,27 @@ Phase 2 Status: ✅ Production Ready
 - Incremental updates working
 - Economic data integrated
 - Error handling robust
+
+# Already Implemented:
+  ✅ Price data (daily/monthly, bulk EOD)
+  ✅ Company fundamentals (financials, ratios, key metrics)
+  ✅ Bulk snapshots (TTM metrics, ratios, price targets, profiles)
+  ✅ Screener data (Nasdaq)
+  ✅ Calendar data (earnings, economic events)
+  ✅ FRED economic data (free tier)
+
+  In Progress/Planned:
+
+  Economic Data Expansion:
+  - BLS Public Data API (Bureau of Labor Statistics - employment, CPI, PPI, etc.)
+  - University of Michigan Consumer Surveys (sentiment, expectations)
+  - Conference Board data (leading indicators, consumer confidence)
+  - Shiller Data (PE ratios, market valuations)
+  - Census Bureau (economic indicators, housing, etc.)
+
+  SEC Financial Data:
+  - Separate project already at Phase 1 (reconstruct → Excel)
+  - Next: Standardize schemas → Database integration
+  - Eventually: Feed into this collector project?
+
+  Then: Admin UI Phase

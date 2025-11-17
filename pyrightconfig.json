@@ -1,0 +1,33 @@
+{
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "pythonVersion": "3.12",
+      "extraPaths": [
+        "./src"
+      ]
+    },
+    {
+      "root": "./scripts",
+      "pythonVersion": "3.12",
+      "extraPaths": [
+        "../src"
+      ]
+    }
+  ],
+  "include": [
+    "src",
+    "scripts",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".venv",
+    "alembic/versions"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportGeneralTypeIssues": false
+}
