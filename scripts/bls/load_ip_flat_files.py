@@ -77,7 +77,7 @@ def main():
         if not args.skip_data:
             print("LOADING TIME SERIES DATA")
             print("-" * 80)
-            ip_parser.load_data(session, data_files=data_files, batch_size=args.batch_size)
+            ip_parser.load_data(session, data_files=data_files, batch_size=args.batch_size) # type: ignore
             print()
 
         print("=" * 80)

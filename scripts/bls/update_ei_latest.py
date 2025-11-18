@@ -117,27 +117,37 @@ def main():
             })
 
         # Upsert to database
-        print(f"\nUpserting {len(data_to_upsert)} observations to database...")
+        if data_to_upsert:
+            print(f"\nUpserting {len(data_to_upsert)} observations to database...")
 
-        from sqlalchemy.dialects.postgresql import insert
-        stmt = insert(EIData).values(data_to_upsert)
-        stmt = stmt.on_conflict_do_update(
-            index_elements=['series_id', 'year', 'period'],
-            set_={
-                'value': stmt.excluded.value,
-                'footnote_codes': stmt.excluded.footnote_codes,
-                'updated_at': datetime.now(UTC),
-            }
-        )
-        session.execute(stmt)
-        session.commit()
+            from sqlalchemy.dialects.postgresql import insert
+            stmt = insert(EIData).values(data_to_upsert)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['series_id', 'year', 'period'],
+                set_={
+                    'value': stmt.excluded.value,
+                    'footnote_codes': stmt.excluded.footnote_codes,
+                    'updated_at': datetime.now(UTC),
+                }
+            )
+            session.execute(stmt)
+            session.commit()
 
-        print("\n" + "=" * 80)
-        print("SUCCESS! EI data updated")
-        print(f"  Series updated: {len(series_ids)}")
-        print(f"  Observations: {len(data_to_upsert)}")
-        print(f"  API requests: ~{num_requests}")
-        print("=" * 80)
+            print("\n" + "=" * 80)
+            print("SUCCESS! EI data updated")
+            print(f"  Series updated: {len(series_ids)}")
+            print(f"  Observations: {len(data_to_upsert)}")
+            print(f"  API requests: ~{num_requests}")
+            print("=" * 80)
+        else:
+            print("\n" + "=" * 80)
+            print("NO DATA TO UPDATE")
+            print(f"  Series queried: {len(series_ids)}")
+            print(f"  Observations fetched: 0")
+            print(f"  API requests: ~{num_requests}")
+            print("\nNote: EI data for 2025 may not be available yet.")
+            print("Try using --start-year 2024 to get the latest available data.")
+            print("=" * 80)
 
     except Exception as e:
         print(f"\nERROR: {e}")
