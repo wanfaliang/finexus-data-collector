@@ -1,102 +1,39 @@
 #!/usr/bin/env python3
 """
-Update LA (Local Area Unemployment Statistics) data with latest observations from BLS API
+Update LA data with latest observations from BLS API
 
 This script fetches the latest data points for LA series via the BLS API
 and updates the database. Use this for regular updates after initial load.
 
-Supports flexible filtering for tiered update strategies:
-  - Filter by area types (states, metros, counties, etc.)
-  - Filter by seasonal adjustment (seasonally adjusted vs not adjusted)
-  - Filter by measure codes (unemployment rate, employment, etc.)
-
 Usage:
-    # Update all active series (not recommended - 675 requests!)
     python scripts/bls/update_la_latest.py
-
-    # Monthly update: States + Major Metros only (~50 requests)
-    python scripts/bls/update_la_latest.py --area-types A,B --seasonal S
-
-    # Quarterly update: All Metro/Micro areas (~300 requests)
-    python scripts/bls/update_la_latest.py --area-types B,D,E
-
-    # Semi-Annual: Counties and Cities (~320 requests)
-    python scripts/bls/update_la_latest.py --area-types F,G
-
-    # Update specific series
-    python scripts/bls/update_la_latest.py --series-ids LASBS060000000000003,LAUCN040130000000003
-
-    # Test with subset
-    python scripts/bls/update_la_latest.py --limit 10
-
-Area Type Codes:
-    A = Statewide
-    B = Metropolitan areas
-    C = Metropolitan divisions
-    D = Micropolitan areas
-    E = Combined areas
-    F = Counties and equivalents
-    G = Cities and towns above 25,000 population
-    H = Cities and towns below 25,000 population in New England
-    I = Towns in New England
-    J = Cities and towns below 25,000 population, except New England
-    K = Census divisions
-    L = Census regions
-    M = Multi-entity small labor market areas
-    N = Balance of state areas
-
-Seasonal Codes:
-    S = Seasonally adjusted
-    U = Not seasonally adjusted
-
-Measure Codes:
-    03 = Unemployment rate (%)
-    04 = Unemployment (persons)
-    05 = Employment (persons)
-    06 = Labor force (persons)
-    07 = Employment-population ratio (%)
-    08 = Labor force participation rate (%)
-    09 = Civilian noninstitutional population (persons)
+    python scripts/bls/update_la_latest.py --start-year 2024
+    python scripts/bls/update_la_latest.py --limit 100
+    python scripts/bls/update_la_latest.py --dry-run  # Preview without fetching
 """
 import sys
 import argparse
 from pathlib import Path
 from datetime import datetime, UTC
 from typing import Any, Dict, List, cast
+from collections import defaultdict
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from bls.bls_client import BLSClient
 from database.bls_models import LASeries, LAData
+from database.bls_tracking_models import BLSSeriesUpdateStatus, BLSAPIUsageLog
 from config import settings
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Update LA data with latest from BLS API",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Monthly: States + Major Metros (seasonally adjusted)
-  python scripts/bls/update_la_latest.py --area-types A,B --seasonal S
-
-  # Quarterly: All Metro/Micro areas
-  python scripts/bls/update_la_latest.py --area-types B,D,E
-
-  # Semi-Annual: Counties and Cities
-  python scripts/bls/update_la_latest.py --area-types F,G
-
-  # Update unemployment rate only
-  python scripts/bls/update_la_latest.py --measure-codes 03
-        """
-    )
+    parser = argparse.ArgumentParser(description="Update LA data with latest from BLS API")
     parser.add_argument(
         '--start-year',
         type=int,
-        default=datetime.now().year,
-        help='Start year for update (default: current year)'
+        help='Start year for update (default: last year for dry-run, current year otherwise)'
     )
     parser.add_argument(
         '--end-year',
@@ -105,21 +42,8 @@ Examples:
         help='End year for update (default: current year)'
     )
     parser.add_argument(
-        '--area-types',
-        help='Comma-separated area type codes to filter (A=states, B=metros, F=counties, etc.)'
-    )
-    parser.add_argument(
-        '--seasonal',
-        choices=['S', 'U'],
-        help='Filter by seasonal adjustment: S=seasonally adjusted, U=not adjusted'
-    )
-    parser.add_argument(
-        '--measure-codes',
-        help='Comma-separated measure codes to filter (03=rate, 04=unemployment, 05=employment, etc.)'
-    )
-    parser.add_argument(
         '--series-ids',
-        help='Comma-separated list of series IDs to update (overrides filters)'
+        help='Comma-separated list of series IDs to update (default: all active series)'
     )
     parser.add_argument(
         '--limit',
@@ -129,13 +53,37 @@ Examples:
     parser.add_argument(
         '--dry-run',
         action='store_true',
-        help='Show what would be updated without making API calls'
+        help='Preview what would be updated without making API calls or database changes'
+    )
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='Force update even if series are marked as current'
+    )
+    parser.add_argument(
+        '--areas',
+        help='Area codes (comma-separated)'
+    )
+    parser.add_argument(
+        '--measures',
+        help='Measure codes (comma-separated)'
+    )
+    parser.add_argument(
+        '--seasonal',
+        help='Seasonal adjustment: S or U'
     )
 
     args = parser.parse_args()
 
+    # Set default start year based on dry-run mode
+    if args.start_year is None:
+        args.start_year = datetime.now().year - 1 if args.dry_run else datetime.now().year
+
     print("=" * 80)
-    print("UPDATING LA (LOCAL AREA UNEMPLOYMENT) DATA FROM BLS API")
+    if args.dry_run:
+        print("DRY RUN: PREVIEW LA DATA UPDATE (NO CHANGES WILL BE MADE)")
+    else:
+        print("UPDATING LA (Local Area Unemployment Statistics) DATA FROM BLS API")
     print("=" * 80)
     print(f"\nYear range: {args.start_year}-{args.end_year}")
 
@@ -149,123 +97,282 @@ Examples:
         # Get series IDs to update
         if args.series_ids:
             series_ids = [s.strip() for s in args.series_ids.split(',')]
-            print(f"Updating {len(series_ids)} specified series")
+            print(f"Target series: {len(series_ids)} specified series")
         else:
-            # Build query with filters
+            # Get all active series from database
             query = session.query(LASeries.series_id).filter(LASeries.is_active == True)
-
-            filters_applied = []
-
-            # Filter by area types
-            if args.area_types:
-                area_type_list = [t.strip() for t in args.area_types.split(',')]
-                query = query.filter(LASeries.area_type_code.in_(area_type_list))
-                filters_applied.append(f"area_types={','.join(area_type_list)}")
-
-            # Filter by seasonal adjustment
+            # Apply survey-specific filters
+            if args.areas:
+                filter_values = [v.strip() for v in args.areas.split(',')]
+                query = query.filter(LASeries.area_code.in_(filter_values))
+                print(f"Filter: area_code in {filter_values}")
+            if args.measures:
+                filter_values = [v.strip() for v in args.measures.split(',')]
+                query = query.filter(LASeries.measure_code.in_(filter_values))
+                print(f"Filter: measure_code in {filter_values}")
             if args.seasonal:
-                query = query.filter(LASeries.seasonal_code == args.seasonal)
-                filters_applied.append(f"seasonal={args.seasonal}")
+                filter_values = [v.strip() for v in args.seasonal.split(',')]
+                query = query.filter(LASeries.seasonal_code.in_(filter_values))
+                print(f"Filter: seasonal_code in {filter_values}")
 
-            # Filter by measure codes
-            if args.measure_codes:
-                measure_list = [m.strip() for m in args.measure_codes.split(',')]
-                query = query.filter(LASeries.measure_code.in_(measure_list))
-                filters_applied.append(f"measures={','.join(measure_list)}")
-
-            # Apply limit if specified
             if args.limit:
                 query = query.limit(args.limit)
-                filters_applied.append(f"limit={args.limit}")
-
             series_ids = [row[0] for row in query.all()]
-
-            if filters_applied:
-                print(f"Filters: {', '.join(filters_applied)}")
-            print(f"Updating {len(series_ids)} active series from database")
+            print(f"Target series: {len(series_ids)} active series from database")
 
         if not series_ids:
             print("No series to update!")
+            return
+
+        # Check status and filter out already-current series (unless --force or specific series-ids)
+        if not args.series_ids and not args.force:  # Only auto-filter if not explicitly specified or forced
+            from datetime import timedelta
+            current_threshold = datetime.now() - timedelta(hours=24)
+            current_series = session.query(
+                BLSSeriesUpdateStatus.series_id
+            ).filter(
+                BLSSeriesUpdateStatus.survey_code == 'la',
+                BLSSeriesUpdateStatus.is_current == True,
+                BLSSeriesUpdateStatus.last_checked_at >= current_threshold
+            ).all()
+            current_series_ids = set([row[0] for row in current_series])
+
+            # Filter out current series
+            original_count = len(series_ids)
+            series_ids = [sid for sid in series_ids if sid not in current_series_ids]
+
+            if len(current_series_ids) > 0:
+                print(f"Skipping {len(current_series_ids)} already-current series (checked within 24h)")
+                print(f"Series needing update: {len(series_ids)}")
+
+        if not series_ids:
+            print("\nAll series are already up-to-date!")
+            print("Use --force to update anyway, or wait for new data.")
+            session.close()
             return
 
         # Calculate number of API requests needed
         num_requests = (len(series_ids) + 49) // 50  # Ceiling division
         print(f"API requests needed: ~{num_requests} ({len(series_ids)} series ÷ 50 per request)")
 
-        # Check if within daily limit
-        if num_requests > 500:
-            print(f"\n⚠️  WARNING: {num_requests} requests exceeds daily limit of 500!")
-            print("   Consider adding filters (--area-types, --seasonal, --measure-codes)")
-            if not args.dry_run:
-                response = input("Continue anyway? (y/N): ")
-                if response.lower() != 'y':
-                    print("Aborted.")
-                    return
-
         if args.dry_run:
-            print("\n[DRY RUN] Would update the following series:")
-            for i, sid in enumerate(series_ids[:10], 1):
-                print(f"  {i}. {sid}")
-            if len(series_ids) > 10:
-                print(f"  ... and {len(series_ids) - 10} more")
-            print(f"\nTotal: {len(series_ids)} series, ~{num_requests} API requests")
-            return
+            # In dry-run mode, check what data already exists
+            print(f"\nAnalyzing existing data in database...")
 
-        # Get API key from config
-        api_key = settings.api.bls_api_key
+            # Get latest data point for each series
+            latest_data = session.query(
+                LAData.series_id,
+                func.max(LAData.year).label('max_year')
+            ).filter(
+                LAData.series_id.in_(series_ids)
+            ).group_by(
+                LAData.series_id
+            ).all()
 
-        # Create BLS client
-        client = BLSClient(api_key=api_key)
+            series_with_data = {row[0]: row[1] for row in latest_data}
+            series_without_data = set(series_ids) - set(series_with_data.keys())
 
-        # Fetch data from API
-        print(f"\nFetching data from BLS API...")
-        rows = cast(
-            List[Dict[str, Any]],
-            client.get_many(
-                series_ids,
-                start_year=args.start_year,
-                end_year=args.end_year,
-                calculations=False,
-                catalog=False,
-                as_dataframe=False
-            )
-        )
+            # Count series by latest data year
+            year_distribution = defaultdict(int)
+            for series_id, max_year in series_with_data.items():
+                year_distribution[max_year] += 1
 
-        print(f"Fetched {len(rows)} observations")
+            print(f"\nExisting Data Summary:")
+            print(f"  Series with data: {len(series_with_data)}")
+            print(f"  Series without data: {len(series_without_data)}")
 
-        # Convert to database format
-        data_to_upsert: List[Dict[str, Any]] = []
-        for row in rows:
-            data_to_upsert.append({
-                'series_id': row['series_id'],
-                'year': row['year'],
-                'period': row['period'],
-                'value': row['value'],
-                'footnote_codes': row.get('footnotes'),
-            })
+            if year_distribution:
+                print(f"\n  Latest data year distribution:")
+                for year in sorted(year_distribution.keys(), reverse=True):
+                    count = year_distribution[year]
+                    print(f"    {year}: {count} series")
 
-        # Upsert to database
-        print(f"\nUpserting {len(data_to_upsert)} observations to database...")
+            # Estimate observations to fetch
+            years_to_fetch = args.end_year - args.start_year + 1
+            max_periods_per_series = years_to_fetch * 12
+            estimated_observations = len(series_ids) * max_periods_per_series
 
-        from sqlalchemy.dialects.postgresql import insert
-        stmt = insert(LAData).values(data_to_upsert)
-        stmt = stmt.on_conflict_do_update(
-            index_elements=['series_id', 'year', 'period'],
-            set_={
-                'value': stmt.excluded.value,
-                'footnote_codes': stmt.excluded.footnote_codes,
-                'updated_at': datetime.now(UTC),
-            }
-        )
-        session.execute(stmt)
-        session.commit()
+            print(f"\nEstimated Fetch:")
+            print(f"  Years to fetch: {years_to_fetch} ({args.start_year}-{args.end_year})")
+            print(f"  Max periods per series: {max_periods_per_series} (monthly)")
+            print(f"  Estimated observations: ~{estimated_observations:,} (max possible)")
+            print(f"  Note: Actual count will be lower (only available data points)")
 
-        print("\n" + "=" * 80)
-        print("SUCCESS! LA data updated")
-        print(f"  Series updated: {len(series_ids)}")
-        print(f"  Observations: {len(data_to_upsert)}")
-        print(f"  API requests: ~{num_requests}")
-        print("=" * 80)
+            print("\n" + "=" * 80)
+            print("DRY RUN COMPLETE - No API calls made, no data updated")
+            print("=" * 80)
+            print("\nTo perform actual update, run without --dry-run flag")
+
+        else:
+            # Actual update mode
+            # Ask for confirmation
+            print("\n" + "-" * 80)
+            response = input("Continue with API update? (Y/N): ")
+            if response.upper() != 'Y':
+                print("Update cancelled.")
+                session.close()
+                return
+            print("-" * 80)
+
+            # Get API key from config
+            api_key = settings.api.bls_api_key
+
+            # Create BLS client
+            client = BLSClient(api_key=api_key)
+
+            # Process in batches of 50 series (one API request each)
+            print(f"\nFetching data from BLS API in batches...")
+            from sqlalchemy.dialects.postgresql import insert
+            from datetime import date
+
+            batch_size = 50
+            total_observations = 0
+            total_series_updated = 0
+            total_requests_made = 0
+            failed_batches = []
+
+            for batch_num, i in enumerate(range(0, len(series_ids), batch_size), 1):
+                batch = series_ids[i:i+batch_size]
+                batch_start = i + 1
+                batch_end = min(i + batch_size, len(series_ids))
+
+                try:
+                    # Fetch this batch
+                    print(f"Batch {batch_num}/{num_requests}: Fetching series {batch_start}-{batch_end}...")
+
+                    rows = cast(
+                        List[Dict[str, Any]],
+                        client.get_many(
+                            batch,
+                            start_year=args.start_year,
+                            end_year=args.end_year,
+                            calculations=False,
+                            catalog=False,
+                            as_dataframe=False
+                        )
+                    )
+
+                    total_requests_made += 1
+
+                    # Convert to database format
+                    data_to_upsert: List[Dict[str, Any]] = []
+                    for row in rows:
+                        data_to_upsert.append({
+                            'series_id': row['series_id'],
+                            'year': row['year'],
+                            'period': row['period'],
+                            'value': row['value'],
+                            'footnote_codes': row.get('footnotes'),
+                        })
+
+                    # Upsert batch to database
+                    if data_to_upsert:
+                        stmt = insert(LAData).values(data_to_upsert)
+                        stmt = stmt.on_conflict_do_update(
+                            index_elements=['series_id', 'year', 'period'],
+                            set_={
+                                'value': stmt.excluded.value,
+                                'footnote_codes': stmt.excluded.footnote_codes,
+                                'updated_at': datetime.now(UTC),
+                            }
+                        )
+                        session.execute(stmt)
+                        session.commit()
+                        total_observations += len(data_to_upsert)
+                        print(f"  Saved {len(data_to_upsert)} observations")
+                    else:
+                        print(f"  No data returned for this batch")
+
+                    # Record API usage for this batch
+                    usage_log = BLSAPIUsageLog(
+                        usage_date=date.today(),
+                        requests_used=1,
+                        series_count=len(batch),
+                        survey_code='la',
+                        script_name='update_la_latest'
+                    )
+                    session.add(usage_log)
+
+                    # Update series status for this batch
+                    now = datetime.now()
+                    for series_id in batch:
+                        # Check if series is current (has recent data)
+                        latest = session.query(
+                            func.max(LAData.year)
+                        ).filter(
+                            LAData.series_id == series_id
+                        ).scalar()
+
+                        is_current = latest is not None and latest >= args.end_year - 1
+
+                        # Upsert status
+                        status_stmt = insert(BLSSeriesUpdateStatus).values({
+                            'series_id': series_id,
+                            'survey_code': 'la',
+                            'last_checked_at': now,
+                            'last_updated_at': now,
+                            'is_current': is_current,
+                        })
+                        status_stmt = status_stmt.on_conflict_do_update(
+                            index_elements=['series_id'],
+                            set_={
+                                'last_checked_at': status_stmt.excluded.last_checked_at,
+                                'last_updated_at': status_stmt.excluded.last_updated_at,
+                                'is_current': status_stmt.excluded.is_current,
+                            }
+                        )
+                        session.execute(status_stmt)
+
+                    session.commit()
+                    total_series_updated += len(batch)
+
+                except KeyboardInterrupt:
+                    print(f"\n\nUpdate interrupted by user at batch {batch_num}")
+                    print(f"Progress saved: {total_series_updated} series, {total_observations} observations")
+                    session.commit()
+                    break
+
+                except Exception as e:
+                    print(f"  ERROR in batch {batch_num}: {e}")
+                    failed_batches.append((batch_num, batch_start, batch_end, str(e)))
+                    session.rollback()
+
+                    # Check if it's an API limit error
+                    error_str = str(e).lower()
+                    if 'quota' in error_str or 'limit' in error_str or 'exceeded' in error_str:
+                        print(f"\n  API limit likely exceeded. Stopping to preserve quota.")
+                        print(f"  Progress saved: {total_series_updated} series updated successfully")
+                        break
+
+                    # For other errors, continue with next batch
+                    print(f"  Continuing with next batch...")
+                    continue
+
+            # Summary
+            print("\n" + "=" * 80)
+            if total_series_updated > 0:
+                print("UPDATE COMPLETE!")
+                print(f"  Series updated: {total_series_updated} / {len(series_ids)}")
+                print(f"  Observations: {total_observations:,}")
+                print(f"  API requests: {total_requests_made}")
+
+                if failed_batches:
+                    print(f"\n  Failed batches: {len(failed_batches)}")
+                    for batch_num, start, end, error in failed_batches[:5]:  # Show first 5
+                        print(f"    Batch {batch_num} (series {start}-{end}): {error[:50]}")
+                    if len(failed_batches) > 5:
+                        print(f"    ... and {len(failed_batches) - 5} more")
+
+                if total_series_updated < len(series_ids):
+                    remaining = len(series_ids) - total_series_updated
+                    print(f"\n  Remaining series: {remaining}")
+                    print(f"  Run script again to continue (already-updated series will be skipped)")
+            else:
+                print("NO DATA UPDATED")
+                print(f"  All {len(failed_batches)} batches failed")
+                if failed_batches:
+                    print(f"\n  First error: {failed_batches[0][3]}")
+            print("=" * 80)
 
     except Exception as e:
         print(f"\nERROR: {e}")

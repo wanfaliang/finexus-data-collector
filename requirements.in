@@ -2,6 +2,13 @@ alembic==1.17.1
 apscheduler==3.11.1
 backports.tarfile==1.2.0
 black==25.9.0
+
+# Admin UI Backend (FastAPI)
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+websockets==13.1
+
 flake8==7.3.0
 importlib-metadata==8.0.0
 ipython==9.6.0

@@ -28,13 +28,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 # --- Import your models Base for autogenerate support ---------------------
 from src.database.models import Base
 from src.database.bls_models import Base as BLSBase
+from src.database.bls_tracking_models import Base as BLSTrackingBase
 
-# Combine metadata from both Base objects for autogenerate
+# Combine metadata from all Base objects for autogenerate
 from sqlalchemy import MetaData
 combined_metadata = MetaData()
 for table in Base.metadata.tables.values():
     table.to_metadata(combined_metadata)
 for table in BLSBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in BLSTrackingBase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 
 target_metadata = combined_metadata

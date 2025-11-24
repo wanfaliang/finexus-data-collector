@@ -4180,26 +4180,26 @@ BD (Business Employment Dynamics) Integration - COMPLETE ✓
 
 We now have 18 major BLS surveys fully integrated:
 
-  | Survey | Name                                 | Series   | Status      |
+  | Survey | Name                                 | Series        | Status |
   |--------|--------------------------------------|----------|-------------|
-  | AP     | Average Price Data                   | ~2,700   | ✅ Complete |
-  | CU     | Consumer Price Index                 | ~16,000  | ✅ Complete |
-  | LA     | Local Area Unemployment              | ~45,000  | ✅ Complete |
-  | CE     | Employment/Hours/Earnings (National) | ~24,000  | ✅ Complete |
-  | PC     | Producer Price Index - Industry      | ~115,000 | ✅ Complete |
-  | WP     | Producer Price Index - Commodities   | ~110,000 | ✅ Complete |
-  | SM     | State/Metro Employment               | ~3.1M    | ✅ Complete |
-  | JT     | Job Openings/Labor Turnover (JOLTS)  | ~46,000  | ✅ Complete |
-  | EC     | Employment Cost Index                | ~11,000  | ✅ Complete |
-  | OE     | Occupational Employment/Wages        | ~2.5M    | ✅ Complete |
-  | PR     | Major Sector Productivity            | ~10,000  | ✅ Complete |
-  | IP     | Industry Productivity                | ~21,000  | ✅ Complete |
-  | TU     | American Time Use Survey             | ~87,000  | ✅ Complete |
-  | LN     | Labor Force Stats (CPS)              | ~67,000  | ✅ Complete |
-  | CW     | Consumer Price Index Urban           | ~67,000  | ✅ Complete |
-  | SU     | Chained CPI-U                        | ~29      | ✅ Complete |
-  | EI     | Export-import price index            | ~29      | ✅ Complete |
-  | BD     | Business Employment Dynamics         | ~29      | ✅ Complete |
+  | AP     | Average Price Data                   | ~2,700            | ✅ |
+  | CU     | Consumer Price Index                 | ~16,000           | ✅ |
+  | LA     | Local Area Unemployment              | ~45,000 675 rqs   | ✅ |
+  | CE     | Employment/Hours/Earnings (National) | ~24,000           | ✅ |
+  | PC     | Producer Price Index - Industry      | ~115,000          | ✅ |
+  | WP     | Producer Price Index - Commodities   | ~110,000          | ✅ |
+  | SM     | State/Metro Employment               | ~3.1M             | ✅ |
+  | JT     | Job Openings/Labor Turnover (JOLTS)  | ~46,000           | ✅ |
+  | EC     | Employment Cost Index                | ~11,000           | ✅ |
+  | OE     | Occupational Employment/Wages        | ~2.5M             | ✅ |
+  | PR     | Major Sector Productivity            | ~10,000           | ✅ |
+  | IP     | Industry Productivity                | ~21,000           | ✅ |
+  | TU     | American Time Use Survey             | ~87,000           | ✅ |
+  | LN     | Labor Force Stats (CPS)              | ~67,000           | ✅ |
+  | CW     | Consumer Price Index Urban           | ~67,000           | ✅ |
+  | SU     | Chained CPI-U                        | ~29               | ✅ |
+  | EI     | Export-import price index            | ~33  rqs          | ✅ |
+  | BD     | Business Employment Dynamics         | ~690 rqs          | ✅ |
   This represents comprehensive coverage of:
   - ✅ Inflation (CPI, PPI, Average Prices, EI)
   - ✅ Employment/Unemployment (CE, LA, SM, LN, JT)
@@ -4300,3 +4300,65 @@ Tables That Could Be Shared:
   UNION
   SELECT DISTINCT industry_code, industry_name
   FROM bls_oe_industries;
+
+## Update strategies
+
+ Summary
+
+  You're absolutely correct! For massive surveys like OE, API updates are completely
+  impractical. Here's what I've done:
+
+  1. Created Survey Analysis Tool
+
+  File: scripts/bls/check_series_counts.py
+
+  Shows series counts and API request estimates for all surveys.
+
+  2. Created Update Strategy Guide
+
+  File: docs/bls_update_strategy.md
+
+  Comprehensive guide categorizing all 18 surveys:
+
+  ✅ Safe for API Updates (8 surveys):
+  - AP, PC, WP, JT, PR, SU, EI - Monthly/weekly updates OK
+
+  ⚠️ Feasible but Monitor (5 surveys):
+  - CU, CE, SM, IP, CW - Monthly updates possible, ~1 day each
+
+  🔶 Challenging (4 surveys):
+  - LA, TU, LN, BD - Quarterly/annual only, or use flat files
+
+  ❌ Use Flat Files Only (1 survey):
+  - OE - 6M+ series, 120,740 requests, 241 days!
+
+  3. Added Safety Guard to OE Script
+
+  The OE update script now:
+  - Shows prominent warning about 6M+ series
+  - Blocks execution unless --limit or --series-ids is used
+  - Recommends flat file downloads
+  - Provides clear instructions
+
+  Recommended Approach
+
+  For OE (and other large surveys):
+  # Download flat files
+  wget -r -np -nH --cut-dirs=3 https://download.bls.gov/pub/time.series/oe/
+
+  # Load using flat file loader
+  python scripts/bls/load_oe_flat_files.py --data-files oe.data.0.Current
+
+  For small/medium surveys:
+  # Monthly API updates are fine
+  python scripts/bls/update_ap_latest.py
+  python scripts/bls/update_cu_latest.py
+  # etc.
+
+  API Quota Management:
+  - With 500 requests/day and 25,000/year, you can comfortably update the 13
+  safe+feasible surveys monthly (~300 requests/month)
+  - Use flat files for OE, LA, TU, LN major updates
+
+  This approach gives you the best of both worlds - quick API updates for manageable
+  surveys, and efficient flat file loads for massive ones!
