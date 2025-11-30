@@ -57,10 +57,11 @@ const formatRelativeTime = (dateStr: string | null | undefined): string => {
 interface SurveyCardProps {
   survey: SurveyFreshness;
   onUpdate: () => void;
+  onForceUpdate: () => void;
   isUpdating: boolean;
 }
 
-function SurveyCard({ survey, onUpdate, isUpdating }: SurveyCardProps) {
+function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'current':
@@ -186,26 +187,48 @@ function SurveyCard({ survey, onUpdate, isUpdating }: SurveyCardProps) {
           </Box>
         </Box>
 
-        {/* Action Button */}
-        <Tooltip title="Start full update for this survey">
-          <span>
-            <Button
-              fullWidth
-              size="small"
-              variant="outlined"
-              startIcon={isUpdatingNow ? <CircularProgress size={14} color="inherit" /> : <PlayArrow />}
-              onClick={onUpdate}
-              disabled={isUpdatingNow || isUpdating}
-              sx={{
-                fontSize: '0.75rem',
-                py: 0.5,
-                fontWeight: 500,
-              }}
-            >
-              {isUpdatingNow ? 'Updating...' : 'Update'}
-            </Button>
-          </span>
-        </Tooltip>
+        {/* Action Buttons */}
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title="Resume update (skip already-updated series)">
+            <span style={{ flex: 1 }}>
+              <Button
+                fullWidth
+                size="small"
+                variant="outlined"
+                startIcon={isUpdatingNow ? <CircularProgress size={14} color="inherit" /> : <PlayArrow />}
+                onClick={onUpdate}
+                disabled={isUpdatingNow || isUpdating}
+                sx={{
+                  fontSize: '0.7rem',
+                  py: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                {isUpdatingNow ? 'Updating...' : 'Update'}
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title="Force update all series (reset and start fresh)">
+            <span style={{ flex: 1 }}>
+              <Button
+                fullWidth
+                size="small"
+                variant="outlined"
+                color="warning"
+                startIcon={<Refresh />}
+                onClick={onForceUpdate}
+                disabled={isUpdatingNow || isUpdating}
+                sx={{
+                  fontSize: '0.7rem',
+                  py: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Force
+              </Button>
+            </span>
+          </Tooltip>
+        </Box>
       </CardContent>
     </Card>
   );
@@ -218,11 +241,13 @@ export default function Dashboard() {
     surveyCode: string;
     surveyName: string;
     seriesCount: number;
+    isForce: boolean;
   }>({
     open: false,
     surveyCode: '',
     surveyName: '',
     seriesCount: 0,
+    isForce: false,
   });
 
   const { data: overview, isLoading: loadingOverview } = useQuery({
@@ -249,28 +274,33 @@ export default function Dashboard() {
   });
 
   const executeUpdateMutation = useMutation({
-    mutationFn: (surveyCode: string) => actionsAPI.executeUpdate(surveyCode, true),
+    mutationFn: ({ surveyCode, force }: { surveyCode: string; force: boolean }) =>
+      actionsAPI.executeUpdate(surveyCode, force),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['freshness'] });
-      setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0 });
+      setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, isForce: false });
     },
   });
 
-  const handleUpdateClick = (survey: SurveyFreshness) => {
+  const handleUpdateClick = (survey: SurveyFreshness, isForce: boolean = false) => {
     setConfirmUpdateDialog({
       open: true,
       surveyCode: survey.survey_code,
       surveyName: survey.survey_name,
       seriesCount: survey.series_total || 0,
+      isForce,
     });
   };
 
   const handleConfirmUpdate = () => {
-    executeUpdateMutation.mutate(confirmUpdateDialog.surveyCode);
+    executeUpdateMutation.mutate({
+      surveyCode: confirmUpdateDialog.surveyCode,
+      force: confirmUpdateDialog.isForce
+    });
   };
 
   const handleCancelUpdate = () => {
-    setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0 });
+    setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, isForce: false });
   };
 
   if (loadingOverview || loadingQuota || loadingHistory) {
@@ -387,7 +417,8 @@ export default function Dashboard() {
             <SurveyCard
               key={survey.survey_code}
               survey={survey}
-              onUpdate={() => handleUpdateClick(survey)}
+              onUpdate={() => handleUpdateClick(survey, false)}
+              onForceUpdate={() => handleUpdateClick(survey, true)}
               isUpdating={executeUpdateMutation.isPending}
             />
           ))}
@@ -422,23 +453,28 @@ export default function Dashboard() {
         aria-describedby="confirm-update-description"
       >
         <DialogTitle id="confirm-update-title">
-          Confirm Full Survey Update
+          {confirmUpdateDialog.isForce ? 'Confirm Force Update' : 'Confirm Survey Update'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-update-description">
-            You are about to trigger a full data update for:
+            {confirmUpdateDialog.isForce
+              ? 'You are about to force a complete re-update for:'
+              : 'You are about to resume/trigger an update for:'}
           </DialogContentText>
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+          <Box sx={{ mt: 2, p: 2, bgcolor: confirmUpdateDialog.isForce ? 'warning.light' : 'grey.50', borderRadius: 1 }}>
             <Typography variant="body2" fontWeight="600" gutterBottom>
               {confirmUpdateDialog.surveyCode} - {confirmUpdateDialog.surveyName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              This will update approximately <strong>{confirmUpdateDialog.seriesCount.toLocaleString()}</strong> series
+              {confirmUpdateDialog.isForce
+                ? <>This will <strong>reset all series</strong> and update all <strong>{confirmUpdateDialog.seriesCount.toLocaleString()}</strong> series from scratch</>
+                : <>This will update series that haven't been updated yet (skips already-current series)</>}
             </Typography>
           </Box>
           <DialogContentText sx={{ mt: 2 }}>
-            <strong>Warning:</strong> This operation will consume API quota and may take several minutes to complete.
-            Are you sure you want to proceed?
+            {confirmUpdateDialog.isForce
+              ? <><strong>Warning:</strong> Force update will reset progress and re-fetch ALL series. Use this only when you need a complete refresh.</>
+              : <><strong>Note:</strong> This operation will consume API quota. Already-updated series will be skipped.</>}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -448,10 +484,10 @@ export default function Dashboard() {
           <Button
             onClick={handleConfirmUpdate}
             variant="contained"
-            color="warning"
+            color={confirmUpdateDialog.isForce ? 'error' : 'warning'}
             autoFocus
           >
-            Yes, Update Now
+            {confirmUpdateDialog.isForce ? 'Yes, Force Update' : 'Yes, Update Now'}
           </Button>
         </DialogActions>
       </Dialog>

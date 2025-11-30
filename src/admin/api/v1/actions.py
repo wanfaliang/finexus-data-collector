@@ -218,6 +218,8 @@ async def trigger_freshness_check(
                 freshness.needs_full_update = True # type: ignore
                 freshness.last_bls_update_detected = check_time # type: ignore
                 freshness.total_updates_detected = (freshness.total_updates_detected or 0) + 1 # type: ignore
+                # Reset is_current=False for all series in this survey so they get updated
+                update_manager.reset_series_status(db, result.survey_code)
             else:
                 # Clear flag if no changes detected - data is current
                 freshness.needs_full_update = False # type: ignore

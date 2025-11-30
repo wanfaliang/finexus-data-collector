@@ -1,7 +1,8 @@
 """API v1 Router"""
 from fastapi import APIRouter
 
-from src.admin.api.v1 import freshness, quota, actions, cu_explorer, la_explorer, ce_explorer
+from src.admin.api.v1 import freshness, quota, actions, cu_explorer, la_explorer, ce_explorer, ln_explorer
+from src.admin.api.v1 import bea_dashboard, bea_explorer, bea_actions, bea_sentinel
 
 # Create main API router
 api_router = APIRouter()
@@ -42,4 +43,35 @@ api_router.include_router(
     ce_explorer.router,
     prefix="/explorer",
     tags=["explorer"],
+)
+
+api_router.include_router(
+    ln_explorer.router,
+    prefix="/explorer",
+    tags=["explorer"],
+)
+
+# BEA routers
+api_router.include_router(
+    bea_dashboard.router,
+    prefix="/bea",
+    tags=["bea"],
+)
+
+api_router.include_router(
+    bea_explorer.router,
+    prefix="/bea/explorer",
+    tags=["bea-explorer"],
+)
+
+api_router.include_router(
+    bea_actions.router,
+    prefix="/bea",
+    tags=["bea-actions"],
+)
+
+api_router.include_router(
+    bea_sentinel.router,
+    prefix="/bea",
+    tags=["bea-sentinel"],
 )

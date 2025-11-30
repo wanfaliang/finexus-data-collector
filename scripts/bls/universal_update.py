@@ -90,15 +90,31 @@ def get_remaining_quota(session, daily_limit: int = 500) -> int:
     return max(0, remaining)
 
 
+def reset_series_status(session, survey_code: str) -> int:
+    """
+    Reset is_current=False for all series in a survey.
+    Used when sentinel detects new data or before force update.
+
+    Returns number of series reset.
+    """
+    result = session.query(BLSSeriesUpdateStatus).filter(
+        BLSSeriesUpdateStatus.survey_code == survey_code
+    ).update({'is_current': False})
+    session.commit()
+    return result
+
+
 def get_series_needing_update(session, survey_code: str, series_model, data_model,
                              force: bool = False) -> List[str]:
     """
     Find series that need updates
 
     Returns list of series IDs that either:
-    - Are not marked as current
+    - Are not marked as current (is_current = False)
     - Have no status record
-    - Are marked current but force=True
+
+    If force=True, first resets all series to is_current=False,
+    then returns all active series.
     """
     # Get all active series for this survey
     active_series = session.query(series_model.series_id).filter(
@@ -107,17 +123,16 @@ def get_series_needing_update(session, survey_code: str, series_model, data_mode
     active_series_ids = [row[0] for row in active_series]
 
     if force:
-        # Force update all active series
+        # Reset all series status first, then return all active series
+        reset_series_status(session, survey_code)
         return active_series_ids
 
-    # Get series marked as current (checked within last 24 hours)
-    current_threshold = datetime.now() - timedelta(hours=24)
+    # Get series marked as current - these will be skipped
     current_series = session.query(
         BLSSeriesUpdateStatus.series_id
     ).filter(
         BLSSeriesUpdateStatus.survey_code == survey_code,
-        BLSSeriesUpdateStatus.is_current == True,
-        BLSSeriesUpdateStatus.last_checked_at >= current_threshold
+        BLSSeriesUpdateStatus.is_current == True
     ).all()
     current_series_ids = set([row[0] for row in current_series])
 

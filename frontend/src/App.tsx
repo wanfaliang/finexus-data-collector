@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard';
 import CUExplorer from './pages/CUExplorer';
 import LAExplorer from './pages/LAExplorer';
 import CEExplorer from './pages/CEExplorer';
+import LNExplorer from './pages/LNExplorer';
+import BEADashboard from './pages/BEADashboard';
 
 // Create MUI theme with modern design
 const theme = createTheme({
@@ -190,6 +192,8 @@ function App() {
               <Route path="/surveys/CU/explorer" element={<CUExplorer />} />
               <Route path="/surveys/LA/explorer" element={<LAExplorer />} />
               <Route path="/surveys/CE/explorer" element={<CEExplorer />} />
+              <Route path="/surveys/LN/explorer" element={<LNExplorer />} />
+              <Route path="/bea" element={<BEADashboard />} />
             </Routes>
           </AppLayout>
         </BrowserRouter>

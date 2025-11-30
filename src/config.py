@@ -24,6 +24,7 @@ class APISettings(BaseSettings):
     fmp_api_key: str = Field(..., alias='FMP_API_KEY')
     fred_api_key: str = Field(..., alias='FRED_API_KEY')
     bls_api_key: str = Field(..., alias='BLS_API_KEY')
+    bea_api_key: str = Field(..., alias='BEA_API_KEY')
     census_api_key: str = Field(..., alias='CENSUS_API_KEY')
 
     sleep_sec: float = Field(0.2, alias='API_SLEEP_SEC')
@@ -187,4 +188,28 @@ FMP_ENDPOINTS = {
     "ratios_ttm_bulk": "https://financialmodelingprep.com/stable/ratios-ttm-bulk",
     "price_target_summary_bulk": "https://financialmodelingprep.com/stable/price-target-summary-bulk",
     "company_profile_bulk": "https://financialmodelingprep.com/stable/profile-bulk",
+}
+
+# BEA (Bureau of Economic Analysis) API Configuration
+BEA_BASE_URL = "https://apps.bea.gov/api/data"
+BEA_DATASETS = {
+    "NIPA": "National Income and Product Accounts",
+    "Regional": "Regional Economic Accounts",
+    "NIUnderlyingDetail": "NIPA Underlying Detail",
+    "FixedAssets": "Fixed Assets",
+    "GDPbyIndustry": "GDP by Industry",
+    "ITA": "International Transactions Accounts",
+    "IIP": "International Investment Position",
+    "MNE": "Multinational Enterprises",
+    "IntlServTrade": "International Services Trade",
+    "InputOutput": "Input-Output Statistics",
+    "UnderlyingGDPbyIndustry": "Underlying GDP by Industry",
+}
+
+# BEA Rate Limits (per minute)
+BEA_RATE_LIMITS = {
+    "requests_per_minute": 100,
+    "data_per_minute_mb": 100,
+    "errors_per_minute": 30,
+    "timeout_after_violation_minutes": 60,
 }

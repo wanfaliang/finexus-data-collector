@@ -29,6 +29,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 from src.database.models import Base
 from src.database.bls_models import Base as BLSBase
 from src.database.bls_tracking_models import Base as BLSTrackingBase
+from src.database.bea_models import Base as BEABase
+from src.database.bea_tracking_models import Base as BEATrackingBase
 
 # Combine metadata from all Base objects for autogenerate
 from sqlalchemy import MetaData
@@ -38,6 +40,10 @@ for table in Base.metadata.tables.values():
 for table in BLSBase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 for table in BLSTrackingBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in BEABase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in BEATrackingBase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 
 target_metadata = combined_metadata
