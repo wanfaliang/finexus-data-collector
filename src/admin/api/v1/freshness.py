@@ -1,21 +1,20 @@
 """
 BLS Freshness API Endpoints
 
-Endpoints for managing BLS survey freshness detection and sentinel system.
+Endpoints for managing BLS survey freshness detection.
+Uses the new cycle-based update system.
 """
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from src.admin.core.database import get_db
 from src.admin.schemas.freshness import (
     SurveyFreshnessResponse,
-    SentinelResponse,
     FreshnessOverviewResponse,
 )
-from src.database.bls_tracking_models import BLSSurveyFreshness, BLSSurveySentinel
+from src.bls import update_manager
 
 router = APIRouter()
 
@@ -41,25 +40,22 @@ SURVEY_NAMES = {
     'EI': 'Import/Export Price Indexes',
 }
 
+# Supported surveys
+SUPPORTED_SURVEYS = [
+    'AP', 'CU', 'LA', 'CE', 'PC', 'WP', 'SM', 'JT', 'EC', 'OE',
+    'PR', 'TU', 'IP', 'LN', 'CW', 'SU', 'BD', 'EI'
+]
 
-def _get_survey_status(freshness: Optional[BLSSurveyFreshness]) -> str:
-    """Determine survey status from freshness record"""
-    if not freshness:
-        return "unknown"
-    if freshness.full_update_in_progress:
-        return "updating"
-    if freshness.needs_full_update:
+
+def _get_survey_status_from_cycle(status: dict) -> str:
+    """Determine survey status from cycle-based status"""
+    if not status['has_current_cycle']:
         return "needs_update"
-    return "current"
-
-
-def _calculate_update_progress(freshness: Optional[BLSSurveyFreshness]) -> Optional[float]:
-    """Calculate update progress (0.0 to 1.0)"""
-    if not freshness or not freshness.full_update_in_progress:
-        return None
-    if freshness.series_total_count == 0:
-        return 0.0
-    return freshness.series_updated_count / freshness.series_total_count
+    if status.get('is_running'):
+        return "updating"
+    if status['is_complete']:
+        return "current"
+    return "needs_update"  # Paused/incomplete, can be resumed
 
 
 @router.get("/overview", response_model=FreshnessOverviewResponse)
@@ -68,36 +64,52 @@ async def get_freshness_overview(db: Session = Depends(get_db)):
     Get overview of freshness status for all surveys
 
     Returns summary counts and detailed status for each survey.
+    Uses the new cycle-based update system.
     """
-    # Get all freshness records
-    freshness_records = db.query(BLSSurveyFreshness).all()
-
-    # Build survey responses
     surveys = []
-    for survey_code, survey_name in SURVEY_NAMES.items():
-        # Find freshness record for this survey
-        freshness = next(
-            (f for f in freshness_records if f.survey_code == survey_code),
-            None
-        )
 
-        status = _get_survey_status(freshness)
-        progress = _calculate_update_progress(freshness)
+    for survey_code in SUPPORTED_SURVEYS:
+        survey_name = SURVEY_NAMES.get(survey_code, survey_code)
 
-        surveys.append(SurveyFreshnessResponse(
-            survey_code=survey_code,
-            survey_name=survey_name,
-            status=status,
-            last_bls_update=freshness.last_bls_update_detected if freshness else None,
-            last_check=freshness.last_sentinel_check if freshness else None,
-            sentinels_changed=freshness.sentinels_changed if freshness else 0,
-            sentinels_total=freshness.sentinels_total if freshness else 0,
-            update_frequency_days=float(freshness.bls_update_frequency_days) if freshness and freshness.bls_update_frequency_days else None,
-            update_progress=progress,
-            series_updated=freshness.series_updated_count if freshness else 0,
-            series_total=freshness.series_total_count if freshness else 0,
-            last_full_update_completed=freshness.last_full_update_completed if freshness else None,
-        ))
+        try:
+            status = update_manager.get_survey_status(db, survey_code)
+            survey_status = _get_survey_status_from_cycle(status)
+
+            # Calculate progress
+            progress = None
+            if status['total_series'] > 0:
+                progress = status['series_updated'] / status['total_series']
+
+            surveys.append(SurveyFreshnessResponse(
+                survey_code=survey_code,
+                survey_name=survey_name,
+                status=survey_status,
+                last_bls_update=None,  # No longer tracked in cycle system
+                last_check=None,  # No longer tracked
+                sentinels_changed=0,  # Sentinel system removed
+                sentinels_total=0,
+                update_frequency_days=None,
+                update_progress=progress,
+                series_updated=status['series_updated'],
+                series_total=status['total_series'],
+                last_full_update_completed=status['started_at'] if status['is_complete'] and status['started_at'] else None,
+            ))
+        except Exception as e:
+            # Survey might not have series table yet
+            surveys.append(SurveyFreshnessResponse(
+                survey_code=survey_code,
+                survey_name=survey_name,
+                status="needs_update",
+                last_bls_update=None,
+                last_check=None,
+                sentinels_changed=0,
+                sentinels_total=0,
+                update_frequency_days=None,
+                update_progress=None,
+                series_updated=0,
+                series_total=0,
+                last_full_update_completed=None,
+            ))
 
     # Calculate summary counts
     total_surveys = len(surveys)
@@ -119,13 +131,19 @@ async def get_surveys_needing_update(db: Session = Depends(get_db)):
     """
     Get list of survey codes that need updates
 
-    Returns list of survey codes where needs_full_update = true
+    Returns list of survey codes where update cycle is not complete.
     """
-    surveys = db.query(BLSSurveyFreshness.survey_code).filter(
-        BLSSurveyFreshness.needs_full_update == True
-    ).all()
+    needs_update = []
 
-    return [s[0] for s in surveys]
+    for survey_code in SUPPORTED_SURVEYS:
+        try:
+            status = update_manager.get_survey_status(db, survey_code)
+            if not status['has_current_cycle'] or not status['is_complete']:
+                needs_update.append(survey_code)
+        except Exception:
+            needs_update.append(survey_code)
+
+    return needs_update
 
 
 @router.get("/surveys/{survey_code}", response_model=SurveyFreshnessResponse)
@@ -141,68 +159,43 @@ async def get_survey_freshness(survey_code: str, db: Session = Depends(get_db)):
     if survey_code not in SURVEY_NAMES:
         raise HTTPException(status_code=404, detail=f"Survey {survey_code} not found")
 
-    # Get freshness record
-    freshness = db.query(BLSSurveyFreshness).filter(
-        BLSSurveyFreshness.survey_code == survey_code
-    ).first()
+    survey_name = SURVEY_NAMES[survey_code]
 
-    status = _get_survey_status(freshness)
-    progress = _calculate_update_progress(freshness)
+    try:
+        status = update_manager.get_survey_status(db, survey_code)
+        survey_status = _get_survey_status_from_cycle(status)
 
-    return SurveyFreshnessResponse(
-        survey_code=survey_code,
-        survey_name=SURVEY_NAMES[survey_code],
-        status=status,
-        last_bls_update=freshness.last_bls_update_detected if freshness else None,
-        last_check=freshness.last_sentinel_check if freshness else None,
-        sentinels_changed=freshness.sentinels_changed if freshness else 0,
-        sentinels_total=freshness.sentinels_total if freshness else 0,
-        update_frequency_days=float(freshness.bls_update_frequency_days) if freshness and freshness.bls_update_frequency_days else None,
-        update_progress=progress,
-        series_updated=freshness.series_updated_count if freshness else 0,
-        series_total=freshness.series_total_count if freshness else 0,
-        last_full_update_completed=freshness.last_full_update_completed if freshness else None,
-    )
+        # Calculate progress
+        progress = None
+        if status['total_series'] > 0:
+            progress = status['series_updated'] / status['total_series']
 
-
-@router.get("/surveys/{survey_code}/sentinels", response_model=List[SentinelResponse])
-async def get_survey_sentinels(
-    survey_code: str,
-    limit: Optional[int] = None,
-    db: Session = Depends(get_db)
-):
-    """
-    Get sentinel series for a survey
-
-    Args:
-        survey_code: BLS survey code
-        limit: Optional limit on number of sentinels to return
-    """
-    survey_code = survey_code.upper()
-
-    if survey_code not in SURVEY_NAMES:
-        raise HTTPException(status_code=404, detail=f"Survey {survey_code} not found")
-
-    # Query sentinels
-    query = db.query(BLSSurveySentinel).filter(
-        BLSSurveySentinel.survey_code == survey_code
-    ).order_by(BLSSurveySentinel.sentinel_order)
-
-    if limit:
-        query = query.limit(limit)
-
-    sentinels = query.all()
-
-    return [
-        SentinelResponse(
-            series_id=s.series_id,
-            sentinel_order=s.sentinel_order,
-            last_value=s.last_value,
-            last_year=s.last_year,
-            last_period=s.last_period,
-            check_count=s.check_count,
-            change_count=s.change_count,
-            last_changed_at=s.last_changed_at,
+        return SurveyFreshnessResponse(
+            survey_code=survey_code,
+            survey_name=survey_name,
+            status=survey_status,
+            last_bls_update=None,
+            last_check=None,
+            sentinels_changed=0,
+            sentinels_total=0,
+            update_frequency_days=None,
+            update_progress=progress,
+            series_updated=status['series_updated'],
+            series_total=status['total_series'],
+            last_full_update_completed=status['started_at'].isoformat() if status['is_complete'] and status['started_at'] else None,
         )
-        for s in sentinels
-    ]
+    except Exception as e:
+        return SurveyFreshnessResponse(
+            survey_code=survey_code,
+            survey_name=survey_name,
+            status="needs_update",
+            last_bls_update=None,
+            last_check=None,
+            sentinels_changed=0,
+            sentinels_total=0,
+            update_frequency_days=None,
+            update_progress=None,
+            series_updated=0,
+            series_total=0,
+            last_full_update_completed=None,
+        )

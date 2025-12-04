@@ -4,11 +4,13 @@ This document describes the BEA data integration in FinExus Data Collector.
 
 ## Overview
 
-The BEA integration collects economic data from the Bureau of Economic Analysis public API, focusing on three key datasets:
+The BEA integration collects economic data from the Bureau of Economic Analysis public API, focusing on five key datasets:
 
 - **NIPA** (National Income and Product Accounts) - GDP, income, consumption, investment data
 - **Regional** - State/county level GDP, personal income, employment data
 - **GDPbyIndustry** - GDP by industry sector breakdown, value added, contributions to growth
+- **ITA** (International Transactions Accounts) - Trade balance, exports, imports by country/area
+- **FixedAssets** - Current-cost and chain-type quantity indexes for stocks, depreciation, and investment
 
 ## Architecture
 
@@ -54,11 +56,13 @@ The BEA tables were added in migration `946a41c247c0_add_bea_tables.py`. If you 
 alembic upgrade head
 ```
 
-This creates 19 tables:
+This creates tables including:
 - `bea_datasets` - Dataset catalog
 - `bea_nipa_tables`, `bea_nipa_series`, `bea_nipa_data` - NIPA data
 - `bea_regional_tables`, `bea_regional_line_codes`, `bea_regional_geo_fips`, `bea_regional_data` - Regional data
 - `bea_gdpbyindustry_tables`, `bea_gdpbyindustry_industries`, `bea_gdpbyindustry_data` - GDP by Industry data
+- `bea_ita_indicators`, `bea_ita_areas`, `bea_ita_data` - ITA (International Transactions) data
+- `bea_fixedassets_tables`, `bea_fixedassets_series`, `bea_fixedassets_data` - FixedAssets data
 - `bea_gdp_summary`, `bea_personal_income_summary` - Summary tables
 - `bea_api_usage_log`, `bea_dataset_freshness`, `bea_table_update_status`, `bea_sentinel_series`, `bea_collection_runs`, `bea_release_schedule` - Tracking tables
 
@@ -201,6 +205,94 @@ python scripts/backfill_bea_gdpbyindustry.py --dry-run
 - Quarterly data: 2005 to present
 - Note: Not all tables are available for quarterly frequency
 
+### Backfill ITA (International Transactions) Data
+
+```bash
+# Backfill ALL ITA indicators (annual data, all years)
+python scripts/backfill_bea_ita.py
+
+# Backfill specific indicators
+python scripts/backfill_bea_ita.py --indicators BalGds,BalServ,BalCAcc
+
+# Backfill quarterly seasonally adjusted data
+python scripts/backfill_bea_ita.py --frequency QSA
+
+# Backfill quarterly non-seasonally adjusted data
+python scripts/backfill_bea_ita.py --frequency QNSA
+
+# Backfill last 10 years only
+python scripts/backfill_bea_ita.py --year LAST10
+
+# Preview what would be collected (dry run)
+python scripts/backfill_bea_ita.py --dry-run
+```
+
+**Options:**
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| `--indicators` | IND1,IND2,... | all | Specific indicators to backfill |
+| `--frequency` | A, QSA, QNSA | A | Annual, Quarterly SA, or Quarterly NSA |
+| `--year` | ALL, LAST5, LAST10, ... | ALL | Year specification |
+| `--dry-run` | flag | - | Preview without collecting |
+
+**Important ITA Indicators:**
+| Indicator | Description |
+|-----------|-------------|
+| BalGds | Balance on Goods |
+| BalServ | Balance on Services |
+| BalCAcc | Balance on Current Account |
+| ExpGds | Exports of Goods |
+| ImpGds | Imports of Goods |
+| ExpServ | Exports of Services |
+| ImpServ | Imports of Services |
+| PrimInc | Primary Income |
+| SecInc | Secondary Income |
+
+**API Constraints:**
+- Either one indicator OR one area/country must be specified (not multiple of both)
+- The collector iterates through all indicators to collect complete data
+
+### Backfill FixedAssets Data
+
+```bash
+# Backfill ALL Fixed Assets tables (annual data, all years)
+python scripts/backfill_bea_fixedassets.py
+
+# Backfill specific tables
+python scripts/backfill_bea_fixedassets.py --tables FAAt101,FAAt102,FAAt103
+
+# Backfill last 10 years only
+python scripts/backfill_bea_fixedassets.py --year LAST10
+
+# Preview what would be collected (dry run)
+python scripts/backfill_bea_fixedassets.py --dry-run
+```
+
+**Options:**
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| `--tables` | TABLE1,TABLE2,... | all | Specific tables to backfill |
+| `--year` | ALL, LAST5, LAST10, ... | ALL | Year specification |
+| `--dry-run` | flag | - | Preview without collecting |
+
+**Important FixedAssets Tables:**
+| Table | Description |
+|-------|-------------|
+| FAAt101 | Current-Cost Net Stock of Private Fixed Assets |
+| FAAt102 | Chain-Type Quantity Indexes for Net Stock of Private Fixed Assets |
+| FAAt103 | Current-Cost Depreciation of Private Fixed Assets |
+| FAAt104 | Chain-Type Quantity Indexes for Depreciation of Private Fixed Assets |
+| FAAt105 | Investment in Private Fixed Assets |
+| FAAt106 | Chain-Type Quantity Indexes for Investment in Private Fixed Assets |
+| FAAt201 | Current-Cost Net Stock of Private Fixed Assets by Industry |
+| FAAt301 | Current-Cost Net Stock of Government Fixed Assets |
+| FAAt401 | Current-Cost Net Stock of Consumer Durable Goods |
+
+**Data Availability:**
+- Annual data only: 1901 to present (varying by table)
+- Data covers private fixed assets, government fixed assets, and consumer durables
+- Includes current-cost values and chain-type quantity indexes
+
 ### Incremental Updates
 
 ```bash
@@ -211,6 +303,8 @@ python scripts/update_bea_data.py
 python scripts/update_bea_data.py --dataset NIPA
 python scripts/update_bea_data.py --dataset Regional
 python scripts/update_bea_data.py --dataset GDPbyIndustry
+python scripts/update_bea_data.py --dataset ITA
+python scripts/update_bea_data.py --dataset FixedAssets
 
 # Force update (ignore freshness check)
 python scripts/update_bea_data.py --force
@@ -224,11 +318,13 @@ The update script:
 - Skips datasets updated within last 24 hours (unless `--force`)
 - For Regional, only updates priority tables: SAGDP1, CAINC1, SAINC1
 - For GDPbyIndustry, only updates priority tables: 1, 5, 6 (Value Added, Contributions, Real Value Added)
+- For ITA, only updates priority indicators: BalGds, BalServ, BalCAcc (Trade Balances)
+- For FixedAssets, updates all tables (annual data only)
 
 **Options:**
 | Option | Values | Default | Description |
 |--------|--------|---------|-------------|
-| `--dataset` | NIPA, Regional, GDPbyIndustry, all | all | Dataset to update |
+| `--dataset` | NIPA, Regional, GDPbyIndustry, ITA, FixedAssets, all | all | Dataset to update |
 | `--force` | flag | - | Force update even if recent |
 | `--year` | ALL, LAST5, LAST10, ... | LAST5 | Year specification |
 
@@ -278,6 +374,19 @@ data = client.get_gdpbyindustry_data(
     frequency="A",        # Annual
     year="2020,2021,2022,2023",
     industry="ALL"        # All industries
+)
+
+# Get ITA (International Transactions) data
+data = client.get_ita_data_by_indicator(
+    indicator="BalGds",   # Balance on Goods
+    frequency="A",        # Annual
+    year="2020,2021,2022,2023"
+)
+
+# Get FixedAssets data
+data = client.get_fixedassets_table_data(
+    table_name="FAAt101", # Current-Cost Net Stock
+    year="2020,2021,2022,2023"
 )
 
 # Check rate limit status
@@ -383,9 +492,70 @@ progress = collector.backfill_all_tables(
 )
 ```
 
+### ITACollector
+
+Handles ITA (International Transactions) data collection:
+- Indicators catalog sync (transaction types)
+- Areas/countries catalog sync
+- Data point upserts with composite primary key (indicator, area, frequency, time_period)
+
+```python
+from src.bea.bea_collector import ITACollector
+
+collector = ITACollector(client, session)
+
+# Sync catalogs
+collector.sync_indicators_catalog()
+collector.sync_areas_catalog()
+
+# Collect data for a single indicator
+stats = collector.collect_indicator_data(
+    indicator="BalGds",
+    frequency="A",
+    year="ALL"
+)
+
+# Backfill all indicators
+progress = collector.backfill_all_indicators(
+    frequency="A",
+    year="ALL",
+    indicators=["BalGds", "BalServ", "BalCAcc"],  # optional filter
+    progress_callback=lambda p: print(p.to_dict())
+)
+```
+
+### FixedAssetsCollector
+
+Handles FixedAssets data collection (annual data only):
+- Table catalog sync
+- Series metadata extraction
+- Data point upserts with composite primary key (series_code, time_period)
+
+```python
+from src.bea.bea_collector import FixedAssetsCollector
+
+collector = FixedAssetsCollector(client, session)
+
+# Sync table catalog
+collector.sync_tables_catalog()
+
+# Collect data for a single table
+stats = collector.collect_table_data(
+    table_name="FAAt101",
+    year="ALL"
+)
+
+# Backfill all tables
+progress = collector.backfill_all_tables(
+    year="ALL",
+    tables=["FAAt101", "FAAt102", "FAAt103"],  # optional filter
+    progress_callback=lambda p: print(p.to_dict())
+)
+```
+
 ### BEACollector
 
-Unified collector that combines NIPA, Regional, and GDPbyIndustry:
+Unified collector that combines NIPA, Regional, GDPbyIndustry, ITA, and FixedAssets:
 
 ```python
 from src.bea.bea_collector import BEACollector
@@ -399,6 +569,8 @@ collector.sync_dataset_catalog()
 collector.nipa.backfill_all_tables(...)
 collector.regional.backfill_all_tables(...)
 collector.gdpbyindustry.backfill_all_tables(...)
+collector.ita.backfill_all_indicators(...)
+collector.fixedassets.backfill_all_tables(...)
 ```
 
 ## Database Models
@@ -483,11 +655,62 @@ bea_gdpbyindustry_data
 └── cl_unit, unit_mult, note_ref
 ```
 
+### ITA (International Transactions) Data Models
+
+```
+bea_ita_indicators
+├── indicator_code (PK) - e.g., "BalGds", "ExpServ"
+├── indicator_description
+├── is_active
+└── created_at, updated_at
+
+bea_ita_areas
+├── area_code (PK) - e.g., "China", "Canada", "AllCountries"
+├── area_name
+├── area_type - "Country", "Region", "Aggregate"
+├── is_active
+└── created_at, updated_at
+
+bea_ita_data
+├── indicator_code (PK, FK)
+├── area_code (PK, FK)
+├── frequency (PK) - "A", "QSA", "QNSA"
+├── time_period (PK) - e.g., "2023", "2023Q4"
+├── value
+├── time_series_id, time_series_description
+└── cl_unit, unit_mult, note_ref
+```
+
+### FixedAssets Data Models
+
+```
+bea_fixedassets_tables
+├── table_name (PK) - e.g., "FAAt101", "FAAt201"
+├── table_description
+├── first_year, last_year
+├── is_active
+└── created_at, updated_at
+
+bea_fixedassets_series
+├── series_code (PK) - e.g., "FAAt101-d001-a"
+├── table_name (FK)
+├── line_number
+├── line_description
+├── metric_name, cl_unit, unit_mult
+└── is_active
+
+bea_fixedassets_data
+├── series_code (PK, FK)
+├── time_period (PK) - e.g., "2023" (annual only)
+├── value
+└── note_ref
+```
+
 ### Tracking Models
 
 ```
 bea_dataset_freshness
-├── dataset_name (PK) - "NIPA", "Regional", "GDPbyIndustry"
+├── dataset_name (PK) - "NIPA", "Regional", "GDPbyIndustry", "ITA", "FixedAssets"
 ├── latest_data_year, latest_data_period
 ├── last_checked_at, last_bea_update_detected
 ├── needs_update, update_in_progress
@@ -510,7 +733,9 @@ Access at: `http://localhost:3001/bea`
 
 The dashboard displays:
 - Summary cards (total data points, datasets current/need update, API requests left)
-- Dataset cards for NIPA and Regional (tables, series, data points counts)
+- Dataset cards for NIPA, Regional, GDPbyIndustry, ITA, and FixedAssets (tables/indicators, series, data points counts)
+- Action buttons for backfill and update operations (by dataset, category, frequency)
+- Sentinel monitoring panel for detecting BEA data updates
 - API usage chart (last 7 days)
 - Recent collection runs table
 
@@ -604,3 +829,177 @@ See the official BEA API documentation:
 - Regional data typically starts from 1969 (state) or 2001 (county)
 - Data is released with various lags (monthly indicators faster than annual)
 - BEA revises historical data periodically
+- Key PCE Tables (Section 2.3-2.8)
+
+  | Table  | Description                                   | Frequency |
+  |--------|-----------------------------------------------|-----------|
+  | T20305 | PCE by Major Type of Product (nominal $)      | A, Q      |
+  | T20306 | Real PCE by Major Type of Product (chained $) | A, Q      |
+  | T20301 | % Change in Real PCE by Major Type            | A, Q      |
+  | T20304 | Price Indexes for PCE by Major Type           | A, Q      |
+  | T20405 | PCE by Type of Product (more detailed)        | A, Q      |
+  | T20406 | Real PCE by Type of Product                   | A, Q      |
+  | T20505 | PCE by Function                               | A only    |
+  | T20805 | PCE by Major Type (Monthly)                   | M         |
+  | T20806 | Real PCE by Major Type (Monthly)              | M         |
+
+  Most commonly used:
+  - T20305 - Nominal PCE values
+  - T20306 - Real (inflation-adjusted) PCE values
+  - T20805/T20806 - Monthly PCE data
+
+  The T3xxxx tables with "consumption" are for Government consumption, not personal.
+- Key GDP Tables (Section 1.1-1.17)
+
+  | Table  | Description                               | Frequency |
+  |--------|-------------------------------------------|-----------|
+  | T10105 | GDP (nominal $) - The main GDP table      | A, Q      |
+  | T10106 | Real GDP (chained $) - Inflation-adjusted | A, Q      |
+  | T10101 | % Change in Real GDP                      | A, Q      |
+  | T10102 | Contributions to % Change in Real GDP     | A, Q      |
+  | T10104 | GDP Price Indexes (deflator)              | A, Q      |
+  | T10109 | Implicit Price Deflators for GDP          | A, Q      |
+  | T10110 | Percentage Shares of GDP                  | A, Q      |
+
+  More Detailed GDP Breakdowns
+
+  | Table  | Description                                | Frequency |
+  |--------|--------------------------------------------|-----------|
+  | T10505 | GDP, Expanded Detail (more line items)     | A, Q      |
+  | T10506 | Real GDP, Expanded Detail                  | A, Q      |
+  | T10205 | GDP by Major Type of Product               | A, Q      |
+  | T10705 | GDP vs GNP vs National Income relationship | A, Q      |
+  | T11705 | GDP vs Gross Domestic Income               | A, Q      |
+
+  Not Seasonally Adjusted (Section 8)
+
+  | Table  | Description                           |
+  |--------|---------------------------------------|
+  | T80105 | GDP, Not Seasonally Adjusted (Q)      |
+  | T80106 | Real GDP, Not Seasonally Adjusted (Q) |
+
+  Most commonly used:
+  - T10105 - Nominal GDP
+  - T10106 - Real GDP (chained dollars)
+  - T10101 - GDP growth rate 
+- Important Regional Tables
+
+  State GDP (Annual & Quarterly)
+
+  | Table  | Description             | Frequency |
+  |--------|-------------------------|-----------|
+  | SAGDP1 | State GDP summary       | Annual    |
+  | SAGDP2 | GDP by state (detailed) | Annual    |
+  | SAGDP9 | Real GDP by state       | Annual    |
+  | SQGDP1 | State GDP summary       | Quarterly |
+  | SQGDP2 | GDP by state            | Quarterly |
+  | SQGDP9 | Real GDP by state       | Quarterly |
+
+  State Personal Income
+
+  | Table   | Description                                              | Frequency |
+  |---------|----------------------------------------------------------|-----------|
+  | SAINC1  | Personal income summary (income, population, per capita) | Annual    |
+  | SAINC4  | Personal income & employment by component                | Annual    |
+  | SAINC5N | Personal income & earnings by NAICS industry             | Annual    |
+  | SAINC51 | Disposable personal income                               | Annual    |
+  | SQINC1  | Personal income summary                                  | Quarterly |
+
+  County Level
+
+  | Table  | Description                         |
+  |--------|-------------------------------------|
+  | CAINC1 | County personal income summary      |
+  | CAINC4 | County personal income by component |
+  | CAGDP1 | County GDP summary                  |
+  | CAGDP2 | County GDP detailed                 |
+  | CAGDP9 | County real GDP                     |
+
+  Other Useful
+
+  | Table     | Description                                    |
+  |-----------|------------------------------------------------|
+  | SARPP     | Real personal income & regional price parities |
+  | SAPCE1    | Personal consumption expenditures by state     |
+  | SASUMMARY | State summary (income, GDP, PCE, employment)   |
+
+  ---
+  Important GDP by Industry Tables
+
+  Value Added (Core)
+
+  | Table | Description                                              | Frequency |
+  |-------|----------------------------------------------------------|-----------|
+  | 1     | Value Added by Industry (nominal $)                      | A, Q      |
+  | 10    | Real Value Added by Industry                             | A, Q      |
+  | 5     | Value Added as % of GDP                                  | A, Q      |
+  | 6     | Components of Value Added (compensation, taxes, surplus) | A         |
+  | 8     | Quantity Indexes for Value Added                         | A, Q      |
+  | 13    | Contributions to % Change in Real GDP by Industry        | A, Q      |
+
+  Gross Output
+
+  | Table | Description                   | Frequency |
+  |-------|-------------------------------|-----------|
+  | 15    | Gross Output by Industry      | A, Q      |
+  | 208   | Real Gross Output by Industry | A, Q      |
+
+  Intermediate Inputs
+
+  | Table | Description                          | Frequency |
+  |-------|--------------------------------------|-----------|
+  | 20    | Intermediate Inputs by Industry      | A, Q      |
+  | 209   | Real Intermediate Inputs by Industry | A, Q      |
+
+  ---
+  Important ITA (International Transactions) Indicators
+
+  Trade Balance
+
+  | Indicator | Description                                |
+  |-----------|-------------------------------------------|
+  | BalGds    | Balance on Goods                          |
+  | BalServ   | Balance on Services                       |
+  | BalCAcc   | Balance on Current Account                |
+
+  Exports & Imports
+
+  | Indicator   | Description                              |
+  |-------------|------------------------------------------|
+  | ExpGds      | Exports of Goods                         |
+  | ImpGds      | Imports of Goods                         |
+  | ExpServ     | Exports of Services                      |
+  | ImpServ     | Imports of Services                      |
+
+  Income & Transfers
+
+  | Indicator      | Description                           |
+  |----------------|---------------------------------------|
+  | PrimInc        | Primary Income (investment income)    |
+  | SecInc         | Secondary Income (transfers)          |
+  | IncReceipts    | Income Receipts                       |
+  | IncPayments    | Income Payments                       |
+  | PfInvAssets    | Portfolio Investment Assets           |
+
+  **Frequencies:**
+  - A: Annual
+  - QSA: Quarterly Seasonally Adjusted
+  - QNSA: Quarterly Not Seasonally Adjusted
+
+  **Areas/Countries:** Data available by individual country (China, Canada, Mexico, etc.), regions (Europe, Asia), and aggregates (AllCountries).
+
+  ---
+  Most commonly used:
+  - Regional: SAGDP1, SAINC1, CAINC1 (the "priority" tables)
+  - Industry: Tables 1, 10, 13 (value added and contributions to GDP growth)
+  - ITA: BalGds, BalServ, BalCAcc (trade balances for equity/macro analysis)
+
+## Suggested Schedule
+
+Suggested schedule:
+
+  | Frequency | Datasets                                                       | Schedule                                 |
+  |-----------|----------------------------------------------------------------|------------------------------------------|
+  | Monthly   | NIPA (M)                                                       | 1st week of month                        |
+  | Quarterly | NIPA (Q), GDPbyIndustry (Q), ITA (QSA/QNSA)                    | After quarter end (late Jan/Apr/Jul/Oct) |
+  | Annually  | NIPA (A), Regional, GDPbyIndustry (A), ITA (A), FixedAssets    | Once a year or after major BEA revisions |

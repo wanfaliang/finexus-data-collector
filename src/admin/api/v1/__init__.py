@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from src.admin.api.v1 import freshness, quota, actions, cu_explorer, la_explorer, ce_explorer, ln_explorer
 from src.admin.api.v1 import bea_dashboard, bea_explorer, bea_actions, bea_sentinel
+from src.admin.api.v1 import treasury_dashboard, treasury_actions, treasury_explorer
 
 # Create main API router
 api_router = APIRouter()
@@ -74,4 +75,24 @@ api_router.include_router(
     bea_sentinel.router,
     prefix="/bea",
     tags=["bea-sentinel"],
+)
+
+# Treasury routers - actions MUST come first to avoid route masking
+# (e.g., /backfill/auctions being matched by /auctions/{security_term}/history)
+api_router.include_router(
+    treasury_actions.router,
+    prefix="/treasury",
+    tags=["treasury-actions"],
+)
+
+api_router.include_router(
+    treasury_dashboard.router,
+    prefix="/treasury",
+    tags=["treasury"],
+)
+
+api_router.include_router(
+    treasury_explorer.router,
+    prefix="/treasury/explorer",
+    tags=["treasury-explorer"],
 )

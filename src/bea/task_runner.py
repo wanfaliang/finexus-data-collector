@@ -16,7 +16,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from src.bea.bea_client import BEAClient
-from src.bea.bea_collector import NIPACollector, RegionalCollector, GDPByIndustryCollector, CollectionProgress, SentinelManager
+from src.bea.bea_collector import NIPACollector, RegionalCollector, GDPByIndustryCollector, ITACollector, FixedAssetsCollector, CollectionProgress, SentinelManager
 from src.database.bea_tracking_models import BEACollectionRun, BEADatasetFreshness
 from src.database.connection import get_session
 from src.config import settings
@@ -81,6 +81,8 @@ class BEATaskRunner:
                 "NIPA": "NIPA" in self._running_tasks,
                 "Regional": "Regional" in self._running_tasks,
                 "GDPbyIndustry": "GDPbyIndustry" in self._running_tasks,
+                "ITA": "ITA" in self._running_tasks,
+                "FixedAssets": "FixedAssets" in self._running_tasks,
             }
 
     def start_nipa_backfill(
@@ -363,6 +365,169 @@ class BEATaskRunner:
         log.info(f"Started GDPbyIndustry update task (run_id={run_id})")
         return run_id
 
+    def start_ita_backfill(
+        self,
+        frequency: str = "A",
+        year: str = "ALL",
+        indicators: Optional[list] = None,
+    ) -> Optional[int]:
+        """
+        Start ITA (International Transactions) backfill in background thread.
+
+        Args:
+            frequency: 'A' (annual), 'QSA' (quarterly seasonally adjusted), 'QNSA' (quarterly not seasonally adjusted)
+            year: Year specification ('ALL', 'LAST5', specific year)
+            indicators: Optional list of specific indicator codes
+
+        Returns:
+            run_id if started, None if already running
+        """
+        if self.is_running("ITA"):
+            log.warning("ITA task already running")
+            return None
+
+        # Create run record first
+        run_id = self._create_run_record(
+            "ITA", "backfill",
+            frequency=frequency,
+            year_spec=year,
+            tables_filter=indicators  # Using tables_filter for indicators
+        )
+
+        def task():
+            self._run_ita_backfill(run_id, frequency, year, indicators)
+
+        thread = threading.Thread(target=task, daemon=True)
+
+        with self._task_lock:
+            self._running_tasks["ITA"] = thread
+
+        thread.start()
+        log.info(f"Started ITA backfill task (run_id={run_id})")
+        return run_id
+
+    def start_ita_update(
+        self,
+        frequency: str = "A",
+        year: str = "LAST5",
+        indicators: Optional[list] = None,
+    ) -> Optional[int]:
+        """
+        Start ITA (International Transactions) update in background thread.
+
+        Args:
+            frequency: 'A' (annual), 'QSA' (quarterly seasonally adjusted), 'QNSA' (quarterly not seasonally adjusted)
+            year: Year specification
+            indicators: Optional list of specific indicator codes
+
+        Returns:
+            run_id if started, None if already running
+        """
+        if self.is_running("ITA"):
+            log.warning("ITA task already running")
+            return None
+
+        # Create run record with run_type='update'
+        run_id = self._create_run_record(
+            "ITA", "update",
+            frequency=frequency,
+            year_spec=year,
+            tables_filter=indicators
+        )
+
+        def task():
+            self._run_ita_backfill(run_id, frequency, year, indicators)
+
+        thread = threading.Thread(target=task, daemon=True)
+
+        with self._task_lock:
+            self._running_tasks["ITA"] = thread
+
+        thread.start()
+        log.info(f"Started ITA update task (run_id={run_id})")
+        return run_id
+
+    def start_fixedassets_backfill(
+        self,
+        year: str = "ALL",
+        tables: Optional[list] = None,
+    ) -> Optional[int]:
+        """
+        Start Fixed Assets backfill in background thread.
+
+        Args:
+            year: Year specification ('ALL', 'LAST5', 'LAST10', specific year)
+            tables: Optional list of specific table names
+
+        Returns:
+            run_id if started, None if already running
+
+        Note:
+            Fixed Assets only supports annual data.
+        """
+        if self.is_running("FixedAssets"):
+            log.warning("FixedAssets task already running")
+            return None
+
+        # Create run record first
+        run_id = self._create_run_record(
+            "FixedAssets", "backfill",
+            frequency="A",  # Fixed Assets is annual only
+            year_spec=year,
+            tables_filter=tables
+        )
+
+        def task():
+            self._run_fixedassets_backfill(run_id, year, tables)
+
+        thread = threading.Thread(target=task, daemon=True)
+
+        with self._task_lock:
+            self._running_tasks["FixedAssets"] = thread
+
+        thread.start()
+        log.info(f"Started FixedAssets backfill task (run_id={run_id})")
+        return run_id
+
+    def start_fixedassets_update(
+        self,
+        year: str = "LAST5",
+        tables: Optional[list] = None,
+    ) -> Optional[int]:
+        """
+        Start Fixed Assets update in background thread.
+
+        Args:
+            year: Year specification
+            tables: Optional list of specific table names
+
+        Returns:
+            run_id if started, None if already running
+        """
+        if self.is_running("FixedAssets"):
+            log.warning("FixedAssets task already running")
+            return None
+
+        # Create run record with run_type='update'
+        run_id = self._create_run_record(
+            "FixedAssets", "update",
+            frequency="A",
+            year_spec=year,
+            tables_filter=tables
+        )
+
+        def task():
+            self._run_fixedassets_backfill(run_id, year, tables)
+
+        thread = threading.Thread(target=task, daemon=True)
+
+        with self._task_lock:
+            self._running_tasks["FixedAssets"] = thread
+
+        thread.start()
+        log.info(f"Started FixedAssets update task (run_id={run_id})")
+        return run_id
+
     # ==================== Internal Methods ==================== #
 
     def _create_run_record(
@@ -561,6 +726,87 @@ class BEATaskRunner:
         finally:
             with self._task_lock:
                 self._running_tasks.pop("GDPbyIndustry", None)
+
+    def _run_ita_backfill(
+        self,
+        run_id: int,
+        frequency: str,
+        year: str,
+        indicators: Optional[list],
+    ):
+        """Execute ITA backfill (runs in background thread)."""
+        try:
+            self._update_run_status(run_id, TaskStatus.RUNNING)
+
+            client = self._get_client()
+
+            with get_session() as session:
+                collector = ITACollector(client, session)
+
+                # Pass run_id to collector so it uses existing record (no duplicate)
+                progress = collector.backfill_all_indicators(
+                    frequency=frequency,
+                    year=year,
+                    indicators=indicators,
+                    progress_callback=lambda p: self._update_run_status(run_id, TaskStatus.RUNNING, p),
+                    run_id=run_id
+                )
+
+                status = TaskStatus.COMPLETED if not progress.errors else TaskStatus.FAILED
+                error_msg = "; ".join(progress.errors[:5]) if progress.errors else None
+                self._update_run_status(run_id, status, progress, error_msg)
+
+                # Sync sentinels after successful update
+                if status == TaskStatus.COMPLETED:
+                    sentinel_manager = SentinelManager(client, session)
+                    sentinel_manager.sync_sentinels_from_data('ITA')
+
+                log.info(f"ITA backfill completed: {progress.data_points_inserted} data points")
+
+        except Exception as e:
+            log.error(f"ITA backfill failed: {e}", exc_info=True)
+            self._update_run_status(run_id, TaskStatus.FAILED, error_message=str(e))
+
+        finally:
+            with self._task_lock:
+                self._running_tasks.pop("ITA", None)
+
+    def _run_fixedassets_backfill(
+        self,
+        run_id: int,
+        year: str,
+        tables: Optional[list],
+    ):
+        """Execute Fixed Assets backfill (runs in background thread)."""
+        try:
+            self._update_run_status(run_id, TaskStatus.RUNNING)
+
+            client = self._get_client()
+
+            with get_session() as session:
+                collector = FixedAssetsCollector(client, session)
+
+                # Pass run_id to collector so it uses existing record (no duplicate)
+                progress = collector.backfill_all_tables(
+                    year=year,
+                    tables=tables,
+                    progress_callback=lambda p: self._update_run_status(run_id, TaskStatus.RUNNING, p),
+                    run_id=run_id
+                )
+
+                status = TaskStatus.COMPLETED if not progress.errors else TaskStatus.FAILED
+                error_msg = "; ".join(progress.errors[:5]) if progress.errors else None
+                self._update_run_status(run_id, status, progress, error_msg)
+
+                log.info(f"FixedAssets backfill completed: {progress.data_points_inserted} data points")
+
+        except Exception as e:
+            log.error(f"FixedAssets backfill failed: {e}", exc_info=True)
+            self._update_run_status(run_id, TaskStatus.FAILED, error_message=str(e))
+
+        finally:
+            with self._task_lock:
+                self._running_tasks.pop("FixedAssets", None)
 
     def _run_update(
         self,

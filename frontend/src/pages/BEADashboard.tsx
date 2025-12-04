@@ -33,12 +33,12 @@ import {
   PlayArrow,
   KeyboardArrowDown,
   Refresh,
-  Sensors,
-  NewReleases,
+  OpenInNew,
 } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { beaDashboardAPI, beaActionsAPI, beaSentinelAPI } from '../api/client';
-import type { BEADatasetFreshness, BEACollectionRun, BEASentinelStats } from '../api/client';
+import { beaDashboardAPI, beaActionsAPI } from '../api/client';
+import type { BEADatasetFreshness, BEACollectionRun } from '../api/client';
 
 // Helper function to format timestamps as relative time
 const formatRelativeTime = (dateStr: string | null | undefined): string => {
@@ -76,6 +76,51 @@ const formatDuration = (seconds: number | null): string => {
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
 };
 
+// Dataset info with descriptions and update strategies
+const datasetInfo: Record<string, {
+  description: string;
+  frequencies: string;
+  updateSchedule: string;
+  keyTables: string;
+  explorerPath: string;
+}> = {
+  'NIPA': {
+    description: 'National Income and Product Accounts - GDP, income, consumption',
+    frequencies: 'A, Q, M',
+    updateSchedule: 'Monthly (M), Quarterly (Q), Annually (A)',
+    keyTables: 'T10101 (GDP), T20100 (Personal Income)',
+    explorerPath: '/bea/nipa',
+  },
+  'Regional': {
+    description: 'Regional Economic Accounts - State/county GDP, personal income',
+    frequencies: 'A, Q',
+    updateSchedule: 'Annually or after BEA revisions',
+    keyTables: 'SAGDP1 (State GDP), SAINC1 (State Income)',
+    explorerPath: '/bea/regional',
+  },
+  'GDPbyIndustry': {
+    description: 'GDP by Industry - Value added, contributions by industry sector',
+    frequencies: 'A, Q',
+    updateSchedule: 'Quarterly (late Jan/Apr/Jul/Oct)',
+    keyTables: 'Table 1 (Value Added), Table 5 (Contributions)',
+    explorerPath: '/bea/gdpbyindustry',
+  },
+  'ITA': {
+    description: 'International Transactions - Trade balance, exports, imports',
+    frequencies: 'A, QSA, QNSA',
+    updateSchedule: 'Quarterly (SA/NSA)',
+    keyTables: 'BalGds, BalServ, BalCAcc (Trade Balances)',
+    explorerPath: '/bea/ita',
+  },
+  'FixedAssets': {
+    description: 'Fixed Assets - Current-cost stocks, depreciation, investment',
+    frequencies: 'A only',
+    updateSchedule: 'Annually or after BEA revisions',
+    keyTables: 'FAAt101 (Net Stock), FAAt103 (Depreciation)',
+    explorerPath: '/bea/fixedassets',
+  },
+};
+
 // Dataset Card Component
 function DatasetCard({ dataset }: { dataset: BEADatasetFreshness }) {
   const getStatusConfig = () => {
@@ -90,23 +135,18 @@ function DatasetCard({ dataset }: { dataset: BEADatasetFreshness }) {
 
   const statusConfig = getStatusConfig();
   const StatusIcon = statusConfig.icon;
-
-  const datasetDescriptions: Record<string, string> = {
-    'NIPA': 'National Income and Product Accounts - GDP, income, consumption',
-    'Regional': 'Regional Economic Accounts - State/county GDP, personal income',
-    'GDPbyIndustry': 'GDP by Industry - Value added, contributions by industry sector',
-  };
+  const info = datasetInfo[dataset.dataset_name];
 
   return (
     <Card sx={{ height: '100%', border: '1px solid', borderColor: 'divider' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <CardContent sx={{ pb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
           <Box>
             <Typography variant="h6" fontWeight="bold">
               {dataset.dataset_name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {datasetDescriptions[dataset.dataset_name] || dataset.dataset_name}
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+              {info?.description || dataset.dataset_name}
             </Typography>
           </Box>
           <Chip
@@ -121,51 +161,103 @@ function DatasetCard({ dataset }: { dataset: BEADatasetFreshness }) {
           />
         </Box>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <TableChart sx={{ color: 'primary.main', mb: 0.5 }} />
-              <Typography variant="h6" fontWeight="bold">
+            <Box sx={{ textAlign: 'center', p: 0.75, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <TableChart sx={{ color: 'primary.main', fontSize: 20 }} />
+              <Typography variant="subtitle2" fontWeight="bold">
                 {dataset.tables_count}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
                 Tables
               </Typography>
             </Box>
           </Grid>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <Timeline sx={{ color: 'secondary.main', mb: 0.5 }} />
-              <Typography variant="h6" fontWeight="bold">
+            <Box sx={{ textAlign: 'center', p: 0.75, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Timeline sx={{ color: 'secondary.main', fontSize: 20 }} />
+              <Typography variant="subtitle2" fontWeight="bold">
                 {formatNumber(dataset.series_count)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
                 Series
               </Typography>
             </Box>
           </Grid>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <Storage sx={{ color: 'info.main', mb: 0.5 }} />
-              <Typography variant="h6" fontWeight="bold">
+            <Box sx={{ textAlign: 'center', p: 0.75, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Storage sx={{ color: 'info.main', fontSize: 20 }} />
+              <Typography variant="subtitle2" fontWeight="bold">
                 {formatNumber(dataset.data_points_count)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
                 Data Points
               </Typography>
             </Box>
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="body2" color="text.secondary">
-            Latest Data: {dataset.latest_data_year || 'N/A'}
-            {dataset.latest_data_period && ` ${dataset.latest_data_period}`}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Last Updated: {formatRelativeTime(dataset.last_update_completed)}
-          </Typography>
+        <Box sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Latest Data:</Typography>
+            <Typography variant="caption" fontWeight="medium">
+              {dataset.latest_data_year || 'N/A'}{dataset.latest_data_period && ` ${dataset.latest_data_period}`}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Last Updated:</Typography>
+            <Typography variant="caption" fontWeight="medium">
+              {formatRelativeTime(dataset.last_update_completed)}
+            </Typography>
+          </Box>
         </Box>
+
+        {info && (
+          <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px dashed', borderColor: 'divider', bgcolor: 'action.hover', mx: -2, px: 2, pb: 0.5, mb: -1 }}>
+            <Typography variant="caption" fontWeight="bold" color="primary.main" sx={{ display: 'block', mb: 0.5 }}>
+              Update Strategy
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
+              <Typography variant="caption" color="text.secondary">Frequencies:</Typography>
+              <Typography variant="caption" fontWeight="medium">{info.frequencies}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
+              <Typography variant="caption" color="text.secondary">Schedule:</Typography>
+              <Typography variant="caption" fontWeight="medium" sx={{ textAlign: 'right', maxWidth: '60%' }}>{info.updateSchedule}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">Key Tables:</Typography>
+              <Typography variant="caption" fontWeight="medium" sx={{ textAlign: 'right', maxWidth: '65%', fontSize: '0.65rem' }}>{info.keyTables}</Typography>
+            </Box>
+          </Box>
+        )}
+
+        {/* Explore Button */}
+        {info?.explorerPath && (
+          <Box sx={{ mt: 2, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Button
+              component={Link}
+              to={info.explorerPath}
+              variant="outlined"
+              size="small"
+              endIcon={<OpenInNew sx={{ fontSize: 16 }} />}
+              fullWidth
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  borderColor: 'primary.main',
+                },
+              }}
+            >
+              Explore Data
+            </Button>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
@@ -191,6 +283,8 @@ function CollectionRunRow({ run }: { run: BEACollectionRun }) {
       case 'A': return 'Annual';
       case 'Q': return 'Quarterly';
       case 'M': return 'Monthly';
+      case 'QSA': return 'Qtr (SA)';
+      case 'QNSA': return 'Qtr (NSA)';
       default: return freq;
     }
   };
@@ -232,10 +326,14 @@ function ActionButtons() {
   const [nipaAnchor, setNipaAnchor] = useState<null | HTMLElement>(null);
   const [regionalAnchor, setRegionalAnchor] = useState<null | HTMLElement>(null);
   const [gdpbyindustryAnchor, setGdpbyindustryAnchor] = useState<null | HTMLElement>(null);
+  const [itaAnchor, setItaAnchor] = useState<null | HTMLElement>(null);
+  const [fixedassetsAnchor, setFixedassetsAnchor] = useState<null | HTMLElement>(null);
   // Update menu anchors
   const [nipaUpdateAnchor, setNipaUpdateAnchor] = useState<null | HTMLElement>(null);
   const [regionalUpdateAnchor, setRegionalUpdateAnchor] = useState<null | HTMLElement>(null);
   const [gdpbyindustryUpdateAnchor, setGdpbyindustryUpdateAnchor] = useState<null | HTMLElement>(null);
+  const [itaUpdateAnchor, setItaUpdateAnchor] = useState<null | HTMLElement>(null);
+  const [fixedassetsUpdateAnchor, setFixedassetsUpdateAnchor] = useState<null | HTMLElement>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -249,7 +347,7 @@ function ActionButtons() {
     refetchInterval: (query) => {
       const data = query.state.data;
       // Poll every 3s when task running, don't poll otherwise
-      const isRunning = data?.nipa_running || data?.regional_running || data?.gdpbyindustry_running;
+      const isRunning = data?.nipa_running || data?.regional_running || data?.gdpbyindustry_running || data?.ita_running || data?.fixedassets_running;
       return isRunning ? 3000 : false;
     },
   });
@@ -307,6 +405,32 @@ function ActionButtons() {
     onError: handleMutationError,
   });
 
+  // ITA Mutations
+  const itaBackfillMutation = useMutation({
+    mutationFn: beaActionsAPI.backfillITA,
+    onSuccess: handleMutationResult,
+    onError: handleMutationError,
+  });
+
+  const itaUpdateMutation = useMutation({
+    mutationFn: beaActionsAPI.updateITA,
+    onSuccess: handleMutationResult,
+    onError: handleMutationError,
+  });
+
+  // FixedAssets Mutations
+  const fixedassetsBackfillMutation = useMutation({
+    mutationFn: beaActionsAPI.backfillFixedAssets,
+    onSuccess: handleMutationResult,
+    onError: handleMutationError,
+  });
+
+  const fixedassetsUpdateMutation = useMutation({
+    mutationFn: beaActionsAPI.updateFixedAssets,
+    onSuccess: handleMutationResult,
+    onError: handleMutationError,
+  });
+
   // Backfill handlers
   const handleNipaBackfill = (frequency: 'A' | 'Q' | 'M', year: string) => {
     setNipaAnchor(null);
@@ -339,7 +463,29 @@ function ActionButtons() {
     gdpbyindustryUpdateMutation.mutate({ category, frequency, year: 'LAST5' });
   };
 
-  const isAnyTaskRunning = taskStatus?.nipa_running || taskStatus?.regional_running || taskStatus?.gdpbyindustry_running;
+  // ITA handlers
+  const handleItaBackfill = (frequency: 'A' | 'QSA' | 'QNSA', year: string) => {
+    setItaAnchor(null);
+    itaBackfillMutation.mutate({ frequency, year });
+  };
+
+  const handleItaUpdate = (category: 'priority' | 'goods' | 'services' | 'income' | 'current_account' | 'all', frequency: 'A' | 'QSA' | 'QNSA' = 'A') => {
+    setItaUpdateAnchor(null);
+    itaUpdateMutation.mutate({ category, frequency, year: 'LAST5' });
+  };
+
+  // FixedAssets handlers
+  const handleFixedassetsBackfill = (year: string) => {
+    setFixedassetsAnchor(null);
+    fixedassetsBackfillMutation.mutate({ year });
+  };
+
+  const handleFixedassetsUpdate = (category: 'priority' | 'all', year: string = 'LAST5') => {
+    setFixedassetsUpdateAnchor(null);
+    fixedassetsUpdateMutation.mutate({ year });
+  };
+
+  const isAnyTaskRunning = taskStatus?.nipa_running || taskStatus?.regional_running || taskStatus?.gdpbyindustry_running || taskStatus?.ita_running || taskStatus?.fixedassets_running;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -454,6 +600,68 @@ function ActionButtons() {
           <MenuItem onClick={() => handleGDPbyIndustryBackfill('Q', 'LAST10')}>Last 10 Years</MenuItem>
           <MenuItem onClick={() => handleGDPbyIndustryBackfill('Q', 'LAST5')}>Last 5 Years</MenuItem>
         </Menu>
+
+        {/* ITA Backfill Button */}
+        <Button
+          variant="outlined"
+          startIcon={<PlayArrow />}
+          endIcon={<KeyboardArrowDown />}
+          onClick={(e) => setItaAnchor(e.currentTarget)}
+          disabled={taskStatus?.ita_running}
+          size="small"
+        >
+          {taskStatus?.ita_running ? 'Running...' : 'Int\'l Trade'}
+        </Button>
+        <Menu
+          anchorEl={itaAnchor}
+          open={Boolean(itaAnchor)}
+          onClose={() => setItaAnchor(null)}
+        >
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            Annual (A)
+          </MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('A', 'ALL')}>All Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('A', 'LAST10')}>Last 10 Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('A', 'LAST5')}>Last 5 Years</MenuItem>
+          <Divider />
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            Quarterly (SA)
+          </MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QSA', 'ALL')}>All Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QSA', 'LAST10')}>Last 10 Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QSA', 'LAST5')}>Last 5 Years</MenuItem>
+          <Divider />
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            Quarterly (NSA)
+          </MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QNSA', 'ALL')}>All Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QNSA', 'LAST10')}>Last 10 Years</MenuItem>
+          <MenuItem onClick={() => handleItaBackfill('QNSA', 'LAST5')}>Last 5 Years</MenuItem>
+        </Menu>
+
+        {/* FixedAssets Backfill Button */}
+        <Button
+          variant="outlined"
+          startIcon={<PlayArrow />}
+          endIcon={<KeyboardArrowDown />}
+          onClick={(e) => setFixedassetsAnchor(e.currentTarget)}
+          disabled={taskStatus?.fixedassets_running}
+          size="small"
+        >
+          {taskStatus?.fixedassets_running ? 'Running...' : 'Fixed Assets'}
+        </Button>
+        <Menu
+          anchorEl={fixedassetsAnchor}
+          open={Boolean(fixedassetsAnchor)}
+          onClose={() => setFixedassetsAnchor(null)}
+        >
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            Annual Only (A)
+          </MenuItem>
+          <MenuItem onClick={() => handleFixedassetsBackfill('ALL')}>All Years</MenuItem>
+          <MenuItem onClick={() => handleFixedassetsBackfill('LAST10')}>Last 10 Years</MenuItem>
+          <MenuItem onClick={() => handleFixedassetsBackfill('LAST5')}>Last 5 Years</MenuItem>
+        </Menu>
       </Box>
 
       {/* Update Buttons Row */}
@@ -493,6 +701,7 @@ function ActionButtons() {
           <Divider />
           <MenuItem onClick={() => handleNipaUpdate('all')}>All Tables (Annual)</MenuItem>
           <MenuItem onClick={() => handleNipaUpdate('all', 'Q')}>All Tables (Quarterly)</MenuItem>
+          <MenuItem onClick={() => handleNipaUpdate('all', 'M')}>All Tables (Monthly)</MenuItem>
         </Menu>
 
         {/* Regional Update Button */}
@@ -558,6 +767,63 @@ function ActionButtons() {
           <MenuItem onClick={() => handleGDPbyIndustryUpdate('all')}>All Tables (Annual)</MenuItem>
           <MenuItem onClick={() => handleGDPbyIndustryUpdate('all', 'Q')}>All Tables (Quarterly)</MenuItem>
         </Menu>
+
+        {/* ITA Update Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Refresh />}
+          endIcon={<KeyboardArrowDown />}
+          onClick={(e) => setItaUpdateAnchor(e.currentTarget)}
+          disabled={taskStatus?.ita_running}
+          size="small"
+        >
+          {taskStatus?.ita_running ? 'Updating...' : 'Int\'l Trade'}
+        </Button>
+        <Menu
+          anchorEl={itaUpdateAnchor}
+          open={Boolean(itaUpdateAnchor)}
+          onClose={() => setItaUpdateAnchor(null)}
+        >
+          <MenuItem onClick={() => handleItaUpdate('priority')}>
+            <strong>Priority</strong>&nbsp;(Trade Balances)
+          </MenuItem>
+          <Divider />
+          <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            By Category (Annual)
+          </MenuItem>
+          <MenuItem onClick={() => handleItaUpdate('goods')}>Goods Trade</MenuItem>
+          <MenuItem onClick={() => handleItaUpdate('services')}>Services Trade</MenuItem>
+          <MenuItem onClick={() => handleItaUpdate('income')}>Investment Income</MenuItem>
+          <MenuItem onClick={() => handleItaUpdate('current_account')}>Current Account</MenuItem>
+          <Divider />
+          <MenuItem onClick={() => handleItaUpdate('all')}>All Indicators (Annual)</MenuItem>
+          <MenuItem onClick={() => handleItaUpdate('all', 'QSA')}>All Indicators (Quarterly SA)</MenuItem>
+        </Menu>
+
+        {/* FixedAssets Update Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Refresh />}
+          endIcon={<KeyboardArrowDown />}
+          onClick={(e) => setFixedassetsUpdateAnchor(e.currentTarget)}
+          disabled={taskStatus?.fixedassets_running}
+          size="small"
+        >
+          {taskStatus?.fixedassets_running ? 'Updating...' : 'Fixed Assets'}
+        </Button>
+        <Menu
+          anchorEl={fixedassetsUpdateAnchor}
+          open={Boolean(fixedassetsUpdateAnchor)}
+          onClose={() => setFixedassetsUpdateAnchor(null)}
+        >
+          <MenuItem onClick={() => handleFixedassetsUpdate('all', 'LAST5')}>
+            <strong>All Tables</strong>&nbsp;(Last 5 Years)
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => handleFixedassetsUpdate('all', 'LAST10')}>All Tables (Last 10 Years)</MenuItem>
+        </Menu>
       </Box>
 
       {/* Snackbar for notifications */}
@@ -576,188 +842,6 @@ function ActionButtons() {
         </Alert>
       </Snackbar>
     </Box>
-  );
-}
-
-// Sentinel Panel Component
-function SentinelPanel() {
-  const queryClient = useQueryClient();
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
-
-  // Fetch sentinel stats - no polling needed, data only changes on manual operations
-  const { data: sentinelStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['bea-sentinel-stats'],
-    queryFn: beaSentinelAPI.getStats,
-  });
-
-  // Select sentinels mutation
-  const selectMutation = useMutation({
-    mutationFn: ({ dataset, frequency }: { dataset: string; frequency: string }) =>
-      beaSentinelAPI.selectSentinels(dataset, frequency),
-    onSuccess: (data) => {
-      setSnackbar({ open: true, message: data.message, severity: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['bea-sentinel-stats'] });
-    },
-    onError: (error: Error) => {
-      setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
-    },
-  });
-
-  // Check sentinels mutation
-  const checkMutation = useMutation({
-    mutationFn: (dataset: string) => beaSentinelAPI.checkSentinels(dataset),
-    onSuccess: (data) => {
-      const severity = data.data?.new_data_detected ? 'info' : 'success';
-      setSnackbar({ open: true, message: data.message, severity });
-      queryClient.invalidateQueries({ queryKey: ['bea-sentinel-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['bea-freshness'] });
-    },
-    onError: (error: Error) => {
-      setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
-    },
-  });
-
-  // Check all sentinels mutation
-  const checkAllMutation = useMutation({
-    mutationFn: beaSentinelAPI.checkAllSentinels,
-    onSuccess: (data) => {
-      const severity = data.data?.new_data_detected ? 'info' : 'success';
-      setSnackbar({ open: true, message: data.message, severity });
-      queryClient.invalidateQueries({ queryKey: ['bea-sentinel-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['bea-freshness'] });
-    },
-    onError: (error: Error) => {
-      setSnackbar({ open: true, message: `Error: ${error.message}`, severity: 'error' });
-    },
-  });
-
-  const handleSelectAll = () => {
-    // Select sentinels for all datasets
-    selectMutation.mutate({ dataset: 'NIPA', frequency: 'A' });
-    selectMutation.mutate({ dataset: 'Regional', frequency: 'A' });
-    selectMutation.mutate({ dataset: 'GDPbyIndustry', frequency: 'A' });
-  };
-
-  const datasets = ['NIPA', 'Regional', 'GDPbyIndustry'];
-  const isChecking = checkMutation.isPending || checkAllMutation.isPending;
-  const isSelecting = selectMutation.isPending;
-
-  return (
-    <Card sx={{ mb: 3 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Sensors color="primary" />
-            <Typography variant="h6" fontWeight="bold">
-              Sentinel Monitoring
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleSelectAll}
-              disabled={isSelecting}
-              startIcon={isSelecting ? <CircularProgress size={16} /> : <Sensors />}
-            >
-              {isSelecting ? 'Selecting...' : 'Select Sentinels'}
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => checkAllMutation.mutate()}
-              disabled={isChecking || (sentinelStats?.total || 0) === 0}
-              startIcon={isChecking ? <CircularProgress size={16} color="inherit" /> : <Refresh />}
-            >
-              {isChecking ? 'Checking...' : 'Check for Updates'}
-            </Button>
-          </Box>
-        </Box>
-
-        {statsLoading ? (
-          <LinearProgress />
-        ) : (sentinelStats?.total || 0) === 0 ? (
-          <Alert severity="info" sx={{ mt: 1 }}>
-            No sentinels configured. Click "Select Sentinels" to automatically choose representative series for monitoring.
-          </Alert>
-        ) : (
-          <Grid container spacing={2}>
-            {datasets.map((dataset) => {
-              const datasetStats = sentinelStats?.by_dataset?.[dataset];
-              if (!datasetStats) return null;
-
-              return (
-                <Grid item xs={12} md={4} key={dataset}>
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {dataset}
-                      </Typography>
-                      <Chip
-                        label={`${datasetStats.count} sentinels`}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Last Checked: {datasetStats.last_checked ? formatRelativeTime(datasetStats.last_checked) : 'Never'}
-                      </Typography>
-                      {datasetStats.changes_detected > 0 && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                          <NewReleases color="warning" sx={{ fontSize: 16 }} />
-                          <Typography variant="body2" color="warning.main">
-                            {datasetStats.changes_detected} changes detected
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Box sx={{ mt: 1.5, display: 'flex', gap: 1 }}>
-                      <Button
-                        size="small"
-                        variant="text"
-                        onClick={() => selectMutation.mutate({ dataset, frequency: 'A' })}
-                        disabled={isSelecting}
-                      >
-                        Reselect
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="text"
-                        onClick={() => checkMutation.mutate(dataset)}
-                        disabled={isChecking}
-                      >
-                        Check
-                      </Button>
-                    </Box>
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-            severity={snackbar.severity}
-            sx={{ width: '100%' }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -784,12 +868,12 @@ export default function BEADashboard() {
 
   const { data: recentRuns, isLoading: runsLoading } = useQuery({
     queryKey: ['bea-recent-runs'],
-    queryFn: () => beaDashboardAPI.getRecentRuns(10),
+    queryFn: () => beaDashboardAPI.getRecentRuns(50),
     refetchInterval: () => {
       // Only poll when a task is running, otherwise don't poll
       // Get task status from query cache
-      const status = queryClient.getQueryData<{ nipa_running: boolean; regional_running: boolean; gdpbyindustry_running: boolean }>(['bea-task-status']);
-      const isRunning = status?.nipa_running || status?.regional_running || status?.gdpbyindustry_running;
+      const status = queryClient.getQueryData<{ nipa_running: boolean; regional_running: boolean; gdpbyindustry_running: boolean; ita_running: boolean; fixedassets_running: boolean }>(['bea-task-status']);
+      const isRunning = status?.nipa_running || status?.regional_running || status?.gdpbyindustry_running || status?.ita_running || status?.fixedassets_running;
       return isRunning ? 5000 : false;
     },
   });
@@ -823,7 +907,7 @@ export default function BEADashboard() {
           BEA Data Dashboard
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Bureau of Economic Analysis - NIPA, Regional, and GDP by Industry Data
+          Bureau of Economic Analysis - NIPA, Regional, GDP by Industry, International Transactions, and Fixed Assets
         </Typography>
       </Box>
 
@@ -877,27 +961,57 @@ export default function BEADashboard() {
       </Card>
 
       {/* Dataset Cards */}
-      <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+      <Typography
+        variant="h6"
+        fontWeight="600"
+        sx={{
+          mb: 2,
+          color: 'primary.main',
+          borderBottom: '2px solid',
+          borderColor: 'primary.main',
+          pb: 1,
+          display: 'inline-block',
+        }}
+      >
         Datasets
       </Typography>
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(5, 1fr)',
+          },
+          gap: 2,
+          mb: 3,
+        }}
+      >
         {freshnessData?.datasets.map((dataset) => (
-          <Grid item xs={12} md={6} key={dataset.dataset_name}>
-            <DatasetCard dataset={dataset} />
-          </Grid>
+          <DatasetCard key={dataset.dataset_name} dataset={dataset} />
         ))}
-      </Grid>
-
-      {/* Sentinel Monitoring Panel */}
-      <SentinelPanel />
+      </Box>
 
       {/* API Usage Chart */}
       {usageHistory && usageHistory.length > 0 && (
+        <>
+        <Typography
+          variant="h6"
+          fontWeight="600"
+          sx={{
+            mb: 2,
+            color: 'primary.main',
+            borderBottom: '2px solid',
+            borderColor: 'primary.main',
+            pb: 1,
+            display: 'inline-block',
+          }}
+        >
+          API Usage (Last 7 Days)
+        </Typography>
         <Card sx={{ mb: 3 }}>
           <CardContent>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              API Usage (Last 7 Days)
-            </Typography>
             <Box sx={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[...usageHistory].reverse()}>
@@ -917,14 +1031,26 @@ export default function BEADashboard() {
             </Box>
           </CardContent>
         </Card>
+        </>
       )}
 
       {/* Recent Collection Runs */}
+      <Typography
+        variant="h6"
+        fontWeight="600"
+        sx={{
+          mb: 2,
+          color: 'primary.main',
+          borderBottom: '2px solid',
+          borderColor: 'primary.main',
+          pb: 1,
+          display: 'inline-block',
+        }}
+      >
+        Recent Collection Runs
+      </Typography>
       <Card>
         <CardContent>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            Recent Collection Runs
-          </Typography>
           {runsLoading ? (
             <LinearProgress />
           ) : recentRuns && recentRuns.length > 0 ? (

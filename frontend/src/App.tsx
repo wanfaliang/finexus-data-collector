@@ -8,6 +8,13 @@ import LAExplorer from './pages/LAExplorer';
 import CEExplorer from './pages/CEExplorer';
 import LNExplorer from './pages/LNExplorer';
 import BEADashboard from './pages/BEADashboard';
+import NIPAExplorer from './pages/NIPAExplorer';
+import RegionalExplorer from './pages/RegionalExplorer';
+import GDPbyIndustryExplorer from './pages/GDPbyIndustryExplorer';
+import ITAExplorer from './pages/ITAExplorer';
+import FixedAssetsExplorer from './pages/FixedAssetsExplorer';
+import TreasuryDashboard from './pages/TreasuryDashboard';
+import TreasuryExplorer from './pages/TreasuryExplorer';
 
 // Create MUI theme with modern design
 const theme = createTheme({
@@ -194,6 +201,13 @@ function App() {
               <Route path="/surveys/CE/explorer" element={<CEExplorer />} />
               <Route path="/surveys/LN/explorer" element={<LNExplorer />} />
               <Route path="/bea" element={<BEADashboard />} />
+              <Route path="/bea/nipa" element={<NIPAExplorer />} />
+              <Route path="/bea/regional" element={<RegionalExplorer />} />
+              <Route path="/bea/gdpbyindustry" element={<GDPbyIndustryExplorer />} />
+              <Route path="/bea/ita" element={<ITAExplorer />} />
+              <Route path="/bea/fixedassets" element={<FixedAssetsExplorer />} />
+              <Route path="/treasury" element={<TreasuryDashboard />} />
+              <Route path="/treasury/explorer" element={<TreasuryExplorer />} />
             </Routes>
           </AppLayout>
         </BrowserRouter>

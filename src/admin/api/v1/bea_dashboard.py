@@ -37,6 +37,7 @@ DATASET_INFO = {
     'NIPA': 'National Income and Product Accounts - GDP, income, consumption',
     'Regional': 'Regional Economic Accounts - State/county GDP, personal income',
     'GDPbyIndustry': 'GDP by Industry - Value added, contributions by industry sector',
+    'ITA': 'International Transactions - Trade balance, exports, imports by country',
 }
 
 
@@ -67,7 +68,7 @@ async def get_bea_freshness_overview(db: Session = Depends(get_db)):
     datasets = []
     total_data_points = 0
 
-    for dataset_name in ['NIPA', 'Regional', 'GDPbyIndustry']:
+    for dataset_name in ['NIPA', 'Regional', 'GDPbyIndustry', 'ITA', 'FixedAssets']:
         freshness = next(
             (f for f in freshness_records if f.dataset_name == dataset_name),
             None

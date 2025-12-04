@@ -405,6 +405,152 @@ class BEAClient:
 
         return self._extract_data(result)
 
+    # ===================== ITA (International Transactions) Helpers ===================== #
+
+    def get_ita_indicators(self) -> List[Dict[str, Any]]:
+        """Get list of available ITA indicators."""
+        result = self.get_parameter_values("ITA", "Indicator")
+        return result.get("BEAAPI", {}).get("Results", {}).get("ParamValue", [])
+
+    def get_ita_areas(self) -> List[Dict[str, Any]]:
+        """Get list of available ITA areas/countries."""
+        result = self.get_parameter_values("ITA", "AreaOrCountry")
+        return result.get("BEAAPI", {}).get("Results", {}).get("ParamValue", [])
+
+    def get_ita_data(
+        self,
+        indicator: str = "All",
+        area_or_country: str = "AllCountries",
+        frequency: str = "A",
+        year: str = "ALL",
+    ) -> Dict[str, Any]:
+        """
+        Get ITA (International Transactions) data.
+
+        Args:
+            indicator: Indicator code(s) - 'All' or specific code (e.g., 'BalGds')
+            area_or_country: Area/Country - 'AllCountries', 'All', or specific (e.g., 'China')
+            frequency: 'A' (annual), 'QSA' (quarterly seasonally adjusted), 'QNSA' (quarterly not seasonally adjusted)
+            year: Year(s) - 'ALL' or comma-separated years
+
+        Note: Either exactly one indicator OR exactly one area_or_country must be specified
+              (unless one is 'All'/'AllCountries')
+
+        Returns:
+            Dict containing ITA data
+        """
+        return self.get_data(
+            "ITA",
+            Indicator=indicator,
+            AreaOrCountry=area_or_country,
+            Frequency=frequency,
+            Year=year,
+        )
+
+    def get_ita_data_by_indicator(
+        self,
+        indicator: str,
+        frequency: str = "A",
+        year: str = "ALL",
+    ) -> List[Dict[str, Any]]:
+        """
+        Get ITA data for a specific indicator across all countries.
+
+        Args:
+            indicator: Indicator code (e.g., 'BalGds', 'PfInvAssets')
+            frequency: 'A', 'QSA', or 'QNSA'
+            year: Year(s) - 'ALL' or comma-separated years
+
+        Returns:
+            List of data records
+        """
+        result = self.get_ita_data(
+            indicator=indicator,
+            area_or_country="All",
+            frequency=frequency,
+            year=year,
+        )
+        return self._extract_data(result)
+
+    def get_ita_data_by_area(
+        self,
+        area_or_country: str,
+        frequency: str = "A",
+        year: str = "ALL",
+    ) -> List[Dict[str, Any]]:
+        """
+        Get ITA data for a specific area/country across all indicators.
+
+        Args:
+            area_or_country: Area/Country code (e.g., 'China', 'EU')
+            frequency: 'A', 'QSA', or 'QNSA'
+            year: Year(s) - 'ALL' or comma-separated years
+
+        Returns:
+            List of data records
+        """
+        result = self.get_ita_data(
+            indicator="All",
+            area_or_country=area_or_country,
+            frequency=frequency,
+            year=year,
+        )
+        return self._extract_data(result)
+
+    # ===================== Fixed Assets Methods ===================== #
+
+    def get_fixedassets_tables(self) -> List[Dict[str, Any]]:
+        """
+        Get list of available Fixed Assets tables.
+
+        Returns:
+            List of table dicts with 'TableName' and 'Description' keys
+        """
+        result = self.get_parameter_values("FixedAssets", "TableName")
+        return result.get("BEAAPI", {}).get("Results", {}).get("ParamValue", [])
+
+    def get_fixedassets_data(
+        self,
+        table_name: str,
+        year: str = "ALL",
+    ) -> Dict[str, Any]:
+        """
+        Get Fixed Assets data for a table.
+
+        Args:
+            table_name: Table name (e.g., 'FAAt201', 'FAAt405')
+            year: Year(s) - 'ALL', 'X', or comma-separated years
+
+        Returns:
+            Raw API response dict
+
+        Note:
+            Fixed Assets only supports annual data.
+        """
+        return self.get_data(
+            "FixedAssets",
+            TableName=table_name,
+            Year=year,
+        )
+
+    def get_fixedassets_table_data(
+        self,
+        table_name: str,
+        year: str = "ALL",
+    ) -> List[Dict[str, Any]]:
+        """
+        Get Fixed Assets data with extracted records.
+
+        Args:
+            table_name: Table name (e.g., 'FAAt201')
+            year: Year specification
+
+        Returns:
+            List of data records
+        """
+        result = self.get_fixedassets_data(table_name=table_name, year=year)
+        return self._extract_data(result)
+
     # ===================== Data Extraction Helpers ===================== #
 
     def _extract_data(self, result: Dict[str, Any]) -> List[Dict[str, Any]]:

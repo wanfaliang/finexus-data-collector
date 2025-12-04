@@ -7,7 +7,7 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-
+  TextField,
   Typography,
   Tooltip,
   Dialog,
@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Alert,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -58,10 +59,12 @@ interface SurveyCardProps {
   survey: SurveyFreshness;
   onUpdate: () => void;
   onForceUpdate: () => void;
+  onCheckFreshness: () => void;
   isUpdating: boolean;
+  isCheckingFreshness: boolean;
 }
 
-function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardProps) {
+function SurveyCard({ survey, onUpdate, onForceUpdate, onCheckFreshness, isUpdating, isCheckingFreshness }: SurveyCardProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'current':
@@ -136,24 +139,19 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardP
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
             <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
-              Sentinels
+              Updated
             </Typography>
-            <Typography
-              variant="body2"
-              fontWeight="600"
-              fontSize="0.85rem"
-              color={survey.sentinels_changed > 0 ? 'error' : 'text.primary'}
-            >
-              {survey.sentinels_changed} / {survey.sentinels_total}
+            <Typography variant="body2" fontWeight="600" fontSize="0.85rem">
+              {survey.series_updated?.toLocaleString() || 0}
             </Typography>
           </Box>
-          {isUpdatingNow && survey.update_progress !== null && (
+          {(isUpdatingNow || survey.update_progress !== null) && survey.update_progress !== undefined && survey.update_progress > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
                 Progress
               </Typography>
               <Typography variant="body2" fontWeight="600" fontSize="0.85rem" color="info.main">
-                {survey.series_updated} / {survey.series_total} ({(survey.update_progress * 100).toFixed(0)}%)
+                {(survey.update_progress * 100).toFixed(0)}%
               </Typography>
             </Box>
           )}
@@ -161,25 +159,9 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardP
 
         {/* Timestamps */}
         <Box sx={{ mb: 1.5, pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary" fontSize="0.65rem">
-              Last Check
-            </Typography>
-            <Typography variant="caption" fontSize="0.65rem">
-              {formatRelativeTime(survey.last_check)}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary" fontSize="0.65rem">
-              BLS Update
-            </Typography>
-            <Typography variant="caption" fontSize="0.65rem">
-              {formatRelativeTime(survey.last_bls_update)}
-            </Typography>
-          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="caption" color="text.secondary" fontSize="0.65rem">
-              Full Update
+              Last Update
             </Typography>
             <Typography variant="caption" fontSize="0.65rem">
               {formatRelativeTime(survey.last_full_update_completed)}
@@ -189,7 +171,27 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardP
 
         {/* Action Buttons */}
         <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title="Resume update (skip already-updated series)">
+          <Tooltip title="Check if BLS has new data">
+            <span style={{ flex: 1 }}>
+              <Button
+                fullWidth
+                size="small"
+                variant="outlined"
+                color="info"
+                startIcon={isCheckingFreshness ? <CircularProgress size={14} color="inherit" /> : <Sync />}
+                onClick={onCheckFreshness}
+                disabled={isCheckingFreshness || isUpdatingNow}
+                sx={{
+                  fontSize: '0.7rem',
+                  py: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Check
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title="Resume update cycle (skip already-updated series)">
             <span style={{ flex: 1 }}>
               <Button
                 fullWidth
@@ -204,11 +206,11 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardP
                   fontWeight: 500,
                 }}
               >
-                {isUpdatingNow ? 'Updating...' : 'Update'}
+                {isUpdatingNow ? 'Updating...' : 'Resume'}
               </Button>
             </span>
           </Tooltip>
-          <Tooltip title="Force update all series (reset and start fresh)">
+          <Tooltip title="Start new update cycle (reset and update all series)">
             <span style={{ flex: 1 }}>
               <Button
                 fullWidth
@@ -224,7 +226,7 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, isUpdating }: SurveyCardP
                   fontWeight: 500,
                 }}
               >
-                Force
+                Start
               </Button>
             </span>
           </Tooltip>
@@ -241,24 +243,39 @@ export default function Dashboard() {
     surveyCode: string;
     surveyName: string;
     seriesCount: number;
+    seriesRemaining: number;
     isForce: boolean;
   }>({
     open: false,
     surveyCode: '',
     surveyName: '',
     seriesCount: 0,
+    seriesRemaining: 0,
     isForce: false,
   });
+  const [requestsInput, setRequestsInput] = React.useState<string>('');
+  const [apiKeyInput, setApiKeyInput] = React.useState<string>('');
 
   const { data: overview, isLoading: loadingOverview } = useQuery({
     queryKey: ['freshness', 'overview'],
     queryFn: freshnessAPI.getOverview,
-    refetchInterval: 10000,
+    // Only poll every 10s if there's an active update, otherwise no auto-refresh
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      const hasUpdating = data?.surveys?.some(s => s.status === 'updating') ?? false;
+      return hasUpdating ? 10000 : false;
+    },
   });
 
   const { data: quota, isLoading: loadingQuota } = useQuery({
     queryKey: ['quota', 'today'],
     queryFn: () => quotaAPI.getToday(),
+  });
+
+  // Fetch remaining quota from actions API (tracks freshness checks too)
+  const { data: quotaStatus, refetch: refetchQuotaStatus } = useQuery({
+    queryKey: ['actions', 'quota'],
+    queryFn: () => actionsAPI.getQuota(),
   });
 
   const { data: quotaHistory, isLoading: loadingHistory } = useQuery({
@@ -267,40 +284,76 @@ export default function Dashboard() {
   });
 
   const checkFreshnessMutation = useMutation({
-    mutationFn: () => actionsAPI.checkFreshness(),
+    mutationFn: (surveyCodes?: string[]) => actionsAPI.checkFreshness(surveyCodes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['freshness'] });
+    },
+  });
+
+  const [checkingSurvey, setCheckingSurvey] = React.useState<string | null>(null);
+
+  const checkSingleFreshnessMutation = useMutation({
+    mutationFn: (surveyCode: string) => actionsAPI.checkFreshness([surveyCode]),
+    onMutate: (surveyCode) => {
+      setCheckingSurvey(surveyCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['freshness'] });
+    },
+    onSettled: () => {
+      setCheckingSurvey(null);
     },
   });
 
   const executeUpdateMutation = useMutation({
-    mutationFn: ({ surveyCode, force }: { surveyCode: string; force: boolean }) =>
-      actionsAPI.executeUpdate(surveyCode, force),
+    mutationFn: ({ surveyCode, force, maxRequests, apiKey }: { surveyCode: string; force: boolean; maxRequests: number; apiKey?: string }) =>
+      actionsAPI.executeUpdate(surveyCode, force, maxRequests, apiKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['freshness'] });
-      setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, isForce: false });
+      queryClient.invalidateQueries({ queryKey: ['actions', 'quota'] });
+      setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, seriesRemaining: 0, isForce: false });
+      setRequestsInput('');
+      setApiKeyInput('');
     },
   });
 
-  const handleUpdateClick = (survey: SurveyFreshness, isForce: boolean = false) => {
+  const handleUpdateClick = async (survey: SurveyFreshness, isForce: boolean = false) => {
+    // Refresh quota status before opening dialog
+    const { data: freshQuota } = await refetchQuotaStatus();
+    const remaining = freshQuota?.remaining || 0;
+    const seriesRemaining = isForce
+      ? survey.series_total || 0
+      : (survey.series_total || 0) - (survey.series_updated || 0);
+
     setConfirmUpdateDialog({
       open: true,
       surveyCode: survey.survey_code,
       surveyName: survey.survey_name,
       seriesCount: survey.series_total || 0,
+      seriesRemaining,
       isForce,
     });
+    // Default to remaining quota or less
+    setRequestsInput(String(Math.min(remaining, 500)));
   };
 
   const handleConfirmUpdate = () => {
+    const maxRequests = parseInt(requestsInput, 10);
+    if (isNaN(maxRequests) || maxRequests <= 0) {
+      return; // Invalid input
+    }
     executeUpdateMutation.mutate({
       surveyCode: confirmUpdateDialog.surveyCode,
-      force: confirmUpdateDialog.isForce
+      force: confirmUpdateDialog.isForce,
+      maxRequests,
+      apiKey: apiKeyInput.trim() || undefined,
     });
   };
 
   const handleCancelUpdate = () => {
-    setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, isForce: false });
+    setConfirmUpdateDialog({ open: false, surveyCode: '', surveyName: '', seriesCount: 0, seriesRemaining: 0, isForce: false });
+    setRequestsInput('');
+    setApiKeyInput('');
   };
 
   if (loadingOverview || loadingQuota || loadingHistory) {
@@ -409,7 +462,18 @@ export default function Dashboard() {
 
       {/* Survey Cards Grid */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle2" fontWeight="600" sx={{ mb: 2 }}>
+        <Typography
+          variant="h6"
+          fontWeight="600"
+          sx={{
+            mb: 2,
+            color: 'primary.main',
+            borderBottom: '2px solid',
+            borderColor: 'primary.main',
+            pb: 1,
+            display: 'inline-block',
+          }}
+        >
           BLS Surveys
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
@@ -419,17 +483,33 @@ export default function Dashboard() {
               survey={survey}
               onUpdate={() => handleUpdateClick(survey, false)}
               onForceUpdate={() => handleUpdateClick(survey, true)}
+              onCheckFreshness={() => checkSingleFreshnessMutation.mutate(survey.survey_code)}
               isUpdating={executeUpdateMutation.isPending}
+              isCheckingFreshness={checkingSurvey === survey.survey_code}
             />
           ))}
         </Box>
       </Box>
 
       {/* 7-Day API Usage Chart - Full Width */}
+      <Typography
+        variant="h6"
+        fontWeight="600"
+        sx={{
+          mb: 2,
+          color: 'primary.main',
+          borderBottom: '2px solid',
+          borderColor: 'primary.main',
+          pb: 1,
+          display: 'inline-block',
+        }}
+      >
+        7-Day API Usage
+      </Typography>
       <Card sx={{ border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-        <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" fontWeight="600">
-            7-Day API Usage
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle2" fontWeight="600" color="text.secondary">
+            Daily request volume
           </Typography>
         </Box>
         <Box sx={{ p: 2, height: 250 }}>
@@ -451,15 +531,17 @@ export default function Dashboard() {
         onClose={handleCancelUpdate}
         aria-labelledby="confirm-update-title"
         aria-describedby="confirm-update-description"
+        maxWidth="sm"
+        fullWidth
       >
         <DialogTitle id="confirm-update-title">
-          {confirmUpdateDialog.isForce ? 'Confirm Force Update' : 'Confirm Survey Update'}
+          {confirmUpdateDialog.isForce ? 'Start New Update Cycle' : 'Resume Update Cycle'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-update-description">
             {confirmUpdateDialog.isForce
-              ? 'You are about to force a complete re-update for:'
-              : 'You are about to resume/trigger an update for:'}
+              ? 'You are about to start a new update cycle for:'
+              : 'You are about to resume the update cycle for:'}
           </DialogContentText>
           <Box sx={{ mt: 2, p: 2, bgcolor: confirmUpdateDialog.isForce ? 'warning.light' : 'grey.50', borderRadius: 1 }}>
             <Typography variant="body2" fontWeight="600" gutterBottom>
@@ -467,14 +549,66 @@ export default function Dashboard() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {confirmUpdateDialog.isForce
-                ? <>This will <strong>reset all series</strong> and update all <strong>{confirmUpdateDialog.seriesCount.toLocaleString()}</strong> series from scratch</>
-                : <>This will update series that haven't been updated yet (skips already-current series)</>}
+                ? <>This will <strong>create a new cycle</strong> and update all <strong>{confirmUpdateDialog.seriesCount.toLocaleString()}</strong> series from scratch</>
+                : <>Series remaining: <strong>{confirmUpdateDialog.seriesRemaining.toLocaleString()}</strong> of {confirmUpdateDialog.seriesCount.toLocaleString()}</>}
             </Typography>
           </Box>
+
+          {/* Quota Input Section */}
+          <Box sx={{ mt: 3 }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                <strong>Daily quota remaining: {quotaStatus?.remaining ?? '...'}</strong> requests (system key)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Each request updates up to 50 series. Enter the number of requests for this session.
+              </Typography>
+            </Alert>
+
+            <TextField
+              fullWidth
+              label="Requests for this session"
+              type="number"
+              value={requestsInput}
+              onChange={(e) => setRequestsInput(e.target.value)}
+              inputProps={{
+                min: 1,
+                max: apiKeyInput.trim() ? 500 : (quotaStatus?.remaining ?? 500),
+              }}
+              helperText={(() => {
+                const requests = parseInt(requestsInput, 10) || 0;
+                const estimatedSeries = requests * 50;
+                const remaining = quotaStatus?.remaining ?? 0;
+                const usingCustomKey = !!apiKeyInput.trim();
+                if (!usingCustomKey && requests > remaining) {
+                  return `Exceeds remaining quota (${remaining})`;
+                }
+                return `Estimated series: ~${estimatedSeries.toLocaleString()} (${requests} requests × 50 series/request)`;
+              })()}
+              error={!apiKeyInput.trim() && parseInt(requestsInput, 10) > (quotaStatus?.remaining ?? 500)}
+              sx={{ mt: 1 }}
+            />
+
+            {/* Custom API Key Input */}
+            <TextField
+              fullWidth
+              label="Custom BLS API Key (optional)"
+              type="password"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              helperText={apiKeyInput.trim()
+                ? "Using custom key - quota validation skipped, usage not logged"
+                : "Leave empty to use system key with quota tracking"
+              }
+              sx={{ mt: 2 }}
+              size="small"
+            />
+          </Box>
+
           <DialogContentText sx={{ mt: 2 }}>
             {confirmUpdateDialog.isForce
-              ? <><strong>Warning:</strong> Force update will reset progress and re-fetch ALL series. Use this only when you need a complete refresh.</>
-              : <><strong>Note:</strong> This operation will consume API quota. Already-updated series will be skipped.</>}
+              ? <><strong>Warning:</strong> Starting a new cycle will reset progress. Use this only when BLS has published new data.</>
+              : <><strong>Note:</strong> Already-updated series in the current cycle will be skipped.</>}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -484,10 +618,15 @@ export default function Dashboard() {
           <Button
             onClick={handleConfirmUpdate}
             variant="contained"
-            color={confirmUpdateDialog.isForce ? 'error' : 'warning'}
+            color={confirmUpdateDialog.isForce ? 'warning' : 'primary'}
+            disabled={
+              !requestsInput ||
+              parseInt(requestsInput, 10) <= 0 ||
+              (!apiKeyInput.trim() && parseInt(requestsInput, 10) > (quotaStatus?.remaining ?? 0))
+            }
             autoFocus
           >
-            {confirmUpdateDialog.isForce ? 'Yes, Force Update' : 'Yes, Update Now'}
+            {confirmUpdateDialog.isForce ? 'Start New Cycle' : 'Resume Update'}
           </Button>
         </DialogActions>
       </Dialog>

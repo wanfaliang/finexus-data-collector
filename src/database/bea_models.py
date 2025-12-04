@@ -10,7 +10,7 @@ Created: 2025-11-26
 from datetime import datetime, UTC
 from sqlalchemy import (
     Column, Integer, String, Numeric, Date, DateTime,
-    Boolean, Text, ForeignKey, ForeignKeyConstraint, Index, UniqueConstraint, SmallInteger
+    Boolean, Text, ForeignKey, ForeignKeyConstraint, Index, UniqueConstraint, SmallInteger, text
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -395,7 +395,7 @@ class GDPByIndustryData(Base):
     industry_code = Column(String(20), ForeignKey('bea_gdpbyindustry_industries.industry_code'), primary_key=True)
     frequency = Column(String(1), primary_key=True)  # 'A' or 'Q'
     time_period = Column(String(10), primary_key=True)  # 'YYYY' for annual, 'YYYYQn' for quarterly
-    row_type = Column(String(20), primary_key=True, default='total')  # 'total', 'compensation', 'taxes', 'surplus'
+    row_type = Column(String(20), primary_key=True, default='total', server_default=text("'total'"))  # 'total', 'compensation', 'taxes', 'surplus'
 
     # Data
     value = Column(Numeric(20, 6))  # Data value (can be NULL for missing data)
@@ -424,3 +424,172 @@ class GDPByIndustryData(Base):
 
     def __repr__(self):
         return f"<GDPByIndustryData(table={self.table_id}, industry='{self.industry_code}', period={self.time_period}, row_type='{self.row_type}')>"
+
+
+# ==================== ITA (International Transactions Accounts) TABLES ====================
+
+class ITAIndicator(Base):
+    """ITA Indicator catalog - types of international transactions"""
+    __tablename__ = 'bea_ita_indicators'
+
+    indicator_code = Column(String(100), primary_key=True)  # 'BalGds', 'PfInvAssets', etc. (some codes are very long)
+    indicator_description = Column(Text, nullable=False)
+
+    # Status
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_ita_indicators_active', 'is_active'),
+    )
+
+    def __repr__(self):
+        return f"<ITAIndicator(code='{self.indicator_code}')>"
+
+
+class ITAArea(Base):
+    """ITA Area/Country catalog - counterparty countries and regions"""
+    __tablename__ = 'bea_ita_areas'
+
+    area_code = Column(String(50), primary_key=True)  # 'China', 'EU', 'AllCountries', etc.
+    area_name = Column(String(255), nullable=False)
+
+    # Area type for grouping
+    area_type = Column(String(50))  # 'Country', 'Region', 'Aggregate', etc.
+
+    # Status
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_ita_areas_active', 'is_active'),
+        Index('ix_bea_ita_areas_type', 'area_type'),
+    )
+
+    def __repr__(self):
+        return f"<ITAArea(code='{self.area_code}', name='{self.area_name}')>"
+
+
+class ITAData(Base):
+    """ITA Time series data - international transactions values"""
+    __tablename__ = 'bea_ita_data'
+
+    # Composite primary key
+    indicator_code = Column(String(100), ForeignKey('bea_ita_indicators.indicator_code'), primary_key=True)
+    area_code = Column(String(50), ForeignKey('bea_ita_areas.area_code'), primary_key=True)
+    frequency = Column(String(10), primary_key=True)  # 'A', 'QSA', 'QNSA'
+    time_period = Column(String(10), primary_key=True)  # 'YYYY' for annual, 'YYYYQn' for quarterly
+
+    # Data
+    value = Column(Numeric(20, 6))  # Data value (can be NULL for missing data)
+
+    # Metadata from API response
+    time_series_id = Column(String(100))  # Unique identifier from BEA
+    time_series_description = Column(Text)  # Description of the transaction
+    cl_unit = Column(String(50))  # Base unit (e.g., 'USD')
+    unit_mult = Column(SmallInteger)  # Base-10 exponent (6 = millions)
+
+    # Footnote reference
+    note_ref = Column(String(100))
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_ita_data_indicator', 'indicator_code'),
+        Index('ix_bea_ita_data_area', 'area_code'),
+        Index('ix_bea_ita_data_period', 'time_period'),
+        Index('ix_bea_ita_data_freq', 'frequency'),
+        Index('ix_bea_ita_data_indicator_area', 'indicator_code', 'area_code'),
+        Index('ix_bea_ita_data_indicator_period', 'indicator_code', 'time_period'),
+    )
+
+    def __repr__(self):
+        return f"<ITAData(indicator='{self.indicator_code}', area='{self.area_code}', period={self.time_period})>"
+
+
+# ==================== FIXED ASSETS TABLES ====================
+
+class FixedAssetsTable(Base):
+    """Fixed Assets Table catalog - metadata for available Fixed Assets tables"""
+    __tablename__ = 'bea_fixedassets_tables'
+
+    table_name = Column(String(20), primary_key=True)  # 'FAAt201', 'FAAt405', etc.
+    table_description = Column(Text, nullable=False)
+
+    # Year range
+    first_year = Column(SmallInteger)
+    last_year = Column(SmallInteger)
+
+    # Status
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_fixedassets_tables_active', 'is_active'),
+    )
+
+    def __repr__(self):
+        return f"<FixedAssetsTable(name='{self.table_name}')>"
+
+
+class FixedAssetsSeries(Base):
+    """Fixed Assets Series catalog - metadata for each Fixed Assets time series"""
+    __tablename__ = 'bea_fixedassets_series'
+
+    series_code = Column(String(50), primary_key=True)  # Unique series identifier
+    table_name = Column(String(20), ForeignKey('bea_fixedassets_tables.table_name'), nullable=False, index=True)
+
+    line_number = Column(SmallInteger, nullable=False)
+    line_description = Column(Text, nullable=False)
+
+    # Metric information
+    metric_name = Column(String(100))  # 'Current Dollars', 'Chain-Type Quantity Index', etc.
+    cl_unit = Column(String(50))  # Calculation unit type
+    unit_mult = Column(SmallInteger)  # Base-10 exponent (6 = millions, 9 = billions)
+
+    # Status
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_fixedassets_series_table_line', 'table_name', 'line_number'),
+        Index('ix_bea_fixedassets_series_active', 'is_active'),
+    )
+
+    def __repr__(self):
+        return f"<FixedAssetsSeries(code='{self.series_code}', line={self.line_number})>"
+
+
+class FixedAssetsData(Base):
+    """Fixed Assets Time series data - actual Fixed Assets values"""
+    __tablename__ = 'bea_fixedassets_data'
+
+    # Composite primary key
+    series_code = Column(String(50), ForeignKey('bea_fixedassets_series.series_code'), primary_key=True)
+    time_period = Column(String(10), primary_key=True)  # 'YYYY' for annual (Fixed Assets is annual only)
+
+    # Data
+    value = Column(Numeric(20, 6))  # Data value (can be NULL for missing data)
+
+    # Metadata
+    note_ref = Column(String(100))  # Reference to footnotes
+
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    __table_args__ = (
+        Index('ix_bea_fixedassets_data_series', 'series_code'),
+        Index('ix_bea_fixedassets_data_period', 'time_period'),
+    )
+
+    def __repr__(self):
+        return f"<FixedAssetsData(series='{self.series_code}', period={self.time_period}, value={self.value})>"

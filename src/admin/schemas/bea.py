@@ -155,6 +155,7 @@ class NIPATimeSeriesResponse(BaseModel):
     line_description: str
     metric_name: Optional[str] = None
     unit: Optional[str] = None
+    unit_mult: Optional[int] = None  # Power of 10 multiplier (e.g., 6 = millions)
     data: List[Dict[str, Any]]
 
 
@@ -225,6 +226,132 @@ class RegionalTimeSeriesResponse(BaseModel):
     geo_fips: str
     geo_name: str
     unit: Optional[str] = None
+    unit_mult: Optional[int] = None
+    data: List[Dict[str, Any]]
+
+
+# ===================== GDPbyIndustry Explorer ===================== #
+
+class GDPByIndustryTableResponse(BaseModel):
+    """Response model for GDP by Industry table metadata"""
+
+    table_id: int
+    table_description: str
+    has_annual: bool = True
+    has_quarterly: bool = False
+    first_annual_year: Optional[int] = None
+    last_annual_year: Optional[int] = None
+    first_quarterly_year: Optional[int] = None
+    last_quarterly_year: Optional[int] = None
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class GDPByIndustryIndustryResponse(BaseModel):
+    """Response model for GDP by Industry - Industry codes"""
+
+    industry_code: str
+    industry_description: str
+    parent_code: Optional[str] = None
+    industry_level: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class GDPByIndustryTimeSeriesResponse(BaseModel):
+    """Response model for GDP by Industry time series data"""
+
+    table_id: int
+    table_description: str
+    industry_code: str
+    industry_description: str
+    frequency: str
+    unit: Optional[str] = None
+    unit_mult: Optional[int] = None
+    data: List[Dict[str, Any]]
+
+
+# ===================== ITA (International Trade) Explorer ===================== #
+
+class ITAIndicatorResponse(BaseModel):
+    """Response model for ITA indicator metadata"""
+
+    indicator_code: str
+    indicator_description: str
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class ITAAreaResponse(BaseModel):
+    """Response model for ITA area/country"""
+
+    area_code: str
+    area_name: str
+    area_type: Optional[str] = None
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class ITATimeSeriesResponse(BaseModel):
+    """Response model for ITA time series data"""
+
+    indicator_code: str
+    indicator_description: str
+    area_code: str
+    area_name: str
+    frequency: str
+    unit: Optional[str] = None
+    unit_mult: Optional[int] = None
+    data: List[Dict[str, Any]]
+
+
+# ===================== FixedAssets Explorer ===================== #
+
+class FixedAssetsTableResponse(BaseModel):
+    """Response model for Fixed Assets table metadata"""
+
+    table_name: str
+    table_description: str
+    first_year: Optional[int] = None
+    last_year: Optional[int] = None
+    series_count: int = 0
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class FixedAssetsSeriesResponse(BaseModel):
+    """Response model for Fixed Assets series metadata"""
+
+    series_code: str
+    table_name: str
+    line_number: int
+    line_description: str
+    metric_name: Optional[str] = None
+    cl_unit: Optional[str] = None
+    unit_mult: Optional[int] = None
+    data_points_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+
+class FixedAssetsTimeSeriesResponse(BaseModel):
+    """Response model for Fixed Assets time series data"""
+
+    series_code: str
+    line_description: str
+    metric_name: Optional[str] = None
+    unit: Optional[str] = None
+    unit_mult: Optional[int] = None
     data: List[Dict[str, Any]]
 
 

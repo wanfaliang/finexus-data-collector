@@ -8,7 +8,23 @@ export const apiClient = axios.create({
   },
 });
 
-// API response types
+// API response types - Survey Status (cycle-based)
+export interface SurveyStatus {
+  survey_code: string;
+  has_current_cycle: boolean;
+  cycle_id: number | null;
+  total_series: number;
+  series_updated: number;
+  progress_pct: number;
+  started_at: string | null;
+  is_complete: boolean;
+}
+
+export interface AllSurveysStatus {
+  surveys: SurveyStatus[];
+}
+
+// Legacy type for backward compatibility
 export interface SurveyFreshness {
   survey_code: string;
   survey_name: string;
@@ -56,25 +72,29 @@ export interface QuotaBreakdown {
 
 export interface FreshnessCheckResult {
   survey_code: string;
-  sentinels_checked: number;
-  sentinels_changed: number;
-  needs_update: boolean;
+  survey_name: string;
+  has_new_data: boolean;
+  series_checked: number;
+  series_with_new_data: number;
+  our_latest: string | null;
+  bls_latest: string | null;
   error: string | null;
 }
 
 export interface FreshnessCheckResponse {
-  check_time: string;
+  checked_at: string;
   surveys_checked: number;
-  surveys_needing_update: number;
+  surveys_with_new_data: number;
   results: FreshnessCheckResult[];
 }
 
 export interface UpdateTriggerResponse {
   survey_code: string;
-  status: string;
+  status: string;  // 'started', 'already_running', 'error'
   message: string;
-  series_count: number | null;
-  estimated_requests: number | null;
+  cycle_id: number | null;
+  series_total: number | null;
+  series_remaining: number | null;
 }
 
 // API functions
@@ -100,21 +120,40 @@ export const quotaAPI = {
     apiClient.get<QuotaBreakdown>('/quota/breakdown', { params: { usage_date: usageDate } }).then(r => r.data),
 };
 
+export interface QuotaStatus {
+  daily_limit: number;
+  used_today: number;
+  remaining: number;
+}
+
 export const actionsAPI = {
+  // Freshness check - compares BLS API with our database
   checkFreshness: (surveyCodes?: string[]) =>
     apiClient.post<FreshnessCheckResponse>('/actions/freshness/check', { survey_codes: surveyCodes }).then(r => r.data),
 
-  executeUpdate: (surveyCode: string, force = false) =>
-    apiClient.post<UpdateTriggerResponse>(`/actions/freshness/execute/${surveyCode}`, { force }).then(r => r.data),
-
-  resetFreshness: (surveyCode: string) =>
-    apiClient.post(`/actions/freshness/reset/${surveyCode}`, {
-      clear_update_flag: true,
-      reset_sentinels: false,
+  // Trigger update - soft (resume) or force (new cycle)
+  executeUpdate: (surveyCode: string, force = false, maxRequests?: number, apiKey?: string) =>
+    apiClient.post<UpdateTriggerResponse>(`/actions/update/${surveyCode}`, {
+      force,
+      max_requests: maxRequests,
+      api_key: apiKey || undefined  // Don't send empty string
     }).then(r => r.data),
 
+  // Get status for a single survey
+  getSurveyStatus: (surveyCode: string) =>
+    apiClient.get<SurveyStatus>(`/actions/status/${surveyCode}`).then(r => r.data),
+
+  // Get status for all surveys
+  getAllStatus: () =>
+    apiClient.get<AllSurveysStatus>('/actions/status').then(r => r.data),
+
+  // List supported surveys
   listSurveys: () =>
     apiClient.get<string[]>('/actions/surveys').then(r => r.data),
+
+  // Get today's quota status
+  getQuota: () =>
+    apiClient.get<QuotaStatus>('/actions/quota').then(r => r.data),
 };
 
 // ==================== Explorer Types ====================
@@ -900,9 +939,46 @@ export interface NIPATimeSeries {
   line_description: string;
   metric_name: string | null;
   unit: string | null;
+  unit_mult: number | null;  // Power of 10 multiplier (e.g., 6 = millions)
   data: Array<{
     time_period: string;
     value: number | null;
+    note_ref: string | null;
+  }>;
+}
+
+// GDP by Industry Explorer types
+export interface GDPByIndustryTable {
+  table_id: number;
+  table_description: string;
+  has_annual: boolean;
+  has_quarterly: boolean;
+  first_annual_year: number | null;
+  last_annual_year: number | null;
+  first_quarterly_year: number | null;
+  last_quarterly_year: number | null;
+  is_active: boolean;
+}
+
+export interface GDPByIndustryIndustry {
+  industry_code: string;
+  industry_description: string;
+  parent_code: string | null;
+  industry_level: number | null;
+}
+
+export interface GDPByIndustryTimeSeries {
+  table_id: number;
+  table_description: string;
+  industry_code: string;
+  industry_description: string;
+  frequency: string;
+  unit: string | null;
+  unit_mult: number | null;
+  data: Array<{
+    time_period: string;
+    value: number | null;
+    row_type: string;
     note_ref: string | null;
   }>;
 }
@@ -940,6 +1016,7 @@ export interface RegionalTimeSeries {
   geo_fips: string;
   geo_name: string;
   unit: string | null;
+  unit_mult: number | null;
   data: Array<{
     time_period: string;
     value: number | null;
@@ -954,6 +1031,8 @@ export interface BEATaskStatus {
   nipa_running: boolean;
   regional_running: boolean;
   gdpbyindustry_running: boolean;
+  ita_running: boolean;
+  fixedassets_running: boolean;
 }
 
 export interface BEATaskResponse {
@@ -1001,6 +1080,28 @@ export interface GDPByIndustryUpdateRequest {
   category: 'priority' | 'value_added' | 'gross_output' | 'inputs' | 'all';
   frequency: 'A' | 'Q';
   year: string;
+}
+
+export interface ITABackfillRequest {
+  frequency: 'A' | 'QSA' | 'QNSA';
+  year: string;
+  indicators?: string[];
+}
+
+export interface ITAUpdateRequest {
+  category: 'priority' | 'goods' | 'services' | 'income' | 'current_account' | 'all';
+  frequency: 'A' | 'QSA' | 'QNSA';
+  year: string;
+}
+
+export interface FixedAssetsBackfillRequest {
+  year: string;
+  tables?: string[];
+}
+
+export interface FixedAssetsUpdateRequest {
+  year: string;
+  tables?: string[];
 }
 
 export const beaDashboardAPI = {
@@ -1051,6 +1152,20 @@ export const beaActionsAPI = {
 
   updateGDPbyIndustry: (request: GDPByIndustryUpdateRequest) =>
     apiClient.post<BEATaskResponse>('/bea/actions/update/gdpbyindustry', request).then(r => r.data),
+
+  // ITA endpoints
+  backfillITA: (request: ITABackfillRequest) =>
+    apiClient.post<BEATaskResponse>('/bea/actions/backfill/ita', request).then(r => r.data),
+
+  updateITA: (request: ITAUpdateRequest) =>
+    apiClient.post<BEATaskResponse>('/bea/actions/update/ita', request).then(r => r.data),
+
+  // Fixed Assets endpoints
+  backfillFixedAssets: (request: FixedAssetsBackfillRequest) =>
+    apiClient.post<BEATaskResponse>('/bea/actions/backfill/fixedassets', request).then(r => r.data),
+
+  updateFixedAssets: (request: FixedAssetsUpdateRequest) =>
+    apiClient.post<BEATaskResponse>('/bea/actions/update/fixedassets', request).then(r => r.data),
 };
 
 // ==================== BEA Sentinel Types ====================
@@ -1137,6 +1252,127 @@ export const beaSentinelAPI = {
     apiClient.delete<BEASentinelResponse>(`/bea/sentinel/${dataset}`).then(r => r.data),
 };
 
+// ==================== ITA (International Trade) Types ====================
+
+export interface ITAIndicator {
+  indicator_code: string;
+  indicator_description: string;
+  is_active: boolean;
+}
+
+export interface ITAArea {
+  area_code: string;
+  area_name: string;
+  area_type: string | null;
+  is_active: boolean;
+}
+
+export interface ITATimeSeries {
+  indicator_code: string;
+  indicator_description: string;
+  area_code: string;
+  area_name: string;
+  frequency: string;
+  unit: string | null;
+  unit_mult: number | null;
+  data: Array<{
+    time_period: string;
+    value: number | null;
+  }>;
+}
+
+export interface ITAHeadlineMetric {
+  indicator_code: string;
+  indicator_description: string;
+  value: number | null;
+  time_period: string | null;
+  unit: string | null;
+  unit_mult: number | null;
+}
+
+export interface ITAHeadlineResponse {
+  data: ITAHeadlineMetric[];
+  frequency: string;
+}
+
+export interface ITASnapshot {
+  indicator_code: string;
+  indicator_description: string;
+  frequency: string;
+  period: string | null;
+  unit: string | null;
+  unit_mult: number | null;
+  data: Array<{
+    area_code: string;
+    area_name: string;
+    value: number | null;
+  }>;
+}
+
+// ==================== FixedAssets Types ====================
+
+export interface FixedAssetsTable {
+  table_name: string;
+  table_description: string;
+  first_year: number | null;
+  last_year: number | null;
+  series_count: number;
+  is_active: boolean;
+}
+
+export interface FixedAssetsSeries {
+  series_code: string;
+  table_name: string;
+  line_number: number;
+  line_description: string;
+  metric_name: string | null;
+  cl_unit: string | null;
+  unit_mult: number | null;
+  data_points_count: number;
+}
+
+export interface FixedAssetsTimeSeries {
+  series_code: string;
+  line_description: string;
+  metric_name: string | null;
+  unit: string | null;
+  unit_mult: number | null;
+  data: Array<{
+    time_period: string;
+    value: number | null;
+    note_ref: string | null;
+  }>;
+}
+
+export interface FixedAssetsHeadlineMetric {
+  series_code: string;
+  name: string;
+  description: string;
+  line_description: string;
+  value: number | null;
+  time_period: string | null;
+  unit: string | null;
+  unit_mult: number | null;
+}
+
+export interface FixedAssetsHeadlineResponse {
+  data: FixedAssetsHeadlineMetric[];
+}
+
+export interface FixedAssetsSnapshot {
+  table_name: string;
+  table_description: string;
+  period: string | null;
+  unit: string | null;
+  unit_mult: number | null;
+  data: Array<{
+    series_code: string;
+    line_number: number;
+    line_description: string;
+    value: number;
+  }>;
+}
+
 export const beaExplorerAPI = {
   // NIPA endpoints
   getNIPATables: (activeOnly = true) =>
@@ -1188,4 +1424,395 @@ export const beaExplorerAPI = {
     year?: string;
   }) =>
     apiClient.get('/bea/explorer/regional/compare', { params }).then(r => r.data),
+
+  getRegionalSnapshot: (params?: {
+    table_name?: string;
+    line_code?: number;
+    geo_type?: string;
+  }) =>
+    apiClient.get<{
+      data: Array<{ geo_fips: string; geo_name: string; value: number }>;
+      table_name: string;
+      line_code: number;
+      line_description: string | null;
+      unit: string | null;
+      unit_mult: number | null;
+      year: string | null;
+    }>('/bea/explorer/regional/snapshot', { params }).then(r => r.data),
+
+  // GDP by Industry endpoints
+  getGDPByIndustryTables: (activeOnly = true) =>
+    apiClient.get<GDPByIndustryTable[]>('/bea/explorer/gdpbyindustry/tables', { params: { active_only: activeOnly } }).then(r => r.data),
+
+  getGDPByIndustryIndustries: (params?: { active_only?: boolean; level?: number }) =>
+    apiClient.get<GDPByIndustryIndustry[]>('/bea/explorer/gdpbyindustry/industries', { params }).then(r => r.data),
+
+  getGDPByIndustryData: (params: {
+    table_id: number;
+    industry_code: string;
+    frequency?: string;
+    start_year?: number;
+    end_year?: number;
+  }) =>
+    apiClient.get<GDPByIndustryTimeSeries>('/bea/explorer/gdpbyindustry/data', { params }).then(r => r.data),
+
+  getGDPByIndustrySnapshot: (params?: { table_id?: number; frequency?: string }) =>
+    apiClient.get<{
+      data: Array<{
+        industry_code: string;
+        industry_description: string;
+        value: number;
+        parent_code: string | null;
+        industry_level: number | null;
+      }>;
+      table_id: number;
+      table_description: string | null;
+      frequency: string;
+      period: string | null;
+      unit: string | null;
+      unit_mult: number | null;
+    }>('/bea/explorer/gdpbyindustry/snapshot', { params }).then(r => r.data),
+
+  // ITA (International Trade) endpoints
+  getITAIndicators: (params?: { search?: string }) =>
+    apiClient.get<ITAIndicator[]>('/bea/explorer/ita/indicators', { params }).then(r => r.data),
+
+  getITAAreas: (params?: { area_type?: string; search?: string }) =>
+    apiClient.get<ITAArea[]>('/bea/explorer/ita/areas', { params }).then(r => r.data),
+
+  getITAData: (params: {
+    indicator_code: string;
+    area_code: string;
+    frequency?: string;
+    start_year?: number;
+    end_year?: number;
+  }) =>
+    apiClient.get<ITATimeSeries>('/bea/explorer/ita/data', { params }).then(r => r.data),
+
+  getITASnapshot: (params?: {
+    indicator_code?: string;
+    frequency?: string;
+    area_type?: string;
+  }) =>
+    apiClient.get<ITASnapshot>('/bea/explorer/ita/snapshot', { params }).then(r => r.data),
+
+  getITAHeadline: (params?: { frequency?: string; area_code?: string }) =>
+    apiClient.get<ITAHeadlineResponse>('/bea/explorer/ita/headline', { params }).then(r => r.data),
+
+  // Fixed Assets endpoints
+  getFixedAssetsTables: (activeOnly = true) =>
+    apiClient.get<FixedAssetsTable[]>('/bea/explorer/fixedassets/tables', { params: { active_only: activeOnly } }).then(r => r.data),
+
+  getFixedAssetsTable: (tableName: string) =>
+    apiClient.get<FixedAssetsTable>(`/bea/explorer/fixedassets/tables/${tableName}`).then(r => r.data),
+
+  getFixedAssetsTableSeries: (tableName: string) =>
+    apiClient.get<FixedAssetsSeries[]>(`/bea/explorer/fixedassets/tables/${tableName}/series`).then(r => r.data),
+
+  getFixedAssetsSeriesData: (seriesCode: string, params?: {
+    start_year?: number;
+    end_year?: number;
+  }) =>
+    apiClient.get<FixedAssetsTimeSeries>(`/bea/explorer/fixedassets/series/${seriesCode}/data`, { params }).then(r => r.data),
+
+  getFixedAssetsSnapshot: (params?: { table_name?: string }) =>
+    apiClient.get<FixedAssetsSnapshot>('/bea/explorer/fixedassets/snapshot', { params }).then(r => r.data),
+
+  getFixedAssetsHeadline: () =>
+    apiClient.get<FixedAssetsHeadlineResponse>('/bea/explorer/fixedassets/headline').then(r => r.data),
+};
+
+// ======================== Treasury Types ======================== //
+
+export interface TreasuryFreshness {
+  data_type: string;
+  latest_data_date: string | null;
+  last_checked_at: string | null;
+  last_update_detected: string | null;
+  needs_update: boolean;
+  update_in_progress: boolean;
+  last_update_completed: string | null;
+  total_records: number;
+  total_checks: number;
+  total_updates: number;
+}
+
+export interface TreasuryFreshnessOverview {
+  total_data_types: number;
+  types_current: number;
+  types_need_update: number;
+  types_updating: number;
+  total_records: number;
+  data_types: TreasuryFreshness[];
+}
+
+export interface TreasuryCollectionRun {
+  run_id: number;
+  collection_type: string;
+  run_type: string;
+  security_term: string | null;
+  started_at: string;
+  completed_at: string | null;
+  status: string;
+  error_message: string | null;
+  records_fetched: number;
+  records_inserted: number;
+  records_updated: number;
+  api_requests_made: number;
+  duration_seconds: number | null;
+}
+
+export interface TreasuryAuction {
+  auction_id: number;
+  cusip: string;
+  auction_date: string;
+  security_type: string;
+  security_term: string;
+  offering_amount: number | null;
+  total_tendered: number | null;
+  total_accepted: number | null;
+  bid_to_cover_ratio: number | null;
+  high_yield: number | null;
+  coupon_rate: number | null;
+  tail_bps: number | null;
+  auction_result: string | null;
+}
+
+export interface TreasuryAuctionSummary {
+  total_auctions: number;
+  auctions_by_term: Record<string, number>;
+  earliest_auction: string | null;
+  latest_auction: string | null;
+  recent_results: Record<string, number>;
+  avg_bid_to_cover_30d: number | null;
+}
+
+export interface TreasuryUpcomingAuction {
+  upcoming_id: number;
+  cusip: string | null;
+  security_type: string;
+  security_term: string;
+  auction_date: string;
+  issue_date: string | null;
+  maturity_date: string | null;
+  offering_amount: number | null;
+  is_processed: boolean;
+}
+
+export interface TreasuryDailyRate {
+  rate_date: string;
+  yield_1m: number | null;
+  yield_3m: number | null;
+  yield_6m: number | null;
+  yield_1y: number | null;
+  yield_2y: number | null;
+  yield_5y: number | null;
+  yield_7y: number | null;
+  yield_10y: number | null;
+  yield_20y: number | null;
+  yield_30y: number | null;
+  spread_2s10s: number | null;
+  spread_2s30s: number | null;
+}
+
+export interface TreasuryStats {
+  total_auctions: number;
+  total_upcoming_auctions: number;
+  total_daily_rates: number;
+  earliest_auction: string | null;
+  latest_auction: string | null;
+  collection_runs_last_7d: number;
+  // Aliases for backward compatibility
+  upcoming_count?: number;
+  earliest_date?: string | null;
+  latest_date?: string | null;
+}
+
+export interface TreasuryTaskStatus {
+  auctions_running: boolean;
+  upcoming_running: boolean;
+  rates_running: boolean;
+}
+
+export interface TreasuryTaskResponse {
+  success: boolean;
+  message: string;
+  run_id: number | null;
+}
+
+// ======================== Treasury API ======================== //
+
+export const treasuryAPI = {
+  // Freshness
+  getFreshnessOverview: () =>
+    apiClient.get<TreasuryFreshnessOverview>('/treasury/freshness/overview').then(r => r.data),
+
+  // Collection Runs
+  getRecentRuns: (limit = 20, collectionType?: string) =>
+    apiClient.get<TreasuryCollectionRun[]>('/treasury/runs/recent', {
+      params: { limit, collection_type: collectionType }
+    }).then(r => r.data),
+
+  // Auctions
+  getRecentAuctions: (limit = 20, securityTerm?: string) =>
+    apiClient.get<TreasuryAuction[]>('/treasury/auctions/recent', {
+      params: { limit, security_term: securityTerm }
+    }).then(r => r.data),
+
+  getAuctionSummary: () =>
+    apiClient.get<TreasuryAuctionSummary>('/treasury/auctions/summary').then(r => r.data),
+
+  getAuctionHistory: (securityTerm: string, limit = 50) =>
+    apiClient.get<TreasuryAuction[]>(`/treasury/auctions/${securityTerm}/history`, {
+      params: { limit }
+    }).then(r => r.data),
+
+  // Upcoming
+  getUpcomingAuctions: (includeProcessed = false) =>
+    apiClient.get<TreasuryUpcomingAuction[]>('/treasury/upcoming', {
+      params: { include_processed: includeProcessed }
+    }).then(r => r.data),
+
+  // Rates
+  getLatestRates: () =>
+    apiClient.get<TreasuryDailyRate>('/treasury/rates/latest').then(r => r.data),
+
+  getRatesHistory: (days = 30) =>
+    apiClient.get<TreasuryDailyRate[]>('/treasury/rates/history', {
+      params: { days }
+    }).then(r => r.data),
+
+  // Stats
+  getStats: () =>
+    apiClient.get<TreasuryStats>('/treasury/stats').then(r => r.data),
+
+  // Task Status
+  getTaskStatus: () =>
+    apiClient.get<TreasuryTaskStatus>('/treasury/task-status').then(r => r.data),
+
+  // Actions
+  backfillAuctions: async (years = 5, securityTerm?: string) => {
+    console.log('API: backfillAuctions called', { years, securityTerm });
+    const response = await apiClient.post<TreasuryTaskResponse>('/treasury/backfill/auctions', {
+      years,
+      security_term: securityTerm
+    });
+    console.log('API: backfillAuctions response', response.data);
+    return response.data;
+  },
+
+  updateAuctions: (days = 30, securityTerm?: string) =>
+    apiClient.post<TreasuryTaskResponse>('/treasury/update/auctions', {
+      days,
+      security_term: securityTerm
+    }).then(r => r.data),
+
+  refreshUpcoming: () =>
+    apiClient.post<TreasuryTaskResponse>('/treasury/refresh/upcoming').then(r => r.data),
+
+  testApi: () =>
+    apiClient.post<TreasuryTaskResponse>('/treasury/test-api').then(r => r.data),
+};
+
+// ======================== Treasury Explorer Types ======================== //
+
+export interface TreasuryTermSummary {
+  security_term: string;
+  auction_count: number;
+  avg_bid_to_cover: number | null;
+  avg_yield: number | null;
+  latest_auction_date: string | null;
+  latest_yield: number | null;
+}
+
+export interface TreasuryYieldHistoryPoint {
+  auction_date: string;
+  high_yield: number | null;
+  bid_to_cover_ratio: number | null;
+  offering_amount: number | null;
+}
+
+export interface TreasuryYieldHistory {
+  security_term: string;
+  data: TreasuryYieldHistoryPoint[];
+}
+
+export interface TreasuryAuctionDetail {
+  auction_id: number;
+  cusip: string;
+  auction_date: string;
+  security_type: string;
+  security_term: string;
+  term_months: number | null;
+  issue_date: string | null;
+  maturity_date: string | null;
+  offering_amount: number | null;
+  total_tendered: number | null;
+  total_accepted: number | null;
+  bid_to_cover_ratio: number | null;
+  competitive_tendered: number | null;
+  competitive_accepted: number | null;
+  non_competitive_tendered: number | null;
+  non_competitive_accepted: number | null;
+  primary_dealer_tendered: number | null;
+  primary_dealer_accepted: number | null;
+  direct_bidder_tendered: number | null;
+  direct_bidder_accepted: number | null;
+  indirect_bidder_accepted: number | null;
+  high_yield: number | null;
+  high_discount_rate: number | null;
+  low_yield: number | null;
+  median_yield: number | null;
+  coupon_rate: number | null;
+  price_per_100: number | null;
+  wi_yield: number | null;
+  tail_bps: number | null;
+  auction_result: string | null;
+}
+
+export interface TreasurySnapshot {
+  data: Array<{
+    security_term: string;
+    auction_date: string;
+    high_yield: number | null;
+    bid_to_cover_ratio: number | null;
+    offering_amount: number | null;
+    yield_change: number | null;
+    coupon_rate: number | null;
+  }>;
+}
+
+// ======================== Treasury Explorer API ======================== //
+
+export const treasuryExplorerAPI = {
+  getTermSummaries: () =>
+    apiClient.get<TreasuryTermSummary[]>('/treasury/explorer/terms').then(r => r.data),
+
+  getAuctions: (params?: {
+    security_term?: string;
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+    offset?: number;
+  }) =>
+    apiClient.get<TreasuryAuction[]>('/treasury/explorer/auctions', { params }).then(r => r.data),
+
+  getAuctionDetail: (auctionId: number) =>
+    apiClient.get<TreasuryAuctionDetail>(`/treasury/explorer/auctions/${auctionId}`).then(r => r.data),
+
+  getYieldHistory: (securityTerm: string, years = 5) =>
+    apiClient.get<TreasuryYieldHistory>(`/treasury/explorer/history/${securityTerm}`, {
+      params: { years }
+    }).then(r => r.data),
+
+  getUpcoming: () =>
+    apiClient.get<TreasuryUpcomingAuction[]>('/treasury/explorer/upcoming').then(r => r.data),
+
+  compareTerms: (terms: string, years = 5) =>
+    apiClient.get('/treasury/explorer/compare', {
+      params: { terms, years }
+    }).then(r => r.data),
+
+  getSnapshot: () =>
+    apiClient.get<TreasurySnapshot>('/treasury/explorer/snapshot').then(r => r.data),
 };

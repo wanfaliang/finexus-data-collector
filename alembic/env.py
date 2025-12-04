@@ -31,6 +31,8 @@ from src.database.bls_models import Base as BLSBase
 from src.database.bls_tracking_models import Base as BLSTrackingBase
 from src.database.bea_models import Base as BEABase
 from src.database.bea_tracking_models import Base as BEATrackingBase
+from src.database.treasury_models import Base as TreasuryBase
+from src.database.treasury_tracking_models import Base as TreasuryTrackingBase
 
 # Combine metadata from all Base objects for autogenerate
 from sqlalchemy import MetaData
@@ -44,6 +46,10 @@ for table in BLSTrackingBase.metadata.tables.values():
 for table in BEABase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 for table in BEATrackingBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in TreasuryBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+for table in TreasuryTrackingBase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 
 target_metadata = combined_metadata

@@ -8,9 +8,24 @@ Usage:
     python scripts/update_bea_data.py [options]
 
 Options:
-    --dataset NIPA|Regional|GDPbyIndustry|all  Dataset to update (default: all)
-    --force                                     Force update even if data is recent
-    --year YEAR_SPEC                            Year specification for update (default: LAST5)
+    --dataset NIPA|Regional|GDPbyIndustry|ITA|FixedAssets|all  Dataset to update (default: all)
+    --force                                                     Force update even if data is recent
+    --year YEAR_SPEC                                            Year specification for update (default: LAST5)
+
+Examples:
+    # Update all datasets
+    python scripts/update_bea_data.py
+
+    # Update specific dataset
+    python scripts/update_bea_data.py --dataset NIPA
+    python scripts/update_bea_data.py --dataset ITA
+    python scripts/update_bea_data.py --dataset FixedAssets
+
+    # Force update even if recently updated
+    python scripts/update_bea_data.py --force
+
+    # Update last 10 years
+    python scripts/update_bea_data.py --year LAST10
 """
 import argparse
 import logging
@@ -25,7 +40,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.config import settings
 from src.database.connection import get_session
 from src.bea.bea_client import BEAClient
-from src.bea.bea_collector import NIPACollector, RegionalCollector, GDPByIndustryCollector, BEACollector, CollectionProgress
+from src.bea.bea_collector import (
+    NIPACollector, RegionalCollector, GDPByIndustryCollector,
+    ITACollector, FixedAssetsCollector, BEACollector, CollectionProgress
+)
 from src.database.bea_tracking_models import BEADatasetFreshness
 
 # Create logs directory
@@ -183,10 +201,80 @@ def update_gdpbyindustry(session, client: BEAClient, year: str, force: bool) -> 
         return False
 
 
+def update_ita(session, client: BEAClient, year: str, force: bool) -> bool:
+    """Update ITA (International Transactions) dataset"""
+    if not check_needs_update(session, 'ITA', force):
+        return True
+
+    logger.info("Updating ITA data...")
+    collector = ITACollector(client, session)
+
+    # Focus on most important indicators for incremental updates
+    # Trade balance indicators
+    priority_indicators = [
+        'BalGds',    # Balance on Goods
+        'BalServ',   # Balance on Services
+        'BalCAcc',   # Balance on Current Account
+    ]
+
+    try:
+        progress = collector.backfill_all_indicators(
+            frequency='A',
+            year=year,
+            indicators=priority_indicators,
+            progress_callback=progress_callback
+        )
+
+        if progress.errors:
+            logger.warning(f"ITA update completed with {len(progress.errors)} errors")
+            return False
+        else:
+            logger.info(f"ITA update successful: {progress.data_points_inserted} data points")
+            return True
+
+    except Exception as e:
+        logger.error(f"ITA update failed: {e}")
+        return False
+
+
+def update_fixedassets(session, client: BEAClient, year: str, force: bool) -> bool:
+    """Update FixedAssets dataset"""
+    if not check_needs_update(session, 'FixedAssets', force):
+        return True
+
+    logger.info("Updating Fixed Assets data...")
+    collector = FixedAssetsCollector(client, session)
+
+    # Focus on most important tables for incremental updates
+    priority_tables = [
+        'FAAt101',   # Current-Cost Net Stock of Private Fixed Assets
+        'FAAt103',   # Current-Cost Depreciation of Private Fixed Assets
+        'FAAt105',   # Investment in Private Fixed Assets
+    ]
+
+    try:
+        progress = collector.backfill_all_tables(
+            year=year,
+            tables=priority_tables,
+            progress_callback=progress_callback
+        )
+
+        if progress.errors:
+            logger.warning(f"Fixed Assets update completed with {len(progress.errors)} errors")
+            return False
+        else:
+            logger.info(f"Fixed Assets update successful: {progress.data_points_inserted} data points")
+            return True
+
+    except Exception as e:
+        logger.error(f"Fixed Assets update failed: {e}")
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description='Update BEA data')
     parser.add_argument('--dataset', type=str, default='all',
-                        choices=['NIPA', 'Regional', 'GDPbyIndustry', 'all'],
+                        choices=['NIPA', 'Regional', 'GDPbyIndustry', 'ITA', 'FixedAssets', 'all'],
                         help='Dataset to update')
     parser.add_argument('--force', action='store_true',
                         help='Force update even if data is recent')
@@ -226,6 +314,14 @@ def main():
 
         if args.dataset in ('GDPbyIndustry', 'all'):
             if not update_gdpbyindustry(session, client, args.year, args.force):
+                success = False
+
+        if args.dataset in ('ITA', 'all'):
+            if not update_ita(session, client, args.year, args.force):
+                success = False
+
+        if args.dataset in ('FixedAssets', 'all'):
+            if not update_fixedassets(session, client, args.year, args.force):
                 success = False
 
     logger.info("=" * 80)

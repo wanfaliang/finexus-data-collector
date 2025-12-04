@@ -51,6 +51,16 @@ GDPBYINDUSTRY_TABLE_GROUPS = {
     'all': None,
 }
 
+# ITA (International Transactions) indicator categories
+ITA_INDICATOR_GROUPS = {
+    'priority': ['BalGds', 'BalServ', 'BalCAcc'],  # Balance on goods, services, current account
+    'goods': ['ExpGds', 'ImpGds', 'BalGds'],  # Goods exports, imports, balance
+    'services': ['ExpServ', 'ImpServ', 'BalServ'],  # Services exports, imports, balance
+    'income': ['IncReceipts', 'IncPayments', 'NetInc'],  # Investment income
+    'current_account': ['BalGds', 'BalServ', 'PrimInc', 'SecInc', 'BalCAcc'],  # Current account components
+    'all': None,
+}
+
 
 # ==================== Request/Response Models ==================== #
 
@@ -95,6 +105,32 @@ class GDPByIndustryUpdateRequest(BaseModel):
     year: str = Field("LAST5", description="Year specification")
 
 
+class ITABackfillRequest(BaseModel):
+    """Request to start ITA (International Transactions) backfill"""
+    frequency: str = Field("A", description="Data frequency: A (Annual), QSA (Quarterly SA), QNSA (Quarterly NSA)")
+    year: str = Field("ALL", description="Year specification: ALL, LAST5, LAST10, or comma-separated years")
+    indicators: Optional[List[str]] = Field(None, description="Specific indicator codes to backfill (optional)")
+
+
+class ITAUpdateRequest(BaseModel):
+    """Request to start ITA incremental update"""
+    category: str = Field("priority", description="Category: priority, goods, services, income, current_account, all")
+    frequency: str = Field("A", description="Data frequency: A, QSA, QNSA")
+    year: str = Field("LAST5", description="Year specification")
+
+
+class FixedAssetsBackfillRequest(BaseModel):
+    """Request to start Fixed Assets backfill"""
+    year: str = Field("ALL", description="Year specification: ALL, LAST5, LAST10, or comma-separated years")
+    tables: Optional[List[str]] = Field(None, description="Specific table names to backfill (optional)")
+
+
+class FixedAssetsUpdateRequest(BaseModel):
+    """Request to start Fixed Assets update"""
+    year: str = Field("LAST5", description="Year specification")
+    tables: Optional[List[str]] = Field(None, description="Specific table names to update (optional)")
+
+
 class UpdateRequest(BaseModel):
     """Request to start incremental update (legacy - updates priority tables only)"""
     dataset: str = Field("all", description="Dataset to update: NIPA, Regional, GDPbyIndustry, or all")
@@ -114,6 +150,8 @@ class TaskStatusResponse(BaseModel):
     nipa_running: bool
     regional_running: bool
     gdpbyindustry_running: bool
+    ita_running: bool
+    fixedassets_running: bool
 
 
 # ==================== Endpoints ==================== #
@@ -130,6 +168,8 @@ async def get_task_status():
         nipa_running=status["NIPA"],
         regional_running=status["Regional"],
         gdpbyindustry_running=status["GDPbyIndustry"],
+        ita_running=status["ITA"],
+        fixedassets_running=status["FixedAssets"],
     )
 
 
@@ -383,5 +423,137 @@ async def start_gdpbyindustry_update(request: GDPByIndustryUpdateRequest):
     return TaskResponse(
         success=True,
         message=f"GDP by Industry update started (category={request.category}, freq={request.frequency})",
+        run_id=run_id,
+    )
+
+
+# ==================== ITA Endpoints ==================== #
+
+@router.post("/actions/backfill/ita", response_model=TaskResponse)
+async def start_ita_backfill(request: ITABackfillRequest):
+    """
+    Start ITA (International Transactions) data backfill in background.
+
+    - **frequency**: A (Annual), QSA (Quarterly Seasonally Adjusted), QNSA (Quarterly Not Seasonally Adjusted)
+    - **year**: ALL, LAST5, LAST10, or comma-separated years
+    - **indicators**: Optional list of specific indicator codes to backfill
+
+    Returns immediately with run_id. Check /actions/status or recent runs for progress.
+    """
+    # Validate frequency
+    if request.frequency not in ("A", "QSA", "QNSA"):
+        raise HTTPException(status_code=400, detail="frequency must be A, QSA, or QNSA")
+
+    run_id = task_runner.start_ita_backfill(
+        frequency=request.frequency,
+        year=request.year,
+        indicators=request.indicators,
+    )
+
+    if run_id is None:
+        return TaskResponse(
+            success=False,
+            message="ITA backfill already running. Please wait for it to complete.",
+        )
+
+    return TaskResponse(
+        success=True,
+        message=f"ITA backfill started (frequency={request.frequency}, year={request.year})",
+        run_id=run_id,
+    )
+
+
+@router.post("/actions/update/ita", response_model=TaskResponse)
+async def start_ita_update(request: ITAUpdateRequest):
+    """
+    Start ITA incremental update for specific indicator category.
+
+    - **category**: priority, goods, services, income, current_account, all
+    - **frequency**: A, QSA, QNSA
+    - **year**: Year specification (default: LAST5)
+    """
+    valid_categories = list(ITA_INDICATOR_GROUPS.keys())
+    if request.category not in valid_categories:
+        raise HTTPException(status_code=400, detail=f"category must be one of: {valid_categories}")
+    if request.frequency not in ("A", "QSA", "QNSA"):
+        raise HTTPException(status_code=400, detail="frequency must be A, QSA, or QNSA")
+
+    indicators = ITA_INDICATOR_GROUPS.get(request.category)
+
+    run_id = task_runner.start_ita_update(
+        frequency=request.frequency,
+        year=request.year,
+        indicators=indicators,
+    )
+
+    if run_id is None:
+        return TaskResponse(
+            success=False,
+            message="ITA task already running. Please wait for it to complete.",
+        )
+
+    return TaskResponse(
+        success=True,
+        message=f"ITA update started (category={request.category}, freq={request.frequency})",
+        run_id=run_id,
+    )
+
+
+# ==================== Fixed Assets Endpoints ==================== #
+
+@router.post("/actions/backfill/fixedassets", response_model=TaskResponse)
+async def start_fixedassets_backfill(request: FixedAssetsBackfillRequest):
+    """
+    Start Fixed Assets data backfill in background.
+
+    - **year**: ALL, LAST5, LAST10, or comma-separated years
+    - **tables**: Optional list of specific table names to backfill
+
+    Returns immediately with run_id. Check /actions/status or recent runs for progress.
+
+    Note: Fixed Assets only supports annual data.
+    """
+    run_id = task_runner.start_fixedassets_backfill(
+        year=request.year,
+        tables=request.tables,
+    )
+
+    if run_id is None:
+        return TaskResponse(
+            success=False,
+            message="Fixed Assets backfill already running. Please wait for it to complete.",
+        )
+
+    return TaskResponse(
+        success=True,
+        message=f"Fixed Assets backfill started (year={request.year})",
+        run_id=run_id,
+    )
+
+
+@router.post("/actions/update/fixedassets", response_model=TaskResponse)
+async def start_fixedassets_update(request: FixedAssetsUpdateRequest):
+    """
+    Start Fixed Assets update in background.
+
+    - **year**: Year specification (default: LAST5)
+    - **tables**: Optional list of specific table names
+
+    Note: Fixed Assets only supports annual data.
+    """
+    run_id = task_runner.start_fixedassets_update(
+        year=request.year,
+        tables=request.tables,
+    )
+
+    if run_id is None:
+        return TaskResponse(
+            success=False,
+            message="Fixed Assets task already running. Please wait for it to complete.",
+        )
+
+    return TaskResponse(
+        success=True,
+        message=f"Fixed Assets update started (year={request.year})",
         run_id=run_id,
     )

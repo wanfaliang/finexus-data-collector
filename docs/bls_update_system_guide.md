@@ -3,110 +3,122 @@
 ## Overview
 
 The BLS Update System provides intelligent, quota-aware updating of all BLS surveys through:
-- **Sentinel-based freshness detection** - Automatically detect when BLS publishes new data
-- **Smart series tracking** - Only update series that need it
+- **Update Cycles** - Track multi-day update operations
+- **Smart series tracking** - Only update series not yet in the current cycle
 - **Daily quota management** - Stay within API limits (500 requests/day)
 - **Resume capability** - Interrupted updates continue where they left off
 - **Dashboard integration** - Monitor and trigger updates from Admin UI
 
 ## Architecture
 
+### Key Concepts
+
+**Update Cycle** - A single update operation for a survey. May span multiple days due to API quota limits. Only one cycle per survey can be "current" at a time.
+
+**Soft Update** - Resume existing cycle. Skips series already updated in this cycle.
+
+**Force Update** - Create new cycle. Old cycle marked not current. All series start fresh.
+
+**Freshness Check** - Compare BLS API data with our database to detect if new data is available.
+
+### Database Tables
+
+1. **`bls_update_cycles`**
+   - Tracks each update cycle
+   - `id`, `survey_code`, `is_current`, `started_at`, `completed_at`
+   - `total_series`, `series_updated`, `requests_used`
+
+2. **`bls_update_cycle_series`**
+   - Tracks which series have been updated in a cycle
+   - `cycle_id`, `series_id`, `updated_at`
+
+3. **`bls_api_usage_log`**
+   - Tracks daily API quota usage
+   - `usage_date`, `requests_used`, `series_count`, `survey_code`
+
 ### Components
 
-1. **Sentinel System** - Lightweight freshness detection
-   - Monitors representative series for each survey
-   - Detects when BLS publishes new data
-   - Automatically resets series status when changes detected
-
-2. **Update Manager** (`src/bls/update_manager.py`)
+1. **Update Manager** (`src/bls/update_manager.py`)
    - Core update logic used by both CLI and API
-   - Tracks series status (`is_current` flag)
-   - Handles force update with status reset
+   - Functions: `update_survey()`, `get_current_cycle()`, `create_new_cycle()`
+
+2. **Freshness Checker** (`src/bls/freshness_checker.py`)
+   - Stateless freshness checking
+   - Compares 50 series per survey with BLS API
+   - No persistent tracking needed
 
 3. **CLI Scripts** (`scripts/bls/`)
    - `universal_update.py` - Main update script
    - `check_quota.py` - View API usage
-   - `show_status.py` - View series status
-   - `reset_status.py` - Manual status reset
 
-4. **Admin Dashboard** (`frontend/src/pages/Dashboard.tsx`)
-   - Visual survey status
-   - Update and Force Update buttons
-   - Real-time progress tracking
+4. **Admin API** (`src/admin/api/v1/actions.py`)
+   - REST endpoints for Dashboard
+   - Update triggers, status queries, freshness checks
 
-## How It Works
-
-### Series Status Tracking
-
-Each series has an `is_current` flag in `bls_series_update_status`:
-- `is_current = True` → Series has been updated, will be SKIPPED
-- `is_current = False` → Series needs update, will be INCLUDED
-
-### Update Flow
+## Update Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     SENTINEL SYSTEM                              │
-│  Periodically checks representative series for each survey       │
-│  If values changed → BLS published new data                      │
+│                     SOFT UPDATE                                  │
+│  1. Check for current cycle                                      │
+│  2. If exists and incomplete → resume                            │
+│  3. If none or complete → create new cycle                       │
+│  4. Query series NOT IN cycle_series table                       │
+│  5. Update in batches of 50                                      │
+│  6. Insert to cycle_series after each batch                      │
+│  7. Stop when quota reached or all done                          │
 └─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼ (changes detected)
+
 ┌─────────────────────────────────────────────────────────────────┐
-│                     RESET SERIES STATUS                          │
-│  All series in survey → is_current = False                       │
-│  Survey marked as needs_full_update = True                       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     UPDATE EXECUTION                             │
-│  Query series where is_current = False                           │
-│  Update in batches of 50 series                                  │
-│  Mark each updated series → is_current = True                    │
-│  Stop when quota reached                                         │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼ (next day, if quota was reached)
-┌─────────────────────────────────────────────────────────────────┐
-│                     RESUME UPDATE                                │
-│  Query series where is_current = False (remaining series)        │
-│  Continue updating from where we left off                        │
-│  Previously updated series are SKIPPED                           │
+│                     FORCE UPDATE                                 │
+│  1. Mark existing current cycle as not current                   │
+│  2. Create new cycle                                             │
+│  3. All series start fresh (no cycle_series records)             │
+│  4. Update in batches of 50                                      │
+│  5. Insert to cycle_series after each batch                      │
+│  6. Stop when quota reached or all done                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Normal Update vs Force Update
+## Resume Example
 
-**Normal Update** (Dashboard "Update" button or CLI without `--force`):
-- Skips series with `is_current = True`
-- Only updates series with `is_current = False` or no status record
-- Ideal for resuming interrupted updates
+**Day 1:**
+- Force Update LA survey (33,725 series)
+- Create cycle #1, update 25,050 series (501 requests)
+- Hit quota limit, stop
+- cycle #1: `series_updated = 25,050`, `is_current = True`, `completed_at = NULL`
+- 25,050 records in `bls_update_cycle_series` for cycle #1
 
-**Force Update** (Dashboard "Force" button or CLI with `--force`):
-1. First resets ALL series to `is_current = False`
-2. Then updates all active series
-3. Use when you need a complete refresh
+**Day 2:**
+- Soft Update LA survey
+- Find current cycle #1 (incomplete)
+- Query: `SELECT series_id FROM la_series WHERE is_active = TRUE AND series_id NOT IN (SELECT series_id FROM bls_update_cycle_series WHERE cycle_id = 1)`
+- Returns 8,675 remaining series
+- Update 8,675 series (174 requests)
+- Mark cycle #1 complete: `completed_at = now()`
 
 ## Quick Start
 
 ### CLI Usage
 
 ```bash
-# Check what needs updating (no API calls)
+# Check freshness (compares API with database, uses ~17 requests for all surveys)
+python scripts/bls/universal_update.py --check-freshness
+
+# Check cycle status (no API calls)
 python scripts/bls/universal_update.py --check-only
 
-# Update specific surveys (resumes if previously interrupted)
-python scripts/bls/universal_update.py --surveys CU,AP,EI
+# Soft update (resume existing cycle or create new)
+python scripts/bls/universal_update.py --surveys LA
 
-# Force update - reset and update all series
-python scripts/bls/universal_update.py --surveys CU --force
+# Force update (create new cycle, start fresh)
+python scripts/bls/universal_update.py --surveys LA --force
+
+# Update multiple surveys
+python scripts/bls/universal_update.py --surveys CU,CE,AP
 
 # Check quota usage
 python scripts/bls/check_quota.py
-
-# View update status
-python scripts/bls/show_status.py
 ```
 
 ### Dashboard Usage
@@ -114,289 +126,156 @@ python scripts/bls/show_status.py
 1. Navigate to Admin Dashboard
 2. Each survey card shows:
    - Current status (Current, Needs Update, Updating)
-   - Last sentinel check time
-   - Last full update time
-3. Click **Update** to resume/start update (skips current series)
-4. Click **Force** to reset and update all series
+   - Series updated / total
+   - Progress percentage
+3. Click **Update** to resume/start cycle (skips already-updated series)
+4. Click **Force** to create new cycle and start fresh
+5. Click **Check All** to check freshness for all surveys
 
-## Core Scripts
+## API Endpoints
 
-### 1. `universal_update.py` - Main Update Script
+### Status Endpoints
 
-Updates any BLS survey with intelligent series selection and quota management.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/actions/status` | GET | Get status for all surveys |
+| `/actions/status/{survey_code}` | GET | Get status for one survey |
+| `/actions/surveys` | GET | List supported survey codes |
 
-**Options:**
-```bash
---surveys CU,CE,AP     # Specific surveys to update
---daily-limit 400      # Set daily quota limit (default: 500)
---start-year 2024      # Data year range
---end-year 2025
---check-only           # Preview without updating
---force                # Reset status and update all series
---fresh-only           # Only update surveys with sentinel-detected changes
+### Update Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/actions/update/{survey_code}` | POST | Trigger update. Body: `{force: bool}` |
+| `/actions/freshness/check` | POST | Check freshness. Body: `{survey_codes?: string[]}` |
+
+### Legacy Endpoints (Dashboard compatibility)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/actions/freshness/overview` | GET | Legacy format for Dashboard |
+
+## Freshness Checking
+
+The freshness check compares BLS API data with our database to detect if new data is available:
+
+1. Select 50 series per survey
+2. Fetch current data from BLS API
+3. Compare latest (year, period) with our database
+4. Report which surveys have new data
+
+This is a **lightweight, stateless** check - no persistent sentinel tracking.
+
+```python
+# Example response
+{
+  "checked_at": "2025-11-30T14:30:00",
+  "surveys_checked": 17,
+  "surveys_with_new_data": 3,
+  "results": [
+    {
+      "survey_code": "CU",
+      "survey_name": "Consumer Price Index",
+      "has_new_data": true,
+      "series_checked": 50,
+      "series_with_new_data": 48,
+      "our_latest": "2024 M10",
+      "bls_latest": "2024 M11"
+    },
+    ...
+  ]
+}
 ```
-
-**Examples:**
-```bash
-# Daily routine: Update high-priority surveys
-python scripts/bls/universal_update.py --surveys CU,CE,AP,PC
-
-# Only update surveys where sentinel detected new data
-python scripts/bls/universal_update.py --fresh-only
-
-# Force complete refresh of CU
-python scripts/bls/universal_update.py --surveys CU --force
-
-# Safe mode: Low daily limit
-python scripts/bls/universal_update.py --daily-limit 100
-```
-
-### 2. `check_quota.py` - View API Usage
-
-Shows today's API usage and remaining quota.
-
-**Output:**
-```
-================================================================================
-BLS API QUOTA STATUS - 2025-01-15
-================================================================================
-
-Requests:
-  Used today: 156 / 500 (31.2%)
-  Remaining:  344 requests (~17,200 series)
-
-Series updated today: 7,800
-
-Breakdown by survey:
-  CU : 137 requests,   6,840 series
-  AP :  11 requests,     544 series
-  PC :   8 requests,     416 series
-```
-
-### 3. `show_status.py` - View Series Status
-
-Shows which surveys are current and which need updates.
-
-**Options:**
-```bash
---surveys CU,CE        # Show specific surveys
---detailed             # Include last update times
-```
-
-**Output:**
-```
-================================================================================
-BLS SERIES UPDATE STATUS
-================================================================================
-
-CU - Consumer Price Index
-  Active series: 6,840
-  Current: 6,840 (100.0%)
-  Need update: 0
-
-CE - Current Employment Statistics
-  Active series: 22,049
-  Current: 0 (0.0%)
-  Need update: 22,049
-```
-
-### 4. `reset_status.py` - Manual Status Reset
-
-Marks series as needing update (sets `is_current = False`).
-
-**Usage:**
-```bash
-# Reset specific surveys
-python scripts/bls/reset_status.py --surveys CU,CE
-
-# With confirmation
-python scripts/bls/reset_status.py --surveys CU --confirm
-```
-
-**When to use:**
-- Sentinel system not detecting changes correctly
-- Want to force full re-check manually
-- After flat file import
-
-## Sentinel System Details
-
-### How Sentinels Work
-
-Each survey has 50 representative "sentinel" series stored in `bls_survey_sentinels`. These are checked periodically to detect if BLS has published new data.
-
-**Sentinel check process:**
-1. Fetch current values for sentinel series from BLS API
-2. Compare with stored values (year, period, value)
-3. If ANY sentinel has changed → new data published
-4. Reset all series in survey to `is_current = False`
-5. Mark survey as `needs_full_update = True`
-
-### Sentinel Tables
-
-**`bls_survey_sentinels`**
-- `survey_code` - Which survey
-- `series_id` - The sentinel series
-- `last_value`, `last_year`, `last_period` - Stored values for comparison
-- `last_changed_at` - When sentinel last detected change
-
-**`bls_survey_freshness`**
-- `survey_code` - Which survey
-- `needs_full_update` - Flag set when sentinel detects changes
-- `last_bls_update_detected` - When changes were detected
-- `last_sentinel_check` - When sentinels were last checked
-
-## Resume Capability
-
-The system correctly resumes interrupted updates across multiple days:
-
-**Day 1:**
-- Start updating CE survey (22,049 series)
-- Update 12,500 series (250 requests)
-- Hit daily quota limit, stop
-- Series 1-12,500 have `is_current = True`
-- Series 12,501-22,049 have `is_current = False`
-
-**Day 2:**
-- Resume update for CE
-- Query for `is_current = False` → gets series 12,501-22,049
-- Series 1-12,500 are SKIPPED (already current)
-- Continue updating remaining 9,549 series
-
-**Key:** The `is_current` flag persists until sentinel detects new data, enabling multi-day updates.
 
 ## Quota Management
 
 Daily quota tracked in `bls_api_usage_log`:
-- **usage_date** - Date of usage
-- **requests_used** - Number of API requests
-- **series_count** - Number of series updated
-- **survey_code** - Which survey
-- **script_name** - Which script ran
+- Default limit: 500 requests/day
+- Each request fetches up to 50 series
+- Maximum series per day: ~25,000
 
 The system automatically:
 - Checks remaining quota before starting
 - Stops when quota reached
 - Resumes next day where it left off
 
-## Handling Large Surveys
+## Best Practices
 
-### OE (Occupational Employment) - 6M+ series
+1. **Use Soft Update normally**
+   - Resumes existing cycle efficiently
+   - Only use Force when you need a complete refresh
 
-**NEVER use API updates.** Always use flat files:
-```bash
-# Download
-wget -r -np -nH --cut-dirs=3 https://download.bls.gov/pub/time.series/oe/
+2. **Check freshness before updating**
+   - `--check-freshness` to see if BLS has new data
+   - Avoid unnecessary updates
 
-# Load
-python scripts/bls/load_oe_flat_files.py --data-files oe.data.0.Current
-```
+3. **Monitor quota**
+   - Keep buffer for ad-hoc queries
+   - Use `--daily-limit 400` for safety margin
 
-### LA, TU, LN - 30K-90K series
-
-**Recommended:** Use flat files for major updates, API for incremental:
-```bash
-# Annual: Flat file
-python scripts/bls/load_la_flat_files.py --data-files la.data.0.Current
-
-# Monthly: API for specific series
-python scripts/bls/universal_update.py --surveys LA --limit 1000
-```
+4. **Use flat files for large surveys**
+   - OE (6M+ series) - always use flat files
+   - LA, TU, LN - use flat files for initial load
 
 ## Troubleshooting
 
-### "All surveys up-to-date" but data is stale
+### "All cycles complete" but data is stale
 
-Sentinel may not have detected changes. Options:
-1. Check sentinel configuration
-2. Manual reset: `python scripts/bls/reset_status.py --surveys CU`
-3. Use Force Update from Dashboard
-
-### Update not resuming correctly
-
-Verify series status:
+Use freshness check to see if BLS has new data:
 ```bash
-python scripts/bls/show_status.py --surveys CU --detailed
+python scripts/bls/universal_update.py --check-freshness
+```
+
+If BLS has new data, use Force Update:
+```bash
+python scripts/bls/universal_update.py --surveys CU --force
 ```
 
 ### Quota exceeded mid-update
 
 Don't worry! The system:
-1. Stops at quota limit
-2. Records what was updated (`is_current = True`)
-3. Resumes next day (skips already-current series)
+1. Stopped at quota limit
+2. Recorded progress in cycle
+3. Will resume tomorrow with Soft Update
 
-Check status:
+### Want to check cycle progress
+
 ```bash
-python scripts/bls/check_quota.py
-python scripts/bls/show_status.py --surveys CU
+python scripts/bls/universal_update.py --check-only
 ```
 
-### Want to force complete refresh
+### Update not resuming
 
-**From CLI:**
+If cycle exists but not resuming:
+1. Check if cycle is marked complete
+2. Use Force Update to start fresh
+3. Check for errors in previous run
+
+## Migration from Sentinel System
+
+The old sentinel system has been replaced:
+
+**Removed:**
+- `bls_survey_sentinels` table
+- `bls_series_update_status` table
+- `bls_survey_freshness` table
+- Sentinel-based freshness detection
+
+**Added:**
+- `bls_update_cycles` table
+- `bls_update_cycle_series` table
+- On-the-fly freshness checking
+
+Run the migration:
 ```bash
-python scripts/bls/universal_update.py --surveys CU --force
+alembic upgrade head
 ```
-
-**From Dashboard:**
-Click the "Force" button on the survey card.
-
-Both methods:
-1. Reset all series to `is_current = False`
-2. Then update all series
-
-## Database Tables
-
-### `bls_series_update_status`
-Tracks each series' update status:
-- `series_id` - Primary key
-- `survey_code` - Which survey
-- `is_current` - Whether series is up-to-date
-- `last_updated_at` - When last updated
-
-### `bls_survey_sentinels`
-Sentinel series for freshness detection
-
-### `bls_survey_freshness`
-Survey-level freshness tracking
-
-### `bls_api_usage_log`
-Records all API usage for quota tracking
-
-## Best Practices
-
-1. **Let sentinel system work**
-   - Avoid manual resets unless necessary
-   - Sentinel automatically detects new data
-
-2. **Use normal Update, not Force**
-   - Force resets ALL progress
-   - Normal update resumes efficiently
-
-3. **Monitor quota daily**
-   ```bash
-   python scripts/bls/check_quota.py
-   ```
-
-4. **Use flat files for large surveys**
-   - Faster, no quota impact
-   - OE, LA, TU, LN
-
-5. **Keep quota buffer**
-   - Set daily-limit to 400 instead of 500
-   - Leaves room for ad-hoc queries
 
 ## Summary
 
 The BLS Update System provides:
-- **Automatic detection** of new BLS data via sentinels
-- **Smart updates** that skip already-current series
-- **Resume capability** for multi-day large survey updates
-- **Dashboard integration** for easy monitoring and control
+- **Cycle-based tracking** for multi-day updates
+- **Smart resume** capability
+- **Simple freshness checks** without persistent tracking
+- **Dashboard integration** for easy monitoring
 - **Force update** option when complete refresh needed
-
-Run with confidence knowing:
-- Won't exceed quota
-- Won't duplicate work
-- Can resume anytime
-- All activity logged

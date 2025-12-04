@@ -1,30 +1,48 @@
 """
 BLS Survey Update Manager
 
-Reusable core logic for updating BLS survey data.
+Reusable core logic for updating BLS survey data using the Update Cycle system.
 Can be called from CLI scripts or API endpoints.
-"""
-from datetime import datetime, date, timedelta, UTC
-from typing import Any, Dict, List, Optional, Callable
-from decimal import Decimal
 
-from sqlalchemy import func, update as sql_update
+Update Cycle System:
+- Soft Update: Uses existing current cycle, continues where left off
+- Force Update: Creates new cycle, marks old one not current, starts fresh
+"""
+from datetime import datetime, date, UTC
+from typing import Any, Dict, List, Optional, Callable
+
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from src.bls.bls_client import BLSClient
-from src.database.bls_tracking_models import (
-    BLSSeriesUpdateStatus,
-    BLSAPIUsageLog,
-    BLSSurveyFreshness
-)
-from src.database.bls_models import (
-    APSeries, APData, CUSeries, CUData, LASeries, LAData, CESeries, CEData,
-    PCSeries, PCData, WPSeries, WPData, SMSeries, SMData, JTSeries, JTData,
-    ECSeries, ECData, OESeries, OEData, PRSeries, PRData, TUSeries, TUData,
-    IPSeries, IPData, LNSeries, LNData, CWSeries, CWData, SUSeries, SUData,
-    BDSeries, BDData, EISeries, EIData
-)
+try:
+    from src.bls.bls_client import BLSClient
+    from src.database.bls_tracking_models import (
+        BLSUpdateCycle,
+        BLSUpdateCycleSeries,
+        BLSAPIUsageLog,
+    )
+    from src.database.bls_models import (
+        APSeries, APData, CUSeries, CUData, LASeries, LAData, CESeries, CEData,
+        PCSeries, PCData, WPSeries, WPData, SMSeries, SMData, JTSeries, JTData,
+        ECSeries, ECData, OESeries, OEData, PRSeries, PRData, TUSeries, TUData,
+        IPSeries, IPData, LNSeries, LNData, CWSeries, CWData, SUSeries, SUData,
+        BDSeries, BDData, EISeries, EIData
+    )
+except ImportError:
+    from bls.bls_client import BLSClient
+    from database.bls_tracking_models import (
+        BLSUpdateCycle,
+        BLSUpdateCycleSeries,
+        BLSAPIUsageLog,
+    )
+    from database.bls_models import (
+        APSeries, APData, CUSeries, CUData, LASeries, LAData, CESeries, CEData,
+        PCSeries, PCData, WPSeries, WPData, SMSeries, SMData, JTSeries, JTData,
+        ECSeries, ECData, OESeries, OEData, PRSeries, PRData, TUSeries, TUData,
+        IPSeries, IPData, LNSeries, LNData, CWSeries, CWData, SUSeries, SUData,
+        BDSeries, BDData, EISeries, EIData
+    )
 
 
 # Survey configuration: code -> (SeriesModel, DataModel, survey_name)
@@ -52,13 +70,14 @@ SURVEYS = {
 
 class UpdateProgress:
     """Progress tracking for survey updates"""
-    def __init__(self, survey_code: str, total_series: int):
+    def __init__(self, survey_code: str, total_series: int, cycle_id: int):
         self.survey_code = survey_code
         self.total_series = total_series
+        self.cycle_id = cycle_id
         self.series_updated = 0
         self.observations_added = 0
         self.requests_used = 0
-        self.errors = []
+        self.errors: List[str] = []
         self.completed = False
         self.start_time = datetime.now()
         self.end_time: Optional[datetime] = None
@@ -66,6 +85,7 @@ class UpdateProgress:
     def to_dict(self) -> Dict[str, Any]:
         return {
             'survey_code': self.survey_code,
+            'cycle_id': self.cycle_id,
             'total_series': self.total_series,
             'series_updated': self.series_updated,
             'observations_added': self.observations_added,
@@ -73,7 +93,7 @@ class UpdateProgress:
             'progress_pct': (self.series_updated / self.total_series * 100) if self.total_series > 0 else 0,
             'errors': self.errors,
             'completed': self.completed,
-            'duration_seconds': (self.end_time or datetime.now() - self.start_time).total_seconds()
+            'duration_seconds': ((self.end_time or datetime.now()) - self.start_time).total_seconds()
         }
 
 
@@ -90,86 +110,72 @@ def get_remaining_quota(session: Session, daily_limit: int = 500) -> int:
     return max(0, remaining)
 
 
-def reset_series_status(session: Session, survey_code: str) -> int:
-    """
-    Reset is_current=False for all series in a survey.
-    Used when sentinel detects new data or before force update.
+def get_current_cycle(session: Session, survey_code: str) -> Optional[BLSUpdateCycle]:
+    """Get the current update cycle for a survey, if any"""
+    return session.query(BLSUpdateCycle).filter(
+        BLSUpdateCycle.survey_code == survey_code,
+        BLSUpdateCycle.is_current == True
+    ).first()
 
-    Returns number of series reset.
+
+def create_new_cycle(session: Session, survey_code: str, total_series: int) -> BLSUpdateCycle:
     """
-    result = session.query(BLSSeriesUpdateStatus).filter(
-        BLSSeriesUpdateStatus.survey_code == survey_code
+    Create a new update cycle for a survey.
+    Marks any existing current cycle as not current.
+    """
+    # Mark existing current cycle as not current
+    session.query(BLSUpdateCycle).filter(
+        BLSUpdateCycle.survey_code == survey_code,
+        BLSUpdateCycle.is_current == True
     ).update({'is_current': False})
+
+    # Create new cycle
+    cycle = BLSUpdateCycle(
+        survey_code=survey_code,
+        is_current=True,
+        started_at=datetime.now(),
+        total_series=total_series,
+        series_updated=0,
+        requests_used=0
+    )
+    session.add(cycle)
     session.commit()
-    return result
+
+    return cycle
 
 
 def get_series_needing_update(session: Session, survey_code: str, series_model,
-                               data_model, force: bool = False) -> List[str]:
+                               cycle: BLSUpdateCycle) -> List[str]:
     """
-    Find series that need updates
+    Find series that need updates for the given cycle.
 
-    Returns list of series IDs that either:
-    - Are not marked as current (is_current = False)
-    - Have no status record
-
-    If force=True, first resets all series to is_current=False,
-    then returns all active series.
+    Returns list of series IDs that are:
+    - Active in the series table
+    - NOT already updated in this cycle
     """
     # Get all active series for this survey
     active_series = session.query(series_model.series_id).filter(
         series_model.is_active == True
     ).all()
-    active_series_ids = [row[0] for row in active_series]
+    active_series_ids = set(row[0] for row in active_series)
 
-    if force:
-        # Reset all series status first, then return all active series
-        reset_series_status(session, survey_code)
-        return active_series_ids
-
-    # Get series marked as current - these will be skipped
-    current_series = session.query(
-        BLSSeriesUpdateStatus.series_id
-    ).filter(
-        BLSSeriesUpdateStatus.survey_code == survey_code,
-        BLSSeriesUpdateStatus.is_current == True
+    # Get series already updated in this cycle
+    updated_series = session.query(BLSUpdateCycleSeries.series_id).filter(
+        BLSUpdateCycleSeries.cycle_id == cycle.id
     ).all()
-    current_series_ids = set([row[0] for row in current_series])
+    updated_series_ids = set(row[0] for row in updated_series)
 
     # Return series that need updates
-    needs_update = [sid for sid in active_series_ids if sid not in current_series_ids]
+    needs_update = list(active_series_ids - updated_series_ids)
     return needs_update
 
 
-def check_if_series_current(session: Session, series_id: str, data_model,
-                            start_year: int, end_year: int) -> bool:
-    """
-    Check if a series has data up to expected timeframe
-
-    A series is considered current if it has data for the most recent
-    expected period (accounting for reporting lag)
-    """
-    # Get latest data point for this series
-    latest = session.query(
-        func.max(data_model.year).label('max_year'),
-        func.max(data_model.period).label('max_period')
-    ).filter(
-        data_model.series_id == series_id
-    ).first()
-
-    if not latest or not latest.max_year:
-        return False  # No data, needs update
-
-    # Simple check: if latest year is >= end_year - 1, consider current
-    # (accounts for reporting lag)
-    return latest.max_year >= end_year - 1
-
-
 def update_series_batch(session: Session, client: BLSClient, series_ids: List[str],
-                        survey_code: str, data_model,
+                        cycle: BLSUpdateCycle, data_model,
                         start_year: int, end_year: int) -> Dict[str, Any]:
     """
-    Update a batch of series and return statistics
+    Update a batch of series and return statistics.
+    Records each series in the cycle_series table.
     """
     # Fetch from API
     rows = client.get_many(
@@ -192,7 +198,7 @@ def update_series_batch(session: Session, client: BLSClient, series_ids: List[st
             'footnote_codes': row.get('footnotes'),
         })
 
-    # Upsert to database
+    # Upsert data to survey data table
     if data_to_upsert:
         stmt = insert(data_model).values(data_to_upsert)
         stmt = stmt.on_conflict_do_update(
@@ -204,30 +210,16 @@ def update_series_batch(session: Session, client: BLSClient, series_ids: List[st
             }
         )
         session.execute(stmt)
-        session.commit()
 
-    # Update status for each series
+    # Record series in cycle_series table
     now = datetime.now()
-    for series_id in series_ids:
-        is_current = check_if_series_current(session, series_id, data_model,
-                                             start_year, end_year)
-
-        # Upsert status
-        stmt = insert(BLSSeriesUpdateStatus).values({
-            'series_id': series_id,
-            'survey_code': survey_code,
-            'last_checked_at': now,
-            'last_updated_at': now,
-            'is_current': is_current,
-        })
-        stmt = stmt.on_conflict_do_update(
-            index_elements=['series_id'],
-            set_={
-                'last_checked_at': stmt.excluded.last_checked_at,
-                'last_updated_at': stmt.excluded.last_updated_at,
-                'is_current': stmt.excluded.is_current,
-            }
-        )
+    cycle_series_records = [
+        {'cycle_id': cycle.id, 'series_id': sid, 'updated_at': now}
+        for sid in series_ids
+    ]
+    if cycle_series_records:
+        stmt = insert(BLSUpdateCycleSeries).values(cycle_series_records)
+        stmt = stmt.on_conflict_do_nothing()  # In case of retry
         session.execute(stmt)
 
     session.commit()
@@ -261,20 +253,22 @@ def update_survey(
     start_year: Optional[int] = None,
     end_year: Optional[int] = None,
     max_quota: Optional[int] = None,
-    progress_callback: Optional[Callable[[UpdateProgress], None]] = None
+    progress_callback: Optional[Callable[[UpdateProgress], None]] = None,
+    skip_usage_logging: bool = False
 ) -> UpdateProgress:
     """
-    Update a single survey with all its series
+    Update a single survey with all its series.
 
     Args:
         survey_code: BLS survey code (e.g., 'CU', 'LA')
         session: Database session
         client: BLS API client
-        force: Force update even if series marked current
+        force: If True, create new cycle; if False, use existing current cycle
         start_year: Start year for data fetch (default: last year)
         end_year: End year for data fetch (default: current year)
         max_quota: Maximum API requests to use (default: unlimited)
         progress_callback: Optional callback function to report progress
+        skip_usage_logging: If True, don't log API usage (for custom API keys)
 
     Returns:
         UpdateProgress object with results
@@ -293,46 +287,64 @@ def update_survey(
     if end_year is None:
         end_year = datetime.now().year
 
+    # Get total active series count
+    total_active = session.query(series_model.series_id).filter(
+        series_model.is_active == True
+    ).count()
+
+    # Get or create cycle
+    if force:
+        # Force: Create new cycle
+        cycle = create_new_cycle(session, survey_code, total_active)
+        print(f"[UpdateManager] Created new cycle #{cycle.id} for {survey_code}")
+    else:
+        # Soft: Use existing current cycle or create new one
+        cycle = get_current_cycle(session, survey_code)
+        if cycle:
+            print(f"[UpdateManager] Resuming cycle #{cycle.id} for {survey_code}")
+        else:
+            cycle = create_new_cycle(session, survey_code, total_active)
+            print(f"[UpdateManager] No current cycle, created new cycle #{cycle.id} for {survey_code}")
+
     # Get series needing update
-    series_ids = get_series_needing_update(
-        session, survey_code, series_model, data_model, force=force
-    )
+    series_ids = get_series_needing_update(session, survey_code, series_model, cycle)
 
     if not series_ids:
-        # No series need update
-        progress = UpdateProgress(survey_code, 0)
+        # No series need update - cycle is complete
+        cycle.completed_at = datetime.now()
+        cycle.is_running = False
+        session.commit()
+
+        progress = UpdateProgress(survey_code, total_active, cycle.id)
+        progress.series_updated = cycle.series_updated
         progress.completed = True
         progress.end_time = datetime.now()
+        print(f"[UpdateManager] No series need update for {survey_code}, cycle complete")
         return progress
 
     # Initialize progress tracking
-    progress = UpdateProgress(survey_code, len(series_ids))
+    progress = UpdateProgress(survey_code, total_active, cycle.id)
+    progress.series_updated = cycle.series_updated  # Start from current progress
 
-    # Mark freshness as update in progress
-    freshness_update = sql_update(BLSSurveyFreshness).where(
-        BLSSurveyFreshness.survey_code == survey_code
-    ).values(
-        full_update_in_progress=True,
-        last_full_update_started=datetime.now(),
-        series_total_count=len(series_ids),
-        series_updated_count=0
-    )
-    session.execute(freshness_update)
+    # Mark cycle as running
+    cycle.is_running = True
     session.commit()
+
+    print(f"[UpdateManager] {len(series_ids)} series to update for {survey_code}")
 
     try:
         # Update in batches of 50
         for i in range(0, len(series_ids), 50):
             # Check quota limit
             if max_quota is not None and progress.requests_used >= max_quota:
-                progress.errors.append(f"Quota limit reached: {max_quota} requests")
+                print(f"[UpdateManager] Session quota reached ({max_quota} requests), pausing")
                 break
 
             batch = series_ids[i:i+50]
 
             try:
                 stats = update_series_batch(
-                    session, client, batch, survey_code, data_model,
+                    session, client, batch, cycle, data_model,
                     start_year, end_year
                 )
 
@@ -340,17 +352,14 @@ def update_survey(
                 progress.series_updated += stats['series_updated']
                 progress.requests_used += 1
 
-                # Record usage
-                record_api_usage(session, 1, len(batch), survey_code)
-
-                # Update freshness progress
-                freshness_update = sql_update(BLSSurveyFreshness).where(
-                    BLSSurveyFreshness.survey_code == survey_code
-                ).values(
-                    series_updated_count=progress.series_updated
-                )
-                session.execute(freshness_update)
+                # Update cycle progress
+                cycle.series_updated = progress.series_updated
+                cycle.requests_used += 1
                 session.commit()
+
+                # Record usage (skip if using custom API key)
+                if not skip_usage_logging:
+                    record_api_usage(session, 1, len(batch), survey_code)
 
                 # Call progress callback if provided
                 if progress_callback:
@@ -362,7 +371,7 @@ def update_survey(
 
                 # Check if it's an API limit error
                 error_str = str(e).lower()
-                if 'quota' in error_str or 'limit' in error_str or 'exceeded' in error_str:
+                if 'quota' in error_str or 'limit' in error_str or 'exceeded' in error_str or 'threshold' in error_str:
                     progress.errors.append("API quota exceeded, stopping")
                     break
 
@@ -370,35 +379,79 @@ def update_survey(
                 session.rollback()
                 continue
 
-        # Mark as complete
-        progress.completed = True
-        progress.end_time = datetime.now()
+        # Check if cycle is complete
+        if progress.series_updated >= total_active:
+            cycle.completed_at = datetime.now()
+            progress.completed = True
+            print(f"[UpdateManager] Cycle #{cycle.id} completed for {survey_code}")
+        else:
+            print(f"[UpdateManager] Cycle #{cycle.id} paused at {progress.series_updated}/{total_active} series")
 
-        # Update freshness tracking
-        freshness_update = sql_update(BLSSurveyFreshness).where(
-            BLSSurveyFreshness.survey_code == survey_code
-        ).values(
-            full_update_in_progress=False,
-            last_full_update_completed=datetime.now(),
-            needs_full_update=False
-        )
-        session.execute(freshness_update)
+        # Mark cycle as not running
+        cycle.is_running = False
+        progress.end_time = datetime.now()
         session.commit()
 
     except Exception as e:
-        # Mark as failed
-        progress.errors.append(f"Update failed: {str(e)}")
-        progress.end_time = datetime.now()
-
-        # Clear in-progress flag
-        freshness_update = sql_update(BLSSurveyFreshness).where(
-            BLSSurveyFreshness.survey_code == survey_code
-        ).values(
-            full_update_in_progress=False
-        )
-        session.execute(freshness_update)
+        # Mark cycle as not running on error
+        cycle.is_running = False
         session.commit()
 
+        progress.errors.append(f"Update failed: {str(e)}")
+        progress.end_time = datetime.now()
         raise
 
     return progress
+
+
+def get_survey_status(session: Session, survey_code: str) -> Dict[str, Any]:
+    """
+    Get the current update status for a survey.
+
+    Returns dict with:
+    - has_current_cycle: bool
+    - cycle_id: int or None
+    - total_series: int
+    - series_updated: int
+    - progress_pct: float
+    - started_at: datetime or None
+    - is_complete: bool
+    - is_running: bool
+    """
+    survey_code = survey_code.upper()
+
+    if survey_code not in SURVEYS:
+        raise ValueError(f"Invalid survey code: {survey_code}")
+
+    series_model, _, _ = SURVEYS[survey_code]
+
+    # Get total active series
+    total_active = session.query(series_model.series_id).filter(
+        series_model.is_active == True
+    ).count()
+
+    # Get current cycle
+    cycle = get_current_cycle(session, survey_code)
+
+    if cycle:
+        return {
+            'has_current_cycle': True,
+            'cycle_id': cycle.id,
+            'total_series': total_active,
+            'series_updated': cycle.series_updated,
+            'progress_pct': (cycle.series_updated / total_active * 100) if total_active > 0 else 0,
+            'started_at': cycle.started_at,
+            'is_complete': cycle.completed_at is not None,
+            'is_running': cycle.is_running,
+        }
+    else:
+        return {
+            'has_current_cycle': False,
+            'cycle_id': None,
+            'total_series': total_active,
+            'series_updated': 0,
+            'progress_pct': 0,
+            'started_at': None,
+            'is_complete': False,
+            'is_running': False,
+        }

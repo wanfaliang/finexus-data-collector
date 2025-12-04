@@ -21,7 +21,8 @@ from src.database.bea_models import (
     BEADataset, NIPATable, NIPASeries, NIPAData,
     RegionalTable, RegionalLineCode, RegionalGeoFips, RegionalData,
     GDPSummary, PersonalIncomeSummary,
-    GDPByIndustryTable, GDPByIndustryIndustry, GDPByIndustryData
+    GDPByIndustryTable, GDPByIndustryIndustry, GDPByIndustryData,
+    FixedAssetsTable, FixedAssetsSeries, FixedAssetsData
 )
 from src.database.bea_tracking_models import (
     BEAAPIUsageLog, BEADatasetFreshness, BEATableUpdateStatus,
@@ -1532,6 +1533,745 @@ class GDPByIndustryCollector:
         self.session.commit()
 
 
+# ===================== ITA (International Transactions) Collector ===================== #
+
+class ITACollector:
+    """Collector for ITA (International Transactions Accounts) data"""
+
+    def __init__(self, client: BEAClient, session: Session):
+        self.client = client
+        self.session = session
+
+    def sync_indicators_catalog(self) -> int:
+        """
+        Sync ITA indicators catalog from BEA API.
+
+        Returns:
+            Number of indicators synced
+        """
+        from src.database.bea_models import ITAIndicator
+
+        log.info("Syncing ITA indicators catalog...")
+        indicators = self.client.get_ita_indicators()
+
+        now = datetime.now(UTC)
+        count = 0
+
+        for ind in indicators:
+            indicator_code = ind.get('Key', '')
+            indicator_desc = ind.get('Desc', '')
+
+            if not indicator_code:
+                continue
+
+            stmt = insert(ITAIndicator).values(
+                indicator_code=indicator_code,
+                indicator_description=indicator_desc,
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['indicator_code'],
+                set_={
+                    'indicator_description': stmt.excluded.indicator_description,
+                    'updated_at': now,
+                }
+            )
+            self.session.execute(stmt)
+            count += 1
+
+        self.session.commit()
+        log.info(f"Synced {count} ITA indicators")
+        return count
+
+    def sync_areas_catalog(self) -> int:
+        """
+        Sync ITA areas/countries catalog from BEA API.
+
+        Returns:
+            Number of areas synced
+        """
+        from src.database.bea_models import ITAArea
+
+        log.info("Syncing ITA areas catalog...")
+        areas = self.client.get_ita_areas()
+
+        now = datetime.now(UTC)
+        count = 0
+
+        for area in areas:
+            area_code = area.get('Key', '')
+            area_name = area.get('Desc', '')
+
+            if not area_code:
+                continue
+
+            # Determine area type based on code pattern
+            area_type = 'Country'
+            if area_code in ('AllCountries', 'All'):
+                area_type = 'Aggregate'
+            elif any(x in area_name.lower() for x in ['region', 'area', 'other']):
+                area_type = 'Region'
+
+            stmt = insert(ITAArea).values(
+                area_code=area_code,
+                area_name=area_name,
+                area_type=area_type,
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['area_code'],
+                set_={
+                    'area_name': stmt.excluded.area_name,
+                    'area_type': stmt.excluded.area_type,
+                    'updated_at': now,
+                }
+            )
+            self.session.execute(stmt)
+            count += 1
+
+        self.session.commit()
+        log.info(f"Synced {count} ITA areas")
+        return count
+
+    def collect_indicator_data(
+        self,
+        indicator_code: str,
+        frequency: str = 'A',
+        year: str = 'ALL',
+        progress: Optional[CollectionProgress] = None,
+    ) -> Dict[str, int]:
+        """
+        Collect data for a specific ITA indicator across all areas.
+
+        Args:
+            indicator_code: Indicator code (e.g., 'BalGds')
+            frequency: 'A', 'QSA', or 'QNSA'
+            year: Year specification
+
+        Returns:
+            Dict with collection statistics
+        """
+        from src.database.bea_models import ITAData
+
+        year_param = convert_year_spec(year)
+
+        log.info(f"Collecting ITA {indicator_code}, freq {frequency}, year {year_param}...")
+
+        try:
+            data = self.client.get_ita_data_by_indicator(
+                indicator=indicator_code,
+                frequency=frequency,
+                year=year_param,
+            )
+        except BEAAPIError as e:
+            log.error(f"ITA indicator {indicator_code}: {e}")
+            raise
+
+        if progress:
+            progress.api_requests += 1
+
+        if not data:
+            log.warning(f"No data returned for indicator {indicator_code}")
+            return {'areas_count': 0, 'data_points': 0}
+
+        now = datetime.now(UTC)
+        data_points = 0
+        areas_seen = set()
+
+        for row in data:
+            indicator = row.get('Indicator', indicator_code)
+            area = row.get('AreaOrCountry', '')
+            freq = row.get('Frequency', frequency)
+            time_period = row.get('TimePeriod', '')
+            value_str = row.get('DataValue', '')
+
+            if not area or not time_period:
+                continue
+
+            areas_seen.add(area)
+
+            # Parse value
+            value = None
+            if value_str and value_str not in ('', '(NA)', '(D)', 'NA', '--'):
+                try:
+                    # Remove commas and convert
+                    value = Decimal(value_str.replace(',', ''))
+                except:
+                    pass
+
+            # Ensure area exists in catalog
+            self._ensure_area_exists(area, row.get('AreaOrCountry', area))
+
+            stmt = insert(ITAData).values(
+                indicator_code=indicator,
+                area_code=area,
+                frequency=freq,
+                time_period=time_period,
+                value=value,
+                time_series_id=row.get('TimeSeriesId', ''),
+                time_series_description=row.get('TimeSeriesDescription', ''),
+                cl_unit=row.get('CL_UNIT', ''),
+                unit_mult=int(row.get('UNIT_MULT', 0)) if row.get('UNIT_MULT') else None,
+                note_ref=row.get('NoteRef', ''),
+                created_at=now,
+                updated_at=now,
+            )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['indicator_code', 'area_code', 'frequency', 'time_period'],
+                set_={
+                    'value': stmt.excluded.value,
+                    'time_series_id': stmt.excluded.time_series_id,
+                    'time_series_description': stmt.excluded.time_series_description,
+                    'cl_unit': stmt.excluded.cl_unit,
+                    'unit_mult': stmt.excluded.unit_mult,
+                    'note_ref': stmt.excluded.note_ref,
+                    'updated_at': now,
+                }
+            )
+            self.session.execute(stmt)
+            data_points += 1
+
+            if progress:
+                progress.data_points_inserted += 1
+
+        self.session.commit()
+        log.info(f"Collected {len(areas_seen)} areas, {data_points} data points for {indicator_code}")
+        return {'areas_count': len(areas_seen), 'data_points': data_points}
+
+    def _ensure_area_exists(self, area_code: str, area_name: str):
+        """Ensure an area exists in the catalog (for areas returned in data but not in catalog)."""
+        from src.database.bea_models import ITAArea
+
+        now = datetime.now(UTC)
+        stmt = insert(ITAArea).values(
+            area_code=area_code,
+            area_name=area_name,
+            area_type='Country',
+            is_active=True,
+            created_at=now,
+            updated_at=now,
+        )
+        stmt = stmt.on_conflict_do_nothing(index_elements=['area_code'])
+        self.session.execute(stmt)
+
+    def _ensure_indicator_exists(self, indicator_code: str, indicator_desc: str):
+        """Ensure an indicator exists in the catalog."""
+        from src.database.bea_models import ITAIndicator
+
+        now = datetime.now(UTC)
+        stmt = insert(ITAIndicator).values(
+            indicator_code=indicator_code,
+            indicator_description=indicator_desc,
+            is_active=True,
+            created_at=now,
+            updated_at=now,
+        )
+        stmt = stmt.on_conflict_do_nothing(index_elements=['indicator_code'])
+        self.session.execute(stmt)
+
+    def backfill_all_indicators(
+        self,
+        frequency: str = 'A',
+        year: str = 'ALL',
+        indicators: Optional[List[str]] = None,
+        progress_callback: Optional[Callable[[CollectionProgress], None]] = None,
+        run_id: Optional[int] = None
+    ) -> CollectionProgress:
+        """
+        Backfill all ITA indicators (or specified subset).
+
+        Args:
+            frequency: 'A', 'QSA', or 'QNSA'
+            year: Year specification
+            indicators: Optional list of specific indicators to backfill
+            progress_callback: Optional callback for progress updates
+            run_id: Optional existing run_id (if called from task_runner)
+
+        Returns:
+            CollectionProgress with results
+        """
+        from src.database.bea_models import ITAIndicator
+
+        # Sync catalogs first
+        self.sync_indicators_catalog()
+        self.sync_areas_catalog()
+
+        # Get list of indicators
+        if indicators:
+            indicator_list = indicators
+        else:
+            result = self.session.query(ITAIndicator.indicator_code).filter(
+                ITAIndicator.is_active == True
+            ).all()
+            indicator_list = [r[0] for r in result]
+
+        progress = CollectionProgress('ITA', 'backfill', len(indicator_list))
+
+        # Use existing run_id or create a new one
+        if run_id:
+            progress.run_id = run_id
+        else:
+            progress.run_id = start_collection_run(
+                self.session, 'ITA', 'backfill',
+                frequency=frequency,
+                year_spec=year,
+                tables_filter=indicators
+            )
+
+        log.info(f"Starting ITA backfill for {len(indicator_list)} indicators ({frequency}, {year})...")
+
+        for indicator_code in indicator_list:
+            try:
+                stats = self.collect_indicator_data(
+                    indicator_code=indicator_code,
+                    frequency=frequency,
+                    year=year,
+                    progress=progress,
+                )
+                progress.tables_processed += 1
+                progress.series_processed += stats.get('areas_count', 0)
+
+                if progress_callback:
+                    progress_callback(progress)
+
+            except BEAAPIError as e:
+                error_msg = f"Indicator {indicator_code}: {str(e)}"
+                log.error(error_msg)
+                progress.errors.append(error_msg)
+
+                # Check if rate limited
+                if 'rate' in str(e).lower() or '429' in str(e):
+                    log.warning("Rate limited, stopping collection")
+                    break
+
+            except Exception as e:
+                error_msg = f"Indicator {indicator_code}: {str(e)}"
+                log.error(error_msg)
+                progress.errors.append(error_msg)
+                self.session.rollback()
+
+        progress.end_time = datetime.now(UTC)
+
+        # Complete collection run
+        status = 'completed' if not progress.errors else 'partial'
+        complete_collection_run(self.session, progress.run_id, progress, status)
+
+        # Update dataset freshness
+        self._update_freshness(progress)
+
+        return progress
+
+    def _update_freshness(self, progress: CollectionProgress):
+        """Update dataset freshness tracking"""
+        from src.database.bea_models import ITAIndicator, ITAData
+
+        now = datetime.now(UTC)
+
+        # Get latest data year from database
+        latest_year = self.session.query(func.max(ITAData.time_period)).filter(
+            ITAData.time_period.op('~')('^[0-9]{4}')  # Regex: starts with 4 digits
+        ).scalar()
+
+        latest_data_year = None
+        if latest_year:
+            try:
+                latest_data_year = int(latest_year[:4])
+            except:
+                pass
+
+        # Get counts
+        indicators_count = self.session.query(func.count(ITAIndicator.indicator_code)).scalar() or 0
+        data_count = self.session.query(func.count()).select_from(ITAData).scalar() or 0
+
+        stmt = insert(BEADatasetFreshness).values(
+            dataset_name='ITA',
+            latest_data_year=latest_data_year,
+            last_checked_at=now,
+            last_bea_update_detected=now if progress.data_points_inserted > 0 else None,
+            needs_update=False,
+            update_in_progress=False,
+            last_update_completed=now,
+            tables_count=indicators_count,  # Using indicators as "tables"
+            series_count=indicators_count,
+            data_points_count=data_count,
+            total_checks=1,
+            total_updates_detected=1 if progress.data_points_inserted > 0 else 0,
+            created_at=now,
+            updated_at=now,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['dataset_name'],
+            set_={
+                'latest_data_year': stmt.excluded.latest_data_year,
+                'last_checked_at': now,
+                'last_bea_update_detected': stmt.excluded.last_bea_update_detected,
+                'needs_update': False,
+                'update_in_progress': False,
+                'last_update_completed': now,
+                'tables_count': stmt.excluded.tables_count,
+                'series_count': stmt.excluded.series_count,
+                'data_points_count': stmt.excluded.data_points_count,
+                'total_checks': BEADatasetFreshness.total_checks + 1,
+                'total_updates_detected': BEADatasetFreshness.total_updates_detected + (1 if progress.data_points_inserted > 0 else 0),
+                'updated_at': now,
+            }
+        )
+        self.session.execute(stmt)
+        self.session.commit()
+
+
+# ===================== Fixed Assets Collector ===================== #
+
+class FixedAssetsCollector:
+    """Collector for Fixed Assets data (capital stock, depreciation, investment)"""
+
+    def __init__(self, client: BEAClient, session: Session):
+        self.client = client
+        self.session = session
+
+    def sync_tables_catalog(self) -> int:
+        """
+        Sync Fixed Assets table catalog from BEA API.
+
+        Returns:
+            Number of tables synced
+        """
+        log.info("Syncing Fixed Assets tables catalog...")
+        tables = self.client.get_fixedassets_tables()
+
+        now = datetime.now(UTC)
+        count = 0
+
+        for t in tables:
+            table_name = t.get('TableName', '')
+            if not table_name:
+                continue
+
+            description = t.get('Description', '')
+
+            stmt = insert(FixedAssetsTable).values(
+                table_name=table_name,
+                table_description=description,
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['table_name'],
+                set_={
+                    'table_description': stmt.excluded.table_description,
+                    'updated_at': now,
+                }
+            )
+            self.session.execute(stmt)
+            count += 1
+
+        self.session.commit()
+        log.info(f"Synced {count} Fixed Assets tables")
+        return count
+
+    def collect_table_data(
+        self,
+        table_name: str,
+        year: str = 'ALL',
+        progress: Optional[CollectionProgress] = None
+    ) -> Dict[str, int]:
+        """
+        Collect data for a single Fixed Assets table.
+
+        Args:
+            table_name: Fixed Assets table name (e.g., 'FAAt201')
+            year: Year specification ('ALL', 'LAST5', 'LAST10', or comma-separated)
+            progress: Optional progress tracker
+
+        Returns:
+            Dict with 'series_count' and 'data_points' counts
+
+        Note:
+            Fixed Assets only supports annual data.
+        """
+        # Convert year specification to actual years
+        actual_year = convert_year_spec(year)
+        log.info(f"Collecting Fixed Assets {table_name}, year {actual_year}...")
+
+        try:
+            result = self.client.get_fixedassets_data(
+                table_name=table_name,
+                year=actual_year,
+            )
+        except BEAAPIError as e:
+            log.error(f"Table {table_name}: {e}")
+            if progress:
+                progress.errors.append(f"{table_name}: {str(e)}")
+            return {'series_count': 0, 'data_points': 0}
+
+        if progress:
+            progress.api_requests += 1
+
+        data = self.client._extract_data(result)
+
+        if not data:
+            log.warning(f"No data returned for Fixed Assets table {table_name}")
+            return {'series_count': 0, 'data_points': 0}
+
+        now = datetime.now(UTC)
+        series_seen = set()
+        data_points = 0
+
+        for row in data:
+            series_code = row.get('SeriesCode', '')
+            if not series_code:
+                continue
+
+            # Upsert series if not seen yet
+            if series_code not in series_seen:
+                series_seen.add(series_code)
+
+                stmt = insert(FixedAssetsSeries).values(
+                    series_code=series_code,
+                    table_name=table_name,
+                    line_number=int(row.get('LineNumber', 0)),
+                    line_description=row.get('LineDescription', ''),
+                    metric_name=row.get('METRIC_NAME', row.get('Metric_Name', '')),
+                    cl_unit=row.get('CL_UNIT', ''),
+                    unit_mult=int(row.get('UNIT_MULT', 0)) if row.get('UNIT_MULT') else None,
+                    is_active=True,
+                    created_at=now,
+                    updated_at=now,
+                )
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=['series_code'],
+                    set_={
+                        'line_description': stmt.excluded.line_description,
+                        'metric_name': stmt.excluded.metric_name,
+                        'cl_unit': stmt.excluded.cl_unit,
+                        'unit_mult': stmt.excluded.unit_mult,
+                        'updated_at': now,
+                    }
+                )
+                self.session.execute(stmt)
+
+            # Parse time period
+            time_period = row.get('TimePeriod', '')
+
+            # Parse value
+            value_str = row.get('DataValue', '')
+            try:
+                # Handle values with commas
+                value = Decimal(value_str.replace(',', '')) if value_str and value_str not in ('', 'ND', '(ND)') else None
+            except:
+                value = None
+
+            # Upsert data point
+            stmt = insert(FixedAssetsData).values(
+                series_code=series_code,
+                time_period=time_period,
+                value=value,
+                note_ref=row.get('NoteRef', ''),
+                created_at=now,
+                updated_at=now,
+            )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['series_code', 'time_period'],
+                set_={
+                    'value': stmt.excluded.value,
+                    'note_ref': stmt.excluded.note_ref,
+                    'updated_at': now,
+                }
+            )
+            self.session.execute(stmt)
+            data_points += 1
+
+        self.session.commit()
+
+        if progress:
+            progress.series_processed += len(series_seen)
+            progress.data_points_inserted += data_points
+
+        log.info(f"Collected {len(series_seen)} series, {data_points} data points for {table_name}")
+        return {'series_count': len(series_seen), 'data_points': data_points}
+
+    def backfill_all_tables(
+        self,
+        year: str = 'ALL',
+        tables: Optional[List[str]] = None,
+        progress_callback: Optional[Callable[[CollectionProgress], None]] = None,
+        run_id: Optional[int] = None
+    ) -> CollectionProgress:
+        """
+        Backfill all Fixed Assets tables (or specified subset).
+
+        Args:
+            year: Year specification
+            tables: Optional list of specific tables to backfill
+            progress_callback: Optional callback for progress updates
+            run_id: Optional existing run_id (if called from task_runner)
+
+        Returns:
+            CollectionProgress with results
+
+        Note:
+            Fixed Assets only supports annual data.
+        """
+        # Sync tables catalog first
+        self.sync_tables_catalog()
+
+        # Get list of tables
+        if tables:
+            table_list = tables
+        else:
+            result = self.session.query(FixedAssetsTable.table_name).filter(
+                FixedAssetsTable.is_active == True
+            ).all()
+            table_list = [r[0] for r in result]
+
+        progress = CollectionProgress('FixedAssets', 'backfill', len(table_list))
+
+        # Use existing run_id or create a new one
+        if run_id:
+            progress.run_id = run_id
+        else:
+            progress.run_id = start_collection_run(
+                self.session, 'FixedAssets', 'backfill',
+                frequency='A',  # Fixed Assets is annual only
+                year_spec=year,
+                tables_filter=tables
+            )
+
+        log.info(f"Starting Fixed Assets backfill for {len(table_list)} tables (year={year})...")
+
+        for table_name in table_list:
+            try:
+                stats = self.collect_table_data(
+                    table_name=table_name,
+                    year=year,
+                    progress=progress,
+                )
+                progress.tables_processed += 1
+
+                # Update table status
+                self._update_table_status(table_name, stats)
+
+                if progress_callback:
+                    progress_callback(progress)
+
+            except Exception as e:
+                log.error(f"Error collecting {table_name}: {e}")
+                progress.errors.append(f"{table_name}: {str(e)}")
+
+        # Update freshness tracking
+        self._update_freshness(progress)
+
+        # Update run record
+        status = 'partial' if progress.errors else 'completed'
+        complete_collection_run(self.session, progress.run_id, progress, status)
+
+        log.info(f"Fixed Assets backfill complete: {progress.tables_processed} tables, "
+                 f"{progress.series_processed} series, {progress.data_points_inserted} data points")
+
+        return progress
+
+    def _update_table_status(self, table_name: str, stats: Dict[str, int]):
+        """Update table status after collection"""
+        now = datetime.now(UTC)
+
+        # Get latest data period
+        latest = self.session.query(
+            func.max(FixedAssetsData.time_period)
+        ).join(FixedAssetsSeries).filter(
+            FixedAssetsSeries.table_name == table_name
+        ).scalar()
+
+        # Parse year from time period (Fixed Assets is annual only, e.g., '2023')
+        last_year = None
+        last_period = None
+        if latest:
+            last_year = int(latest)
+            last_period = 'A'
+
+        stmt = insert(BEATableUpdateStatus).values(
+            dataset_name='FixedAssets',
+            table_name=table_name,
+            last_data_year=last_year,
+            last_data_period=last_period,
+            last_checked_at=now,
+            last_updated_at=now,
+            is_current=True,
+            rows_in_table=stats.get('data_points', 0),
+            created_at=now,
+            updated_at=now,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['dataset_name', 'table_name'],
+            set_={
+                'last_data_year': stmt.excluded.last_data_year,
+                'last_data_period': stmt.excluded.last_data_period,
+                'last_checked_at': now,
+                'last_updated_at': now,
+                'is_current': True,
+                'rows_in_table': stmt.excluded.rows_in_table,
+                'updated_at': now,
+            }
+        )
+        self.session.execute(stmt)
+        self.session.commit()
+
+    def _update_freshness(self, progress: CollectionProgress):
+        """Update dataset freshness after collection"""
+        now = datetime.now(UTC)
+
+        # Get counts
+        tables_count = self.session.query(func.count(FixedAssetsTable.table_name)).filter(
+            FixedAssetsTable.is_active == True
+        ).scalar() or 0
+
+        series_count = self.session.query(func.count(FixedAssetsSeries.series_code)).scalar() or 0
+        data_count = self.session.query(func.count()).select_from(FixedAssetsData).scalar() or 0
+
+        # Get latest year
+        latest_year = self.session.query(func.max(FixedAssetsData.time_period)).scalar()
+
+        stmt = insert(BEADatasetFreshness).values(
+            dataset_name='FixedAssets',
+            latest_data_year=int(latest_year) if latest_year else None,
+            last_checked_at=now,
+            last_bea_update_detected=now if progress.data_points_inserted > 0 else None,
+            needs_update=False,
+            update_in_progress=False,
+            last_update_completed=now,
+            tables_count=tables_count,
+            series_count=series_count,
+            data_points_count=data_count,
+            total_checks=1,
+            total_updates_detected=1 if progress.data_points_inserted > 0 else 0,
+            created_at=now,
+            updated_at=now,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['dataset_name'],
+            set_={
+                'latest_data_year': stmt.excluded.latest_data_year,
+                'last_checked_at': now,
+                'last_bea_update_detected': stmt.excluded.last_bea_update_detected,
+                'needs_update': False,
+                'update_in_progress': False,
+                'last_update_completed': now,
+                'tables_count': stmt.excluded.tables_count,
+                'series_count': stmt.excluded.series_count,
+                'data_points_count': stmt.excluded.data_points_count,
+                'total_checks': BEADatasetFreshness.total_checks + 1,
+                'total_updates_detected': BEADatasetFreshness.total_updates_detected + (1 if progress.data_points_inserted > 0 else 0),
+                'updated_at': now,
+            }
+        )
+        self.session.execute(stmt)
+        self.session.commit()
+
+
 # ===================== Unified Collector ===================== #
 
 class BEACollector:
@@ -1543,6 +2283,8 @@ class BEACollector:
         self.nipa = NIPACollector(client, session)
         self.regional = RegionalCollector(client, session)
         self.gdpbyindustry = GDPByIndustryCollector(client, session)
+        self.ita = ITACollector(client, session)
+        self.fixedassets = FixedAssetsCollector(client, session)
 
     def sync_dataset_catalog(self):
         """Sync BEA dataset catalog"""

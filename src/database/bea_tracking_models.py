@@ -12,7 +12,7 @@ Created: 2025-11-26
 from datetime import datetime, UTC
 from sqlalchemy import (
     Column, Integer, String, SmallInteger, Date, DateTime,
-    Boolean, Numeric, Text, Index
+    Boolean, Numeric, Text, Index, text
 )
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -169,7 +169,7 @@ class BEASentinelSeries(Base):
 
     # Tracking
     last_checked_at = Column(DateTime)
-    has_changed = Column(Boolean, nullable=False, default=False)  # True if last check found a difference
+    has_changed = Column(Boolean, nullable=False, default=False, server_default=text('false'))  # True if last check found a difference
 
     # Metadata
     created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
@@ -198,7 +198,7 @@ class BEACollectionRun(Base):
     run_type = Column(String(20), nullable=False)  # 'backfill', 'update', 'refresh'
 
     # Run parameters (dataset-specific)
-    frequency = Column(String(1))  # 'A' (annual), 'Q' (quarterly), 'M' (monthly) - for NIPA/GDPbyIndustry
+    frequency = Column(String(10))  # 'A', 'Q', 'M' for NIPA/GDPbyIndustry; 'QSA', 'QNSA' for ITA
     geo_scope = Column(String(20))  # 'STATE', 'COUNTY', 'MSA' - for Regional
     year_spec = Column(String(50))  # 'ALL', 'LAST5', 'LAST10', or specific years like '2020,2021,2022'
 
