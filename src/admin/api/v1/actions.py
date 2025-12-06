@@ -83,6 +83,10 @@ class UpdateTriggerRequest(BaseModel):
         None,
         description="Optional custom BLS API key. If provided, skips quota validation and usage logging."
     )
+    user_agent: Optional[str] = Field(
+        None,
+        description="Optional custom User-Agent string. Should match API key registration with BLS."
+    )
 
 
 class UpdateTriggerResponse(BaseModel):
@@ -249,8 +253,9 @@ async def trigger_update(
                 detail="No API quota remaining today. Please try again tomorrow."
             )
 
-    # Determine which API key to use
+    # Determine which API key and user agent to use
     api_key_to_use = request.api_key if using_custom_key else settings.api.bls_api_key
+    user_agent_to_use = request.user_agent if (using_custom_key and request.user_agent) else None
 
     # Capture values for background task (avoid closure issues)
     _survey_code = survey_code
@@ -258,6 +263,7 @@ async def trigger_update(
     _max_requests = max_requests
     _using_custom_key = using_custom_key
     _api_key = api_key_to_use
+    _user_agent = user_agent_to_use
 
     # Execute update in background
     def run_update():
@@ -265,13 +271,17 @@ async def trigger_update(
         from src.database.connection import get_session
 
         key_info = "custom key" if _using_custom_key else "system key"
-        print(f"[Actions] Starting {'force ' if _force else ''}update for {_survey_code} (max {_max_requests} requests, {key_info})")
+        agent_info = f", custom user-agent" if _user_agent else ""
+        print(f"[Actions] Starting {'force ' if _force else ''}update for {_survey_code} (max {_max_requests} requests, {key_info}{agent_info})")
 
         try:
             # Create a new database session for background task
             with get_session() as bg_session:
-                # Create BLS client with appropriate key
-                client = BLSClient(api_key=_api_key)
+                # Create BLS client with appropriate key and user agent
+                client_kwargs = {"api_key": _api_key}
+                if _user_agent:
+                    client_kwargs["user_agent"] = _user_agent
+                client = BLSClient(**client_kwargs)
 
                 # Define progress callback
                 def progress_callback(progress):

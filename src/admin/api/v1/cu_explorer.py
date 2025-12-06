@@ -321,7 +321,7 @@ def get_cu_overview(
 @router.get("/overview/timeline", response_model=CUOverviewTimelineResponse)
 def get_cu_overview_timeline(
     area_code: str = Query("0000", description="Area code (default: US City Average)"),
-    months_back: int = Query(12, ge=1, le=120, description="Number of months to look back"),
+    months_back: int = Query(12, ge=0, le=600, description="Number of months to look back (0 for all time)"),
     db: Session = Depends(get_db)
 ):
     """Get historical timeline data for overview dashboard"""
@@ -338,20 +338,22 @@ def get_cu_overview_timeline(
     headline_series_id = f"CU{seasonal_code}R{area_code}SA0"
     core_series_id = f"CU{seasonal_code}R{area_code}SA0L1E"
 
-    # Get the most recent N months of data directly
+    # Get the most recent N months of data directly (0 = all time)
     # Fetch extra data for YoY calculations (need data from 13 months ago)
-    fetch_limit = months_back + 13  # Get enough for YoY calculations
+    fetch_limit = None if months_back == 0 else months_back + 13  # Get enough for YoY calculations
 
     # Get headline data - get most recent records
-    headline_data = db.query(CUData).filter(
+    headline_query = db.query(CUData).filter(
         CUData.series_id == headline_series_id
-    ).order_by(CUData.year.desc(), CUData.period.desc()).limit(fetch_limit).all()
+    ).order_by(CUData.year.desc(), CUData.period.desc())
+    headline_data = headline_query.all() if fetch_limit is None else headline_query.limit(fetch_limit).all()
     headline_data = list(reversed(headline_data))  # Reverse to chronological order
 
     # Get core data
-    core_data = db.query(CUData).filter(
+    core_query = db.query(CUData).filter(
         CUData.series_id == core_series_id
-    ).order_by(CUData.year.desc(), CUData.period.desc()).limit(fetch_limit).all()
+    ).order_by(CUData.year.desc(), CUData.period.desc())
+    core_data = core_query.all() if fetch_limit is None else core_query.limit(fetch_limit).all()
     core_data = list(reversed(core_data))  # Reverse to chronological order
 
     # Create dictionaries for quick lookup
@@ -484,7 +486,7 @@ def get_cu_category_analysis(
 @router.get("/categories/timeline", response_model=CUCategoryTimelineResponse)
 def get_cu_category_timeline(
     area_code: str = Query("0000", description="Area code (default: US City Average)"),
-    months_back: int = Query(12, ge=1, le=120, description="Number of months to look back"),
+    months_back: int = Query(12, ge=0, le=600, description="Number of months to look back (0 for all time)"),
     db: Session = Depends(get_db)
 ):
     """Get historical timeline data for category analysis"""
@@ -510,16 +512,17 @@ def get_cu_category_timeline(
         ("SAG", "Other goods and services"),
     ]
 
-    # Get data for all categories
+    # Get data for all categories (0 = all time)
     # Fetch most recent N months directly using LIMIT
-    fetch_limit = months_back + 13  # Extra records for YoY calculations
+    fetch_limit = None if months_back == 0 else months_back + 13  # Extra records for YoY calculations
 
     category_data = {}
     for item_code, category_name in categories:
         series_id = f"CU{seasonal_code}R{area_code}{item_code}"
-        data = db.query(CUData).filter(
+        query = db.query(CUData).filter(
             CUData.series_id == series_id
-        ).order_by(CUData.year.desc(), CUData.period.desc()).limit(fetch_limit).all()
+        ).order_by(CUData.year.desc(), CUData.period.desc())
+        data = query.all() if fetch_limit is None else query.limit(fetch_limit).all()
 
         # Reverse to chronological order
         data = list(reversed(data))
@@ -659,7 +662,7 @@ def compare_areas(
 @router.get("/areas/compare/timeline", response_model=CUAreaComparisonTimelineResponse)
 def get_area_comparison_timeline(
     item_code: str = Query("SA0", description="Item code to compare across areas"),
-    months_back: int = Query(12, ge=1, le=120, description="Number of months to look back"),
+    months_back: int = Query(12, ge=0, le=600, description="Number of months to look back (0 for all time)"),
     db: Session = Depends(get_db)
 ):
     """Get historical timeline data for area comparison"""
@@ -678,9 +681,9 @@ def get_area_comparison_timeline(
         CUArea.selectable == 'T'
     ).order_by(CUArea.sort_sequence).limit(15).all()
 
-    # Get data for all areas
+    # Get data for all areas (0 = all time)
     # Fetch most recent N months directly using LIMIT
-    fetch_limit = months_back + 13  # Extra records for YoY calculations
+    fetch_limit = None if months_back == 0 else months_back + 13  # Extra records for YoY calculations
 
     area_data = {}
     series_list = []
@@ -703,9 +706,10 @@ def get_area_comparison_timeline(
         series_list.append((series_id, area_code, area_name))
 
     for series_id, area_code, area_name in series_list:
-        data = db.query(CUData).filter(
+        query = db.query(CUData).filter(
             CUData.series_id == series_id
-        ).order_by(CUData.year.desc(), CUData.period.desc()).limit(fetch_limit).all()
+        ).order_by(CUData.year.desc(), CUData.period.desc())
+        data = query.all() if fetch_limit is None else query.limit(fetch_limit).all()
 
         # Reverse to chronological order
         data = list(reversed(data))

@@ -431,7 +431,7 @@ def get_demographic_analysis(db: Session = Depends(get_db)):
 
 @router.get("/overview/timeline", response_model=LNOverviewTimelineResponse)
 def get_overview_timeline(
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     db: Session = Depends(get_db)
 ):
     """Get timeline data for overview metrics (headline unemployment, LFPR, emp-pop ratio)"""
@@ -441,18 +441,21 @@ def get_overview_timeline(
     lfpr_series_id = "LNS11300000"  # Labor force participation rate
     epop_series_id = "LNS12300000"  # Employment-population ratio
 
-    # Get data for all three series
-    headline_data = db.query(LNData).filter(
+    # Get data for all three series (0 = all time)
+    headline_query = db.query(LNData).filter(
         LNData.series_id == headline_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    headline_data = headline_query.all() if months_back == 0 else headline_query.limit(months_back).all()
 
-    lfpr_data = db.query(LNData).filter(
+    lfpr_query = db.query(LNData).filter(
         LNData.series_id == lfpr_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    lfpr_data = lfpr_query.all() if months_back == 0 else lfpr_query.limit(months_back).all()
 
-    epop_data = db.query(LNData).filter(
+    epop_query = db.query(LNData).filter(
         LNData.series_id == epop_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    epop_data = epop_query.all() if months_back == 0 else epop_query.limit(months_back).all()
 
     # Create dictionaries for easier lookup
     headline_dict = {(d.year, d.period): float(d.value) if d.value else None for d in headline_data}
@@ -480,7 +483,7 @@ def get_overview_timeline(
 @router.get("/demographics/timeline", response_model=LNDemographicTimelineResponse)
 def get_demographic_timeline(
     dimension_type: str = Query(..., description="Dimension type: age, sex, race, education"),
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     db: Session = Depends(get_db)
 ):
     """Get timeline data for a specific demographic dimension"""
@@ -533,19 +536,21 @@ def get_demographic_timeline(
 
     dim_config = dimension_maps[dimension_type]
 
-    # Get data for all series in this dimension
+    # Get data for all series in this dimension (0 = all time)
     all_series_data = {}
     for name, series_id in dim_config["series"].items():
-        data = db.query(LNData).filter(
+        query = db.query(LNData).filter(
             LNData.series_id == series_id
-        ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+        ).order_by(LNData.year.desc(), LNData.period.desc())
+        data = query.all() if months_back == 0 else query.limit(months_back).all()
         all_series_data[name] = {(d.year, d.period): float(d.value) if d.value else None for d in data}
 
     # Get unique time periods from first series
     first_series_id = list(dim_config["series"].values())[0]
-    time_points = db.query(LNData).filter(
+    time_query = db.query(LNData).filter(
         LNData.series_id == first_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    time_points = time_query.all() if months_back == 0 else time_query.limit(months_back).all()
 
     # Get period names
     period_map = {p.period_code: p.period_name for p in db.query(BLSPeriod).all()}
@@ -602,7 +607,7 @@ def get_occupation_analysis(db: Session = Depends(get_db)):
 
 @router.get("/occupations/timeline", response_model=LNOccupationTimelineResponse)
 def get_occupation_timeline(
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     db: Session = Depends(get_db)
 ):
     """Get timeline data for occupation unemployment"""
@@ -616,19 +621,21 @@ def get_occupation_timeline(
         "Production, transportation, and material moving": "LNS14000000",  # Placeholder
     }
 
-    # Get data for all occupation series
+    # Get data for all occupation series (0 = all time)
     all_series_data = {}
     for name, series_id in occupation_series_map.items():
-        data = db.query(LNData).filter(
+        query = db.query(LNData).filter(
             LNData.series_id == series_id
-        ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+        ).order_by(LNData.year.desc(), LNData.period.desc())
+        data = query.all() if months_back == 0 else query.limit(months_back).all()
         all_series_data[name] = {(d.year, d.period): float(d.value) if d.value else None for d in data}
 
     # Get unique time periods from first series
     first_series_id = list(occupation_series_map.values())[0]
-    time_points = db.query(LNData).filter(
+    time_query = db.query(LNData).filter(
         LNData.series_id == first_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    time_points = time_query.all() if months_back == 0 else time_query.limit(months_back).all()
 
     # Get period names
     period_map = {p.period_code: p.period_name for p in db.query(BLSPeriod).all()}
@@ -661,21 +668,20 @@ def get_occupation_timeline(
 def get_industry_analysis(db: Session = Depends(get_db)):
     """Get unemployment breakdown by industry (latest snapshot)"""
 
-    # Key industry series (seasonally adjusted, 16 years and over)
+    # Key industry unemployment rate series (not seasonally adjusted - no SA available for industry)
     industry_series_map = {
-        "Agriculture and related": "LNS14000000",  # Placeholder - need actual series
-        "Mining, quarrying, oil and gas": "LNS14000000",  # Placeholder
-        "Construction": "LNS14000000",  # Placeholder
-        "Manufacturing": "LNS14000000",  # Placeholder
-        "Wholesale and retail trade": "LNS14000000",  # Placeholder
-        "Transportation and utilities": "LNS14000000",  # Placeholder
-        "Information": "LNS14000000",  # Placeholder
-        "Financial activities": "LNS14000000",  # Placeholder
-        "Professional and business services": "LNS14000000",  # Placeholder
-        "Education and health services": "LNS14000000",  # Placeholder
-        "Leisure and hospitality": "LNS14000000",  # Placeholder
-        "Other services": "LNS14000000",  # Placeholder
-        "Public administration": "LNS14000000",  # Placeholder
+        "Agriculture and related": "LNU04032244",
+        "Mining, quarrying, and oil/gas": "LNU04032230",
+        "Construction": "LNU04032231",
+        "Manufacturing": "LNU04032232",
+        "Wholesale and retail trade": "LNU04032235",
+        "Transportation and utilities": "LNU04032236",
+        "Information": "LNU04032237",
+        "Financial activities": "LNU04032238",
+        "Professional and business services": "LNU04032239",
+        "Education and health services": "LNU04032240",
+        "Leisure and hospitality": "LNU04032241",
+        "Other services": "LNU04032242",
     }
 
     industry_metrics = []
@@ -689,41 +695,42 @@ def get_industry_analysis(db: Session = Depends(get_db)):
 
 @router.get("/industries/timeline", response_model=LNIndustryTimelineResponse)
 def get_industry_timeline(
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     db: Session = Depends(get_db)
 ):
     """Get timeline data for industry unemployment"""
 
-    # Key industry series
+    # Key industry unemployment rate series (not seasonally adjusted - no SA available for industry)
     industry_series_map = {
-        "Agriculture and related": "LNS14000000",  # Placeholder
-        "Mining, quarrying, oil and gas": "LNS14000000",  # Placeholder
-        "Construction": "LNS14000000",  # Placeholder
-        "Manufacturing": "LNS14000000",  # Placeholder
-        "Wholesale and retail trade": "LNS14000000",  # Placeholder
-        "Transportation and utilities": "LNS14000000",  # Placeholder
-        "Information": "LNS14000000",  # Placeholder
-        "Financial activities": "LNS14000000",  # Placeholder
-        "Professional and business services": "LNS14000000",  # Placeholder
-        "Education and health services": "LNS14000000",  # Placeholder
-        "Leisure and hospitality": "LNS14000000",  # Placeholder
-        "Other services": "LNS14000000",  # Placeholder
-        "Public administration": "LNS14000000",  # Placeholder
+        "Agriculture and related": "LNU04032244",
+        "Mining, quarrying, and oil/gas": "LNU04032230",
+        "Construction": "LNU04032231",
+        "Manufacturing": "LNU04032232",
+        "Wholesale and retail trade": "LNU04032235",
+        "Transportation and utilities": "LNU04032236",
+        "Information": "LNU04032237",
+        "Financial activities": "LNU04032238",
+        "Professional and business services": "LNU04032239",
+        "Education and health services": "LNU04032240",
+        "Leisure and hospitality": "LNU04032241",
+        "Other services": "LNU04032242",
     }
 
-    # Get data for all industry series
+    # Get data for all industry series (0 = all time)
     all_series_data = {}
     for name, series_id in industry_series_map.items():
-        data = db.query(LNData).filter(
+        query = db.query(LNData).filter(
             LNData.series_id == series_id
-        ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+        ).order_by(LNData.year.desc(), LNData.period.desc())
+        data = query.all() if months_back == 0 else query.limit(months_back).all()
         all_series_data[name] = {(d.year, d.period): float(d.value) if d.value else None for d in data}
 
     # Get unique time periods from first series
     first_series_id = list(industry_series_map.values())[0]
-    time_points = db.query(LNData).filter(
+    time_query = db.query(LNData).filter(
         LNData.series_id == first_series_id
-    ).order_by(LNData.year.desc(), LNData.period.desc()).limit(months_back).all()
+    ).order_by(LNData.year.desc(), LNData.period.desc())
+    time_points = time_query.all() if months_back == 0 else time_query.limit(months_back).all()
 
     # Get period names
     period_map = {p.period_code: p.period_name for p in db.query(BLSPeriod).all()}

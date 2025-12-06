@@ -23,7 +23,7 @@ import {
   Sync,
   Refresh,
   PlayArrow,
-  
+  Explore,
 } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
@@ -231,6 +231,25 @@ function SurveyCard({ survey, onUpdate, onForceUpdate, onCheckFreshness, isUpdat
             </span>
           </Tooltip>
         </Box>
+
+        {/* Explorer Button */}
+        <Button
+          component={Link}
+          to={`/surveys/${survey.survey_code}/explorer`}
+          fullWidth
+          size="small"
+          variant="contained"
+          color="primary"
+          startIcon={<Explore />}
+          sx={{
+            mt: 1.5,
+            fontSize: '0.75rem',
+            py: 0.75,
+            fontWeight: 600,
+          }}
+        >
+          Explore {survey.survey_code} Data
+        </Button>
       </CardContent>
     </Card>
   );
@@ -255,6 +274,7 @@ export default function Dashboard() {
   });
   const [requestsInput, setRequestsInput] = React.useState<string>('');
   const [apiKeyInput, setApiKeyInput] = React.useState<string>('');
+  const [userAgentInput, setUserAgentInput] = React.useState<string>('');
 
   const { data: overview, isLoading: loadingOverview } = useQuery({
     queryKey: ['freshness', 'overview'],
@@ -306,8 +326,8 @@ export default function Dashboard() {
   });
 
   const executeUpdateMutation = useMutation({
-    mutationFn: ({ surveyCode, force, maxRequests, apiKey }: { surveyCode: string; force: boolean; maxRequests: number; apiKey?: string }) =>
-      actionsAPI.executeUpdate(surveyCode, force, maxRequests, apiKey),
+    mutationFn: ({ surveyCode, force, maxRequests, apiKey, userAgent }: { surveyCode: string; force: boolean; maxRequests: number; apiKey?: string; userAgent?: string }) =>
+      actionsAPI.executeUpdate(surveyCode, force, maxRequests, apiKey, userAgent),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['freshness'] });
       queryClient.invalidateQueries({ queryKey: ['actions', 'quota'] });
@@ -347,6 +367,7 @@ export default function Dashboard() {
       force: confirmUpdateDialog.isForce,
       maxRequests,
       apiKey: apiKeyInput.trim() || undefined,
+      userAgent: userAgentInput.trim() || undefined,
     });
   };
 
@@ -603,6 +624,20 @@ export default function Dashboard() {
               sx={{ mt: 2 }}
               size="small"
             />
+
+            {/* Custom User-Agent Input - only show when custom API key is provided */}
+            {apiKeyInput.trim() && (
+              <TextField
+                fullWidth
+                label="User-Agent (recommended with custom key)"
+                value={userAgentInput}
+                onChange={(e) => setUserAgentInput(e.target.value)}
+                placeholder="YourApp/1.0 (+contact: your@email.com)"
+                helperText="Identifies your application to BLS. Should match your API key registration."
+                sx={{ mt: 2 }}
+                size="small"
+              />
+            )}
           </Box>
 
           <DialogContentText sx={{ mt: 2 }}>

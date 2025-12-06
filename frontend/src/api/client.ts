@@ -132,11 +132,12 @@ export const actionsAPI = {
     apiClient.post<FreshnessCheckResponse>('/actions/freshness/check', { survey_codes: surveyCodes }).then(r => r.data),
 
   // Trigger update - soft (resume) or force (new cycle)
-  executeUpdate: (surveyCode: string, force = false, maxRequests?: number, apiKey?: string) =>
+  executeUpdate: (surveyCode: string, force = false, maxRequests?: number, apiKey?: string, userAgent?: string) =>
     apiClient.post<UpdateTriggerResponse>(`/actions/update/${surveyCode}`, {
       force,
       max_requests: maxRequests,
-      api_key: apiKey || undefined  // Don't send empty string
+      api_key: apiKey || undefined,  // Don't send empty string
+      user_agent: userAgent || undefined  // Don't send empty string
     }).then(r => r.data),
 
   // Get status for a single survey
@@ -423,9 +424,16 @@ export interface CESupersectorItem {
   supersector_name: string;
 }
 
+export interface CEDataTypeItem {
+  data_type_code: string;
+  data_type_text: string;
+  category?: string;
+}
+
 export interface CEDimensions {
   industries: CEIndustryItem[];
   supersectors: CESupersectorItem[];
+  data_types: CEDataTypeItem[];
 }
 
 export interface CESeriesInfo {
@@ -435,6 +443,8 @@ export interface CESeriesInfo {
   industry_name: string;
   supersector_code?: string;
   supersector_name?: string;
+  data_type_code?: string;
+  data_type_text?: string;
   seasonal_code?: string;
   begin_year?: number;
   begin_period?: string;
@@ -461,6 +471,185 @@ export interface CESeriesData {
 export interface CEDataResponse {
   survey_code: string;
   series: CESeriesData[];
+}
+
+// CE Analytics
+export interface CEEmploymentMetric {
+  series_id: string;
+  name: string;
+  latest_value?: number;
+  latest_date?: string;
+  month_over_month?: number;
+  month_over_month_pct?: number;
+  year_over_year?: number;
+  year_over_year_pct?: number;
+}
+
+export interface CEOverviewResponse {
+  survey_code: string;
+  total_nonfarm?: CEEmploymentMetric;
+  total_private?: CEEmploymentMetric;
+  goods_producing?: CEEmploymentMetric;
+  service_providing?: CEEmploymentMetric;
+  government?: CEEmploymentMetric;
+  last_updated?: string;
+}
+
+export interface CEOverviewTimelinePoint {
+  year: number;
+  period: string;
+  period_name: string;
+  total_nonfarm?: number;
+  total_private?: number;
+  goods_producing?: number;
+  service_providing?: number;
+  government?: number;
+}
+
+export interface CEOverviewTimelineResponse {
+  survey_code: string;
+  timeline: CEOverviewTimelinePoint[];
+}
+
+export interface CESupersectorMetric {
+  supersector_code: string;
+  supersector_name: string;
+  series_id: string;
+  latest_value?: number;
+  latest_date?: string;
+  month_over_month?: number;
+  month_over_month_pct?: number;
+  year_over_year?: number;
+  year_over_year_pct?: number;
+}
+
+export interface CESupersectorAnalysisResponse {
+  survey_code: string;
+  supersectors: CESupersectorMetric[];
+  last_updated?: string;
+}
+
+export interface CESupersectorTimelinePoint {
+  year: number;
+  period: string;
+  period_name: string;
+  supersectors: Record<string, number | null>;
+}
+
+export interface CESupersectorTimelineResponse {
+  survey_code: string;
+  timeline: CESupersectorTimelinePoint[];
+  supersector_names: Record<string, string>;
+}
+
+export interface CEIndustryMetric {
+  industry_code: string;
+  industry_name: string;
+  series_id: string;
+  display_level: number;
+  latest_value?: number;
+  latest_date?: string;
+  month_over_month?: number;
+  month_over_month_pct?: number;
+  year_over_year?: number;
+  year_over_year_pct?: number;
+}
+
+export interface CEIndustryAnalysisResponse {
+  survey_code: string;
+  industries: CEIndustryMetric[];
+  total_count: number;
+  last_updated?: string;
+}
+
+export interface CEIndustryTimelinePoint {
+  year: number;
+  period: string;
+  period_name: string;
+  industries: Record<string, number | null>;
+}
+
+export interface CEIndustryTimelineResponse {
+  survey_code: string;
+  timeline: CEIndustryTimelinePoint[];
+  industry_names: Record<string, string>;
+}
+
+// CE Data Type Analysis
+export interface CEDataTypeMetric {
+  data_type_code: string;
+  data_type_text: string;
+  series_id: string;
+  industry_code: string;
+  industry_name: string;
+  latest_value?: number;
+  latest_date?: string;
+  month_over_month?: number;
+  month_over_month_pct?: number;
+  year_over_year?: number;
+  year_over_year_pct?: number;
+}
+
+export interface CEDataTypeAnalysisResponse {
+  survey_code: string;
+  industry_code: string;
+  industry_name: string;
+  data_types: CEDataTypeMetric[];
+  last_updated?: string;
+}
+
+export interface CEDataTypeTimelinePoint {
+  year: number;
+  period: string;
+  period_name: string;
+  data_types: Record<string, number | null>;
+}
+
+export interface CEDataTypeTimelineResponse {
+  survey_code: string;
+  industry_code: string;
+  industry_name: string;
+  timeline: CEDataTypeTimelinePoint[];
+  data_type_names: Record<string, string>;
+}
+
+// CE Earnings Analysis
+export interface CEEarningsMetric {
+  industry_code: string;
+  industry_name: string;
+  supersector_code?: string;
+  supersector_name?: string;
+  avg_hourly_earnings?: number;
+  avg_weekly_earnings?: number;
+  avg_weekly_hours?: number;
+  latest_date?: string;
+  hourly_mom_change?: number;
+  hourly_mom_pct?: number;
+  hourly_yoy_change?: number;
+  hourly_yoy_pct?: number;
+}
+
+export interface CEEarningsAnalysisResponse {
+  survey_code: string;
+  earnings: CEEarningsMetric[];
+  total_count: number;
+  last_updated?: string;
+}
+
+export interface CEEarningsTimelinePoint {
+  year: number;
+  period: string;
+  period_name: string;
+  avg_hourly_earnings?: number;
+  avg_weekly_earnings?: number;
+  avg_weekly_hours?: number;
+}
+
+export interface CEEarningsTimelineResponse {
+  survey_code: string;
+  industry_code: string;
+  industry_name: string;
+  timeline: CEEarningsTimelinePoint[];
 }
 
 // ==================== Timeline Types ====================
@@ -616,6 +805,7 @@ export const ceExplorerAPI = {
   getSeries: (params?: {
     industry_code?: string;
     supersector_code?: string;
+    data_type_code?: string;
     seasonal_code?: string;
     active_only?: boolean;
     limit?: number;
@@ -625,6 +815,55 @@ export const ceExplorerAPI = {
 
   getSeriesData: (seriesId: string, params?: { start_year?: number; end_year?: number }) =>
     apiClient.get<CEDataResponse>(`/explorer/ce/series/${seriesId}/data`, { params }).then(r => r.data),
+
+  // Overview - headline employment stats
+  getOverview: () =>
+    apiClient.get<CEOverviewResponse>('/explorer/ce/overview').then(r => r.data),
+
+  getOverviewTimeline: (monthsBack = 24) =>
+    apiClient.get<CEOverviewTimelineResponse>('/explorer/ce/overview/timeline', {
+      params: { months_back: monthsBack }
+    }).then(r => r.data),
+
+  // Supersector analysis
+  getSupersectors: () =>
+    apiClient.get<CESupersectorAnalysisResponse>('/explorer/ce/supersectors').then(r => r.data),
+
+  getSupersectorsTimeline: (params?: { supersector_codes?: string; months_back?: number }) =>
+    apiClient.get<CESupersectorTimelineResponse>('/explorer/ce/supersectors/timeline', { params }).then(r => r.data),
+
+  // Industry analysis
+  getIndustries: (params?: {
+    display_level?: number;
+    supersector_code?: string;
+    limit?: number;
+  }) =>
+    apiClient.get<CEIndustryAnalysisResponse>('/explorer/ce/industries', { params }).then(r => r.data),
+
+  getIndustriesTimeline: (industryCodes: string, monthsBack = 24) =>
+    apiClient.get<CEIndustryTimelineResponse>('/explorer/ce/industries/timeline', {
+      params: { industry_codes: industryCodes, months_back: monthsBack }
+    }).then(r => r.data),
+
+  // Data Type analysis (for a specific industry)
+  getDataTypes: (industryCode: string) =>
+    apiClient.get<CEDataTypeAnalysisResponse>(`/explorer/ce/datatypes/${industryCode}`).then(r => r.data),
+
+  getDataTypesTimeline: (industryCode: string, params?: { data_type_codes?: string; months_back?: number }) =>
+    apiClient.get<CEDataTypeTimelineResponse>(`/explorer/ce/datatypes/${industryCode}/timeline`, { params }).then(r => r.data),
+
+  // Earnings analysis
+  getEarnings: (params?: {
+    supersector_code?: string;
+    display_level?: number;
+    limit?: number;
+  }) =>
+    apiClient.get<CEEarningsAnalysisResponse>('/explorer/ce/earnings', { params }).then(r => r.data),
+
+  getEarningsTimeline: (industryCode: string, monthsBack = 24) =>
+    apiClient.get<CEEarningsTimelineResponse>(`/explorer/ce/earnings/${industryCode}/timeline`, {
+      params: { months_back: monthsBack }
+    }).then(r => r.data),
 };
 
 // ==================== LN Explorer Types ====================
@@ -689,7 +928,7 @@ export interface LNDataResponse {
   series: LNSeriesData[];
 }
 
-export interface UnemploymentMetric {
+export interface LNUnemploymentMetric {
   series_id: string;
   dimension_name: string;
   latest_value?: number;
@@ -700,16 +939,16 @@ export interface UnemploymentMetric {
 
 export interface LNOverviewResponse {
   survey_code: string;
-  headline_unemployment?: UnemploymentMetric;
-  labor_force_participation?: UnemploymentMetric;
-  employment_population_ratio?: UnemploymentMetric;
+  headline_unemployment?: LNUnemploymentMetric;
+  labor_force_participation?: LNUnemploymentMetric;
+  employment_population_ratio?: LNUnemploymentMetric;
   last_updated?: string;
 }
 
 export interface DemographicBreakdown {
   dimension_type: string;
   dimension_name: string;
-  metrics: UnemploymentMetric[];
+  metrics: LNUnemploymentMetric[];
 }
 
 export interface LNDemographicAnalysisResponse {
@@ -735,7 +974,7 @@ export interface DemographicTimelinePoint {
   year: number;
   period: string;
   period_name: string;
-  metrics: UnemploymentMetric[];
+  metrics: LNUnemploymentMetric[];
 }
 
 export interface LNDemographicTimelineResponse {
@@ -747,7 +986,7 @@ export interface LNDemographicTimelineResponse {
 
 export interface LNOccupationAnalysisResponse {
   survey_code: string;
-  occupations: UnemploymentMetric[];
+  occupations: LNUnemploymentMetric[];
 }
 
 export interface LNOccupationTimelineResponse {
@@ -757,7 +996,7 @@ export interface LNOccupationTimelineResponse {
 
 export interface LNIndustryAnalysisResponse {
   survey_code: string;
-  industries: UnemploymentMetric[];
+  industries: LNUnemploymentMetric[];
 }
 
 export interface LNIndustryTimelineResponse {

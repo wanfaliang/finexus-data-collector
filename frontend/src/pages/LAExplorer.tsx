@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import {
   Box,
   Card,
@@ -73,11 +73,17 @@ export default function LAExplorer() {
   const [metroPage, setMetroPage] = useState(0);
   const [metroRowsPerPage, setMetroRowsPerPage] = useState(25);
 
+  // Geographic View state
+  const [geoTimeRange, setGeoTimeRange] = useState<number>(12);
+  const [selectedGeoPeriod, setSelectedGeoPeriod] = useState<{year: number, period: string} | null>(null);
+
   // Series Detail state
   const [selectedArea, setSelectedArea] = useState<string>('');
   const [selectedMeasure, setSelectedMeasure] = useState<string>('');
   const [selectedSeasonal, setSelectedSeasonal] = useState<string>('');
   const [selectedSeriesIds, setSelectedSeriesIds] = useState<string[]>([]);
+  const [seriesTimeRange, setSeriesTimeRange] = useState<number>(24);
+  const [seriesView, setSeriesView] = useState<'chart' | 'table'>('chart');
 
   // Helper functions
   const formatRate = (val?: number | null) => (val != null ? `${val.toFixed(1)}%` : 'N/A');
@@ -100,6 +106,18 @@ export default function LAExplorer() {
   const { data: overview, isLoading: loadingOverview } = useQuery({
     queryKey: ['la', 'overview'],
     queryFn: laExplorerAPI.getOverview,
+  });
+
+  // Overview timeline for the chart
+  const { data: overviewTimeline } = useQuery({
+    queryKey: ['la', 'overview', 'timeline', overviewTimeRange],
+    queryFn: () => laExplorerAPI.getOverviewTimeline(overviewTimeRange),
+  });
+
+  // Geographic view timeline (for historical snapshots)
+  const { data: geoTimeline } = useQuery({
+    queryKey: ['la', 'states', 'timeline', geoTimeRange],
+    queryFn: () => laExplorerAPI.getStatesTimeline(geoTimeRange),
   });
 
   const { data: states, isLoading: loadingStates } = useQuery({
@@ -161,13 +179,13 @@ export default function LAExplorer() {
       }),
   });
 
-  const seriesDataQueries = selectedSeriesIds.map(seriesId =>
-    useQuery({
+  const seriesDataQueries = useQueries({
+    queries: selectedSeriesIds.map(seriesId => ({
       queryKey: ['la', 'data', seriesId],
       queryFn: () => laExplorerAPI.getSeriesData(seriesId),
-      enabled: selectedSeriesIds.includes(seriesId),
-    })
-  );
+      enabled: true,
+    })),
+  });
 
   // Timeline Selector Component (reusable)
   const TimelineSelector = ({
@@ -254,10 +272,22 @@ export default function LAExplorer() {
 
       {/* Overview Section */}
       <Card sx={{ mb: 4, border: '2px solid', borderColor: 'divider', boxShadow: 2 }}>
-        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'error.main', bgcolor: 'error.50' }}>
+        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'error.main', bgcolor: 'error.50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" fontWeight="700" sx={{ color: 'error.main' }}>
             National Overview
           </Typography>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Time Range</InputLabel>
+            <Select
+              value={overviewTimeRange}
+              label="Time Range"
+              onChange={(e) => setOverviewTimeRange(e.target.value as number)}
+            >
+              <MenuItem value={12}>Last 12 months</MenuItem>
+              <MenuItem value={24}>Last 2 years</MenuItem>
+              <MenuItem value={60}>Last 5 years</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
@@ -269,61 +299,130 @@ export default function LAExplorer() {
               <CircularProgress />
             </Box>
           ) : overview ? (
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'error.50', border: '2px solid', borderColor: 'error.main' }}>
+            <>
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ bgcolor: 'error.50', border: '2px solid', borderColor: 'error.main' }}>
+                    <CardContent>
+                      <Typography variant="overline" color="error.dark">Unemployment Rate</Typography>
+                      <Typography variant="caption" display="block" color="text.secondary">
+                        {overview.national_unemployment.latest_date}
+                      </Typography>
+                      <Typography variant="h3" fontWeight="bold" color="error.dark" sx={{ my: 1 }}>
+                        {formatRate(overview.national_unemployment.unemployment_rate)}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ bgcolor: 'success.50', border: '2px solid', borderColor: 'success.main' }}>
+                    <CardContent>
+                      <Typography variant="overline" color="success.dark">Employment</Typography>
+                      <Typography variant="caption" display="block" color="text.secondary">
+                        {overview.national_unemployment.latest_date}
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="success.dark" sx={{ my: 1 }}>
+                        {formatNumber(overview.national_unemployment.employment_level)}K
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ bgcolor: 'info.50', border: '2px solid', borderColor: 'info.main' }}>
+                    <CardContent>
+                      <Typography variant="overline" color="info.dark">Labor Force</Typography>
+                      <Typography variant="caption" display="block" color="text.secondary">
+                        {overview.national_unemployment.latest_date}
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="info.dark" sx={{ my: 1 }}>
+                        {formatNumber(overview.national_unemployment.labor_force)}K
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+
+              {/* Overview Timeline Chart */}
+              {overviewTimeline && overviewTimeline.timeline.length > 0 && (
+                <Card variant="outlined">
                   <CardContent>
-                    <Typography variant="overline" color="error.dark">Unemployment Rate</Typography>
-                    <Typography variant="caption" display="block" color="text.secondary">
-                      {overview.national_unemployment.latest_date}
+                    <Typography variant="subtitle2" fontWeight="600" sx={{ mb: 2 }}>
+                      National Unemployment Rate Trend
                     </Typography>
-                    <Typography variant="h3" fontWeight="bold" color="error.dark" sx={{ my: 1 }}>
-                      {formatRate(overview.national_unemployment.unemployment_rate)}
-                    </Typography>
+                    <Box sx={{ height: 300 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={overviewTimeline.timeline}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="period_name"
+                            tick={{ fontSize: 10 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            interval={Math.floor(overviewTimeline.timeline.length / 12)}
+                          />
+                          <YAxis
+                            tick={{ fontSize: 11 }}
+                            domain={['auto', 'auto']}
+                            label={{ value: 'Rate (%)', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }}
+                          />
+                          <Tooltip formatter={(value: number) => [`${value?.toFixed(1)}%`, 'Unemployment Rate']} />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="unemployment_rate"
+                            stroke="#d32f2f"
+                            strokeWidth={2}
+                            dot={false}
+                            name="Unemployment Rate"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
                   </CardContent>
                 </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'success.50', border: '2px solid', borderColor: 'success.main' }}>
-                  <CardContent>
-                    <Typography variant="overline" color="success.dark">Employment</Typography>
-                    <Typography variant="caption" display="block" color="text.secondary">
-                      {overview.national_unemployment.latest_date}
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold" color="success.dark" sx={{ my: 1 }}>
-                      {formatNumber(overview.national_unemployment.employment_level)}K
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'info.50', border: '2px solid', borderColor: 'info.main' }}>
-                  <CardContent>
-                    <Typography variant="overline" color="info.dark">Labor Force</Typography>
-                    <Typography variant="caption" display="block" color="text.secondary">
-                      {overview.national_unemployment.latest_date}
-                    </Typography>
-                    <Typography variant="h4" fontWeight="bold" color="info.dark" sx={{ my: 1 }}>
-                      {formatNumber(overview.national_unemployment.labor_force)}K
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+              )}
+            </>
           ) : null}
         </CardContent>
       </Card>
 
       {/* Geographic View Section */}
       <Card sx={{ mb: 4, border: '2px solid', borderColor: 'divider', boxShadow: 2 }}>
-        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'warning.main', bgcolor: 'warning.50' }}>
+        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'warning.main', bgcolor: 'warning.50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" fontWeight="700" sx={{ color: 'warning.main' }}>
             Geographic View
           </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Time Range</InputLabel>
+              <Select
+                value={geoTimeRange}
+                label="Time Range"
+                onChange={(e) => {
+                  setGeoTimeRange(e.target.value as number);
+                  setSelectedGeoPeriod(null);
+                }}
+              >
+                <MenuItem value={12}>Last 12 months</MenuItem>
+                <MenuItem value={24}>Last 2 years</MenuItem>
+                <MenuItem value={60}>Last 5 years</MenuItem>
+              </Select>
+            </FormControl>
+            {selectedGeoPeriod && (
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => setSelectedGeoPeriod(null)}
+              >
+                Show Latest
+              </Button>
+            )}
+          </Box>
         </Box>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-            View unemployment rates across states and metropolitan areas. Click on any marker to add it to the comparison charts above.
+            View unemployment rates across states and metropolitan areas. {selectedGeoPeriod ? `Showing data for ${formatPeriod(selectedGeoPeriod.period)} ${selectedGeoPeriod.year}` : 'Showing latest data.'} Click on any marker to add it to the comparison charts.
           </Typography>
 
           {/* Color Legend */}
@@ -367,29 +466,51 @@ export default function LAExplorer() {
               <CircularProgress />
             </Box>
           ) : (() => {
-            // Pre-process metros with coordinates
+            // Get historical rates if a period is selected
+            const historicalStateRates: Record<string, number> = {};
+            if (selectedGeoPeriod && geoTimeline) {
+              const timelinePoint = geoTimeline.timeline.find(
+                p => p.year === selectedGeoPeriod.year && p.period === selectedGeoPeriod.period
+              );
+              if (timelinePoint && timelinePoint.states) {
+                Object.assign(historicalStateRates, timelinePoint.states);
+              }
+            }
+
+            // Helper to get color from rate
+            const getColorFromRate = (rate: number) => {
+              if (rate < 3) return '#2e7d32';
+              if (rate < 4) return '#66bb6a';
+              if (rate < 5) return '#ffeb3b';
+              if (rate < 6) return '#ffa726';
+              if (rate < 7) return '#ff7043';
+              return '#d32f2f';
+            };
+
+            // Pre-process metros with coordinates (metros don't have historical data in state timeline)
             const metrosWithCoords = (metros?.metros || [])
               .map(metro => {
                 const coords = getLAAreaCoordinates(metro.area_code, metro.area_name);
                 if (!coords) return null;
                 const rate = metro.unemployment_rate || 0;
-                const color = rate < 3 ? '#2e7d32' : rate < 4 ? '#66bb6a' : rate < 5 ? '#ffeb3b' : rate < 6 ? '#ffa726' : rate < 7 ? '#ff7043' : '#d32f2f';
-                return { ...metro, lat: coords.lat, lng: coords.lng, color };
+                return { ...metro, lat: coords.lat, lng: coords.lng, color: getColorFromRate(rate) };
               })
               .filter(m => m !== null) || [];
 
-            // Pre-process states with coordinates
+            // Pre-process states with coordinates - use historical data if period is selected
             const statesWithCoords = states?.states
               .map(state => {
                 const coords = getLAAreaCoordinates(state.area_code, state.area_name);
                 if (!coords) return null;
-                const rate = state.unemployment_rate || 0;
-                const color = rate < 3 ? '#2e7d32' : rate < 4 ? '#66bb6a' : rate < 5 ? '#ffeb3b' : rate < 6 ? '#ffa726' : rate < 7 ? '#ff7043' : '#d32f2f';
-                return { ...state, lat: coords.lat, lng: coords.lng, color };
+                const rate = selectedGeoPeriod && historicalStateRates[state.area_code] !== undefined
+                  ? historicalStateRates[state.area_code]
+                  : (state.unemployment_rate || 0);
+                return { ...state, lat: coords.lat, lng: coords.lng, color: getColorFromRate(rate), unemployment_rate: rate };
               })
               .filter(s => s !== null) || [];
 
             return (
+            <>
             <Box sx={{ height: 500, border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
               <MapContainer
                 center={[39.8283, -98.5795]}
@@ -528,6 +649,16 @@ export default function LAExplorer() {
                 })}
               </MapContainer>
             </Box>
+
+            {/* Timeline Selector for Geographic View */}
+            {geoTimeline && geoTimeline.timeline.length > 0 && (
+              <TimelineSelector
+                timeline={geoTimeline.timeline}
+                selectedPeriod={selectedGeoPeriod}
+                onSelectPeriod={setSelectedGeoPeriod}
+              />
+            )}
+            </>
             );
           })()}
         </CardContent>
@@ -1121,10 +1252,38 @@ export default function LAExplorer() {
 
       {/* Series Detail Explorer Section */}
       <Card sx={{ mb: 4, border: '2px solid', borderColor: 'divider', boxShadow: 2 }}>
-        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'info.main', bgcolor: 'info.50' }}>
+        <Box sx={{ px: 3, py: 2.5, borderBottom: '3px solid', borderColor: 'info.main', bgcolor: 'info.50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" fontWeight="700" sx={{ color: 'info.main' }}>
             Series Detail Explorer
           </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Time Range</InputLabel>
+              <Select
+                value={seriesTimeRange}
+                label="Time Range"
+                onChange={(e) => setSeriesTimeRange(e.target.value as number)}
+              >
+                <MenuItem value={12}>Last 12 months</MenuItem>
+                <MenuItem value={24}>Last 2 years</MenuItem>
+                <MenuItem value={60}>Last 5 years</MenuItem>
+                <MenuItem value={120}>Last 10 years</MenuItem>
+              </Select>
+            </FormControl>
+            <ToggleButtonGroup
+              value={seriesView}
+              exclusive
+              onChange={(_, val) => val && setSeriesView(val)}
+              size="small"
+            >
+              <ToggleButton value="chart">
+                <ShowChart fontSize="small" />
+              </ToggleButton>
+              <ToggleButton value="table">
+                <TableChart fontSize="small" />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Box>
         <CardContent sx={{ p: 3 }}>
           {/* Filters */}
@@ -1177,15 +1336,26 @@ export default function LAExplorer() {
 
           {/* Series List */}
           <Card variant="outlined" sx={{ mb: 3 }}>
-            <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="subtitle2" fontWeight="600">
-                Available Series ({seriesData?.total || 0})
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Select series to visualize (max 5)
-              </Typography>
+            <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="subtitle2" fontWeight="600">
+                  Available Series ({seriesData?.total || 0})
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Select series to compare (max 5)
+                </Typography>
+              </Box>
+              {selectedSeriesIds.length > 0 && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSelectedSeriesIds([])}
+                >
+                  Clear All ({selectedSeriesIds.length})
+                </Button>
+              )}
             </Box>
-            <TableContainer sx={{ maxHeight: 400 }}>
+            <TableContainer sx={{ maxHeight: 300 }}>
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
@@ -1257,67 +1427,148 @@ export default function LAExplorer() {
             </TableContainer>
           </Card>
 
-          {/* Charts for Selected Series */}
+          {/* Combined Chart or 2D Data Table for Selected Series */}
           {selectedSeriesIds.length > 0 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {selectedSeriesIds.map((seriesId, idx) => {
-                const queryResult = seriesDataQueries[idx];
-                const chartData = queryResult?.data;
+            <Card variant="outlined">
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight="600">
+                  {seriesView === 'chart' ? 'Series Comparison Chart' : 'Series Data Table'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {selectedSeriesIds.length} series selected
+                </Typography>
+              </Box>
 
-                return (
-                  <Card key={seriesId} variant="outlined">
-                    <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight="600">
-                          {chartData?.series[0]?.area_name || seriesId}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {chartData?.series[0]?.measure_name}
-                        </Typography>
-                      </Box>
-                      <Button
-                        size="small"
-                        onClick={() => setSelectedSeriesIds(selectedSeriesIds.filter(id => id !== seriesId))}
-                      >
-                        Remove
-                      </Button>
+              {seriesView === 'chart' ? (
+                /* Single Chart with Multiple Lines */
+                <Box sx={{ p: 2, height: 400 }}>
+                  {seriesDataQueries.some(q => q.isLoading) ? (
+                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                      <CircularProgress />
                     </Box>
-                    <Box sx={{ p: 2, height: 300 }}>
-                      {queryResult?.isLoading ? (
-                        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                          <CircularProgress />
-                        </Box>
-                      ) : chartData?.series[0] ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={chartData.series[0].data_points}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                            <XAxis
-                              dataKey="period_name"
-                              tick={{ fontSize: 10 }}
-                              angle={-45}
-                              textAnchor="end"
-                              height={80}
-                              interval={Math.floor(chartData.series[0].data_points.length / 12)}
-                            />
-                            <YAxis tick={{ fontSize: 11 }} />
-                            <Tooltip />
-                            <Legend />
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis
+                          dataKey="period_name"
+                          type="category"
+                          allowDuplicatedCategory={false}
+                          tick={{ fontSize: 10 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                        />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip />
+                        <Legend wrapperStyle={{ fontSize: '11px' }} />
+                        {seriesDataQueries.map((queryResult, idx) => {
+                          const chartData = queryResult?.data;
+                          if (!chartData?.series[0]) return null;
+                          const colors = ['#1976d2', '#2e7d32', '#d32f2f', '#f57c00', '#7b1fa2'];
+                          const seriesInfo = seriesData?.series.find(s => s.series_id === selectedSeriesIds[idx]);
+                          const label = seriesInfo ? `${seriesInfo.area_name} - ${seriesInfo.measure_name}` : selectedSeriesIds[idx];
+                          // Filter data by time range
+                          const filteredData = chartData.series[0].data_points.slice(-seriesTimeRange);
+                          return (
                             <Line
+                              key={selectedSeriesIds[idx]}
+                              data={filteredData}
                               type="monotone"
                               dataKey="value"
-                              stroke="#1976d2"
+                              stroke={colors[idx % colors.length]}
                               strokeWidth={2}
-                              dot={{ r: 2 }}
-                              name="Value"
+                              dot={false}
+                              name={label.length > 40 ? label.substring(0, 37) + '...' : label}
                             />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      ) : null}
+                          );
+                        })}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </Box>
+              ) : (
+                /* 2D Data Table - Rows = Time Periods, Columns = Series */
+                <TableContainer sx={{ maxHeight: 500 }}>
+                  {seriesDataQueries.some(q => q.isLoading) ? (
+                    <Box display="flex" justifyContent="center" alignItems="center" p={4}>
+                      <CircularProgress />
                     </Box>
-                  </Card>
-                );
-              })}
-            </Box>
+                  ) : (() => {
+                    // Build 2D data structure
+                    const allPeriods = new Map<string, { year: number; period: string; period_name: string; values: Record<string, number | null> }>();
+
+                    seriesDataQueries.forEach((queryResult, idx) => {
+                      const chartData = queryResult?.data;
+                      if (!chartData?.series[0]) return;
+                      // Filter by time range
+                      const filteredData = chartData.series[0].data_points.slice(-seriesTimeRange);
+                      filteredData.forEach(dp => {
+                        const key = `${dp.year}-${dp.period}`;
+                        if (!allPeriods.has(key)) {
+                          allPeriods.set(key, {
+                            year: dp.year,
+                            period: dp.period,
+                            period_name: dp.period_name,
+                            values: {}
+                          });
+                        }
+                        allPeriods.get(key)!.values[selectedSeriesIds[idx]] = dp.value;
+                      });
+                    });
+
+                    // Sort by year and period descending (most recent first)
+                    const sortedPeriods = Array.from(allPeriods.values()).sort((a, b) => {
+                      if (b.year !== a.year) return b.year - a.year;
+                      return b.period.localeCompare(a.period);
+                    });
+
+                    return (
+                      <Table size="small" stickyHeader>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', bgcolor: 'background.paper', position: 'sticky', left: 0, zIndex: 3 }}>
+                              Period
+                            </TableCell>
+                            {selectedSeriesIds.map((seriesId, idx) => {
+                              const seriesInfo = seriesData?.series.find(s => s.series_id === seriesId);
+                              return (
+                                <TableCell
+                                  key={seriesId}
+                                  align="right"
+                                  sx={{ fontWeight: 600, fontSize: '0.7rem', bgcolor: 'background.paper', minWidth: 120 }}
+                                >
+                                  {seriesInfo ? (
+                                    <>
+                                      <Box>{seriesInfo.area_name}</Box>
+                                      <Box sx={{ fontWeight: 400, color: 'text.secondary' }}>{seriesInfo.measure_name}</Box>
+                                    </>
+                                  ) : seriesId}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {sortedPeriods.map(period => (
+                            <TableRow key={`${period.year}-${period.period}`} hover>
+                              <TableCell sx={{ fontSize: '0.75rem', fontWeight: 500, position: 'sticky', left: 0, bgcolor: 'background.paper' }}>
+                                {period.period_name}
+                              </TableCell>
+                              {selectedSeriesIds.map(seriesId => (
+                                <TableCell key={seriesId} align="right" sx={{ fontSize: '0.8rem' }}>
+                                  {period.values[seriesId] != null ? period.values[seriesId]?.toLocaleString(undefined, { maximumFractionDigits: 1 }) : '-'}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    );
+                  })()}
+                </TableContainer>
+              )}
+            </Card>
           )}
         </CardContent>
       </Card>

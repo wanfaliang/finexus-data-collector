@@ -307,7 +307,7 @@ def get_overview(db: Session = Depends(get_db)):
 
 @router.get("/overview/timeline", response_model=LAOverviewTimelineResponse)
 def get_overview_timeline(
-    months_back: int = Query(24, ge=1, le=120, description="Number of months to retrieve"),
+    months_back: int = Query(24, ge=0, le=600, description="Number of months to retrieve (0 for all time)"),
     db: Session = Depends(get_db)
 ):
     """Get timeline data for national unemployment overview
@@ -441,7 +441,7 @@ def get_states_analysis(db: Session = Depends(get_db)):
 
 @router.get("/states/timeline", response_model=LAStateTimelineResponse)
 def get_states_timeline(
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     state_codes: Optional[str] = Query(None, description="Comma-separated list of state area codes to include"),
     db: Session = Depends(get_db)
 ):
@@ -492,36 +492,50 @@ def get_states_timeline(
     if not latest:
         raise HTTPException(status_code=404, detail="No data found")
 
-    # Calculate start date
-    start_year = latest.year
-    start_period_num = int(latest.period[1:])
+    # Calculate start date (0 = all time)
+    if months_back == 0:
+        # Get all data - no date filter
+        timeline_data = {}
+        for area_code, series_id in state_series.items():
+            data = db.query(LAData).filter(
+                LAData.series_id == series_id
+            ).order_by(LAData.year, LAData.period).all()
 
-    months_to_subtract = months_back
-    while months_to_subtract > 0:
-        if start_period_num > months_to_subtract:
-            start_period_num -= months_to_subtract
-            months_to_subtract = 0
-        else:
-            months_to_subtract -= start_period_num
-            start_year -= 1
-            start_period_num = 12
+            for d in data:
+                key = (d.year, d.period)
+                if key not in timeline_data:
+                    timeline_data[key] = {}
+                timeline_data[key][area_code] = float(d.value) if d.value else None
+    else:
+        start_year = latest.year
+        start_period_num = int(latest.period[1:])
 
-    start_period = f"M{start_period_num:02d}"
+        months_to_subtract = months_back
+        while months_to_subtract > 0:
+            if start_period_num > months_to_subtract:
+                start_period_num -= months_to_subtract
+                months_to_subtract = 0
+            else:
+                months_to_subtract -= start_period_num
+                start_year -= 1
+                start_period_num = 12
 
-    # Get data for all states
-    timeline_data = {}
-    for area_code, series_id in state_series.items():
-        data = db.query(LAData).filter(
-            LAData.series_id == series_id,
-            ((LAData.year > start_year) |
-             ((LAData.year == start_year) & (LAData.period >= start_period)))
-        ).order_by(LAData.year, LAData.period).all()
+        start_period = f"M{start_period_num:02d}"
 
-        for d in data:
-            key = (d.year, d.period)
-            if key not in timeline_data:
-                timeline_data[key] = {}
-            timeline_data[key][area_code] = float(d.value) if d.value else None
+        # Get data for all states
+        timeline_data = {}
+        for area_code, series_id in state_series.items():
+            data = db.query(LAData).filter(
+                LAData.series_id == series_id,
+                ((LAData.year > start_year) |
+                 ((LAData.year == start_year) & (LAData.period >= start_period)))
+            ).order_by(LAData.year, LAData.period).all()
+
+            for d in data:
+                key = (d.year, d.period)
+                if key not in timeline_data:
+                    timeline_data[key] = {}
+                timeline_data[key][area_code] = float(d.value) if d.value else None
 
     # Get period names
     period_map = {p.period_code: p.period_name for p in db.query(BLSPeriod).all()}
@@ -652,7 +666,7 @@ def get_metros_analysis(
 
 @router.get("/metros/timeline", response_model=LAMetroTimelineResponse)
 def get_metros_timeline(
-    months_back: int = Query(24, ge=1, le=120),
+    months_back: int = Query(24, ge=0, le=600),
     metro_codes: Optional[str] = Query(None, description="Comma-separated list of metro area codes"),
     limit: int = Query(10, ge=1, le=50, description="Number of metros if metro_codes not specified"),
     db: Session = Depends(get_db)
@@ -699,36 +713,50 @@ def get_metros_timeline(
     if not latest:
         raise HTTPException(status_code=404, detail="No data found")
 
-    # Calculate start date
-    start_year = latest.year
-    start_period_num = int(latest.period[1:])
+    # Calculate start date (0 = all time)
+    if months_back == 0:
+        # Get all data - no date filter
+        timeline_data = {}
+        for area_code, series_id in metro_series.items():
+            data = db.query(LAData).filter(
+                LAData.series_id == series_id
+            ).order_by(LAData.year, LAData.period).all()
 
-    months_to_subtract = months_back
-    while months_to_subtract > 0:
-        if start_period_num > months_to_subtract:
-            start_period_num -= months_to_subtract
-            months_to_subtract = 0
-        else:
-            months_to_subtract -= start_period_num
-            start_year -= 1
-            start_period_num = 12
+            for d in data:
+                key = (d.year, d.period)
+                if key not in timeline_data:
+                    timeline_data[key] = {}
+                timeline_data[key][area_code] = float(d.value) if d.value else None
+    else:
+        start_year = latest.year
+        start_period_num = int(latest.period[1:])
 
-    start_period = f"M{start_period_num:02d}"
+        months_to_subtract = months_back
+        while months_to_subtract > 0:
+            if start_period_num > months_to_subtract:
+                start_period_num -= months_to_subtract
+                months_to_subtract = 0
+            else:
+                months_to_subtract -= start_period_num
+                start_year -= 1
+                start_period_num = 12
 
-    # Get data for all metros
-    timeline_data = {}
-    for area_code, series_id in metro_series.items():
-        data = db.query(LAData).filter(
-            LAData.series_id == series_id,
-            ((LAData.year > start_year) |
-             ((LAData.year == start_year) & (LAData.period >= start_period)))
-        ).order_by(LAData.year, LAData.period).all()
+        start_period = f"M{start_period_num:02d}"
 
-        for d in data:
-            key = (d.year, d.period)
-            if key not in timeline_data:
-                timeline_data[key] = {}
-            timeline_data[key][area_code] = float(d.value) if d.value else None
+        # Get data for all metros
+        timeline_data = {}
+        for area_code, series_id in metro_series.items():
+            data = db.query(LAData).filter(
+                LAData.series_id == series_id,
+                ((LAData.year > start_year) |
+                 ((LAData.year == start_year) & (LAData.period >= start_period)))
+            ).order_by(LAData.year, LAData.period).all()
+
+            for d in data:
+                key = (d.year, d.period)
+                if key not in timeline_data:
+                    timeline_data[key] = {}
+                timeline_data[key][area_code] = float(d.value) if d.value else None
 
     # Get period names
     period_map = {p.period_code: p.period_name for p in db.query(BLSPeriod).all()}
